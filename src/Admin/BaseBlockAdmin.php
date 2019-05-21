@@ -73,7 +73,7 @@ abstract class BaseBlockAdmin extends AbstractAdmin
     public function getNewInstance()
     {
         $block = parent::getNewInstance();
-        $block->setType($this->getPersistentParameter('type'));
+        $block->setType($this->getPersistentParameter('type') ? $this->getPersistentParameter('type') : 'sonata.block.service.text');
 
         return $this->loadBlockDefaults($block);
     }
@@ -86,9 +86,6 @@ abstract class BaseBlockAdmin extends AbstractAdmin
     public function preUpdate($object)
     {
         $this->blockManager->get($object)->preUpdate($object);
-
-        // fix weird bug with setter object not being call
-        $object->setChildren($object->getChildren());
 
         if ($object->getPage() instanceof PageInterface) {
             $object->getPage()->setEdited(true);
@@ -121,9 +118,6 @@ abstract class BaseBlockAdmin extends AbstractAdmin
         if ($object->getPage() instanceof PageInterface) {
             $object->getPage()->setEdited(true);
         }
-
-        // fix weird bug with setter object not being call
-        $object->setChildren($object->getChildren());
     }
 
     /**
@@ -195,13 +189,13 @@ abstract class BaseBlockAdmin extends AbstractAdmin
      */
     public function getPersistentParameters()
     {
-        if (!$this->hasRequest()) {
-            return [];
+        $parameters = parent::getPersistentParameters();
+
+        if ($this->hasRequest()) {
+            $parameters['type'] = $this->getRequest()->get('type');
         }
 
-        return [
-            'type' => $this->getRequest()->get('type'),
-        ];
+        return $parameters;
     }
 
     /**

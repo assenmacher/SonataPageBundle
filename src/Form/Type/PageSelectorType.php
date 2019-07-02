@@ -101,16 +101,13 @@ class PageSelectorType extends AbstractType
                 continue;
             }
 
-            if (!$filter_choice['current_page'] && $options['page'] && $options['page']->getId() === $page->getId()) {
+            if (!$filter_choice['current_page'] && $options['page'] && $options['page']->getId() === $page->getId())
+            {
                 continue;
             }
 
-            if (
-                'all' !== $filter_choice['hierarchy'] && (
-                    ('root' !== $filter_choice['hierarchy'] || $page->getParent()) &&
-                    ('children' !== $filter_choice['hierarchy'] || !$page->getParent())
-                )
-            ) {
+            if($page->getParent())
+            {
                 continue;
             }
 
@@ -128,7 +125,7 @@ class PageSelectorType extends AbstractType
 
             $choices[$page->getId()] = $page;
 
-            $this->childWalker($page, $options['page'], $choices);
+            $this->childWalker($page, $options['page'], $choices, $filter_choice);
         }
 
         return $choices;
@@ -164,20 +161,28 @@ class PageSelectorType extends AbstractType
      * @param array         $choices
      * @param int           $level
      */
-    private function childWalker(PageInterface $page, PageInterface $currentPage = null, &$choices, $level = 1)
+    private function childWalker(PageInterface $page, PageInterface $currentPage = null, &$choices, $filter_choice, $level = 1)
     {
         foreach ($page->getChildren() as $child) {
-            if ($currentPage && $currentPage->getId() === $child->getId()) {
+            if (!$filter_choice['current_page'] && $currentPage && $currentPage->getId() === $child->getId()) {
                 continue;
             }
 
-            if ($child->isDynamic()) {
+            if ('all' !== $filter_choice['dynamic'] && (
+                    ($filter_choice['dynamic'] && $child->isDynamic()) ||
+                    (!$filter_choice['dynamic'] && !$child->isDynamic())
+                )
+            ) {
                 continue;
             }
 
-            $choices[$child->getId()] = $child;
+            if ('all' !== $filter_choice['request_method'] && !$child->hasRequestMethod($filter_choice['request_method'])) {
+                continue;
+            }
 
-            $this->childWalker($child, $currentPage, $choices, $level + 1);
+            $choices[$child->getId()] = $child->setLevel($level);
+
+            $this->childWalker($child, $currentPage, $choices, $filter_choice, $level + 1);
         }
     }
 }

@@ -176,6 +176,11 @@ abstract class Page implements PageInterface
     protected static $slugifyMethod;
 
     /**
+     * @var int
+     */
+    protected $level = 0;
+
+    /**
      * {@inheritdoc}
      */
     public function __construct()
@@ -912,6 +917,40 @@ abstract class Page implements PageInterface
     public function getTitle()
     {
         return $this->title;
+    }
+
+    /**
+     * get level
+     *
+     * @return int
+     */
+    public function getLevel() :int
+    {
+        return $this->level;
+    }
+
+    /**
+     * set level
+     *
+     * @param int $level
+
+     * @return Page
+     */
+    public function setLevel(int $level) :Page
+    {
+        $this->level = $level;
+
+        return $this;
+    }
+
+    /**
+     * Get level indented name.
+     *
+     * @return string levelIndentedName
+     */
+    public function getLevelIndentedName($indentedWith = '--') :string
+    {
+        return str_pad('', (strlen($indentedWith) * $this->getLevel()), $indentedWith) . ' ' . $this->getName();
     }
 
     /**

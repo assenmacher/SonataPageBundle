@@ -34,7 +34,7 @@ use Sonata\PageBundle\Model\SiteManagerInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-
+use Sonata\CoreBundle\Validator\ErrorElement;
 /**
  * Admin definition for the Page class.
  *
@@ -102,6 +102,17 @@ class PageAdmin extends AbstractAdmin
         }
     }
 
+    public function validate(ErrorElement $errorElement, $object)
+    {
+        if($object->getId() && $object->getTarget() && $object->getId() === $object->getTarget()->getId())
+        {
+            $errorElement
+                ->with('target')
+                    ->addViolation('The target can\'t be the same page')
+                ->end()
+            ;
+        }
+    }
     /**
      * {@inheritdoc}
      */
@@ -376,7 +387,8 @@ class PageAdmin extends AbstractAdmin
                         'model_manager' => $this->getModelManager(),
                         'class' => $this->getClass(),
                         'required' => false,
-                        'filter_choice' => ['hierarchy' => 'root'],
+                        'filter_choice' => ['request_method' => 'GET'],
+                        'property' => 'levelIndentedName',
                     ], [
                         'admin_code' => $this->getCode(),
                         'link_parameters' => [
@@ -391,13 +403,14 @@ class PageAdmin extends AbstractAdmin
             $formMapper
                 ->with('form_page.group_main_label')
                     ->add('pageAlias', null, ['required' => false])
-                    ->add('parent', PageSelectorType::class, [
+                    ->add('target', PageSelectorType::class, [
                         'page' => $this->getSubject() ?: null,
                         'site' => $this->getSubject() ? $this->getSubject()->getSite() : null,
                         'model_manager' => $this->getModelManager(),
                         'class' => $this->getClass(),
-                        'filter_choice' => ['request_method' => 'all'],
+                        'filter_choice' => ['request_method' => 'all', 'current_page' => true],
                         'required' => false,
+                        'property' => 'levelIndentedName',
                     ], [
                         'admin_code' => $this->getCode(),
                         'link_parameters' => [

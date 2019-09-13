@@ -263,9 +263,9 @@ abstract class BaseBlockAdmin extends AbstractAdmin
         // use new interface method whenever possible
         // NEXT_MAJOR: Remove this check and legacy setDefaultSettings method call
         if (method_exists($service, 'configureSettings')) {
-            $service->configureSettings($resolver, $block);
+            $service->configureSettings($resolver);
         } else {
-            $service->setDefaultSettings($resolver, $block);
+            $service->setDefaultSettings($resolver);
         }
 
         try {

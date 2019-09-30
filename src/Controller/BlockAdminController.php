@@ -81,11 +81,6 @@ class BlockAdminController extends Controller
     {
         $this->admin->checkAccess('create');
 
-        $sharedBlockAdminClass = $this->container->getParameter('sonata.page.admin.shared_block.class');
-        if (!$this->admin->getParent() && \get_class($this->admin) !== $sharedBlockAdminClass) {
-            throw new PageNotFoundException('You cannot create a block without a page');
-        }
-
         $parameters = $this->admin->getPersistentParameters();
 
         if (!$parameters['type']) {

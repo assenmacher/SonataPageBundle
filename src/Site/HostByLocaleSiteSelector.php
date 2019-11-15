@@ -44,8 +44,8 @@ class HostByLocaleSiteSelector extends BaseSiteSelector
 
         $this->site = $this->getPreferredSite($enabledSites, $request);
 
-        if ($this->site && $this->site->getLocale()) {
-            $request->attributes->set('_locale', $this->site->getLocale());
+        if ($this->site && $this->site->getSiteLocale()) {
+            $request->attributes->set('_locale', $this->site->getSiteLocale());
         }
     }
 }

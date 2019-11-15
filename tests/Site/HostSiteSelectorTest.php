@@ -79,7 +79,7 @@ class HostSiteSelectorTest extends TestCase
         $site = $siteSelector->retrieve();
 
         // Ensure request locale matches site locale
-        $this->assertSame($site->getLocale(), $request->attributes->get('_locale'));
+        $this->assertSame($site->getSiteLocale(), $request->attributes->get('_locale'));
 
         return [
             $site,
@@ -194,7 +194,7 @@ class HostSiteSelector extends BaseSiteSelector
         $sites[0]->setHost('localhost');
         $sites[0]->setEnabledFrom($always);
         $sites[0]->setEnabledTo($always);
-        $sites[0]->setLocale('en_US');
+        $sites[0]->setSiteLocale('en_US');
 
         /* Site 1 - Always valid */
         $sites[1] = new HostSite();
@@ -204,7 +204,7 @@ class HostSiteSelector extends BaseSiteSelector
         $sites[1]->setHost('www.example1.com');
         $sites[1]->setEnabledFrom($always);
         $sites[1]->setEnabledTo($always);
-        $sites[1]->setLocale('en_US');
+        $sites[1]->setSiteLocale('en_US');
 
         /* Site 2 - Valid from one hour ago until one hour from now */
         $sites[2] = new HostSite();
@@ -214,7 +214,7 @@ class HostSiteSelector extends BaseSiteSelector
         $sites[2]->setHost('www.example2.com');
         $sites[2]->setEnabledFrom($one_hour_ago);
         $sites[2]->setEnabledTo($one_hour_from_now);
-        $sites[2]->setLocale('en_US');
+        $sites[2]->setSiteLocale('en_US');
 
         /* Site 3 - Valid from one hour ago */
         $sites[3] = new HostSite();
@@ -224,7 +224,7 @@ class HostSiteSelector extends BaseSiteSelector
         $sites[3]->setHost('www.example3.com');
         $sites[3]->setEnabledFrom($one_hour_ago);
         $sites[3]->setEnabledTo($always);
-        $sites[3]->setLocale('en_US');
+        $sites[3]->setSiteLocale('en_US');
 
         /* Site 4 - Valid until one hour from now */
         $sites[4] = new HostSite();
@@ -234,7 +234,7 @@ class HostSiteSelector extends BaseSiteSelector
         $sites[4]->setHost('www.example4.com');
         $sites[4]->setEnabledFrom($always);
         $sites[4]->setEnabledTo($one_hour_from_now);
-        $sites[4]->setLocale('en_US');
+        $sites[4]->setSiteLocale('en_US');
 
         /* Site 5 - Valid from one hour from now */
         $sites[5] = new HostSite();
@@ -244,7 +244,7 @@ class HostSiteSelector extends BaseSiteSelector
         $sites[5]->setHost('www.example5.com');
         $sites[5]->setEnabledFrom($one_hour_from_now);
         $sites[5]->setEnabledTo($always);
-        $sites[5]->setLocale('en_US');
+        $sites[5]->setSiteLocale('en_US');
 
         /* Site 6 - Valid until one hour ago */
         $sites[6] = new HostSite();
@@ -254,7 +254,7 @@ class HostSiteSelector extends BaseSiteSelector
         $sites[6]->setHost('www.example6.com');
         $sites[6]->setEnabledFrom($always);
         $sites[6]->setEnabledTo($one_hour_ago);
-        $sites[6]->setLocale('en_US');
+        $sites[6]->setSiteLocale('en_US');
 
         /* Site 7 - Site is disabled */
         $sites[7] = new HostSite();
@@ -264,7 +264,7 @@ class HostSiteSelector extends BaseSiteSelector
         $sites[7]->setHost('www.example7.com');
         $sites[7]->setEnabledFrom($always);
         $sites[7]->setEnabledTo($always);
-        $sites[7]->setLocale('en_US');
+        $sites[7]->setSiteLocale('en_US');
 
         return $sites;
     }

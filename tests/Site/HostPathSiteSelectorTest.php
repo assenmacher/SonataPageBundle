@@ -46,7 +46,7 @@ class HostPathSiteSelectorTest extends TestCase
         $this->assertSame($expectedPath, $event->getRequest()->getPathInfo());
 
         // Ensure request locale matches site locale
-        $this->assertSame($site->getLocale(), $event->getRequest()->attributes->get('_locale'));
+        $this->assertSame($site->getSiteLocale(), $event->getRequest()->attributes->get('_locale'));
     }
 
     public function siteProvider(): \Generator
@@ -233,7 +233,7 @@ class HostPathSiteSelector extends BaseSiteSelector
         $sites[0]->setEnabledFrom($always);
         $sites[0]->setEnabledTo($always);
         $sites[0]->setIsDefault(false);
-        $sites[0]->setLocale('en_US');
+        $sites[0]->setSiteLocale('en_US');
 
         /* Site 1 - Always valid */
         $sites[1] = new HostPathSite();
@@ -244,7 +244,7 @@ class HostPathSiteSelector extends BaseSiteSelector
         $sites[1]->setEnabledFrom($always);
         $sites[1]->setEnabledTo($always);
         $sites[1]->setIsDefault(false);
-        $sites[1]->setLocale('en_US');
+        $sites[1]->setSiteLocale('en_US');
 
         /* Site 2 - Valid from one hour ago until one hour from now */
         $sites[2] = new HostPathSite();
@@ -255,7 +255,7 @@ class HostPathSiteSelector extends BaseSiteSelector
         $sites[2]->setEnabledFrom($one_hour_ago);
         $sites[2]->setEnabledTo($one_hour_from_now);
         $sites[2]->setIsDefault(true);
-        $sites[2]->setLocale('en_US');
+        $sites[2]->setSiteLocale('en_US');
 
         /* Site 3 - Valid from one hour ago */
         $sites[3] = new HostPathSite();
@@ -266,7 +266,7 @@ class HostPathSiteSelector extends BaseSiteSelector
         $sites[3]->setEnabledFrom($one_hour_ago);
         $sites[3]->setEnabledTo($always);
         $sites[3]->setIsDefault(false);
-        $sites[3]->setLocale('en_US');
+        $sites[3]->setSiteLocale('en_US');
 
         /* Site 4 - Valid until one hour from now */
         $sites[4] = new HostPathSite();
@@ -277,7 +277,7 @@ class HostPathSiteSelector extends BaseSiteSelector
         $sites[4]->setEnabledFrom($always);
         $sites[4]->setEnabledTo($one_hour_from_now);
         $sites[4]->setIsDefault(false);
-        $sites[4]->setLocale('en_US');
+        $sites[4]->setSiteLocale('en_US');
 
         /* Site 5 - Valid from one hour from now */
         $sites[5] = new HostPathSite();
@@ -288,7 +288,7 @@ class HostPathSiteSelector extends BaseSiteSelector
         $sites[5]->setEnabledFrom($one_hour_from_now);
         $sites[5]->setEnabledTo($always);
         $sites[5]->setIsDefault(false);
-        $sites[5]->setLocale('en_US');
+        $sites[5]->setSiteLocale('en_US');
 
         /* Site 6 - Valid until one hour ago */
         $sites[6] = new HostPathSite();
@@ -299,7 +299,7 @@ class HostPathSiteSelector extends BaseSiteSelector
         $sites[6]->setEnabledFrom($always);
         $sites[6]->setEnabledTo($one_hour_ago);
         $sites[6]->setIsDefault(false);
-        $sites[6]->setLocale('en_US');
+        $sites[6]->setSiteLocale('en_US');
 
         /* Site 7 - Site is disabled */
         $sites[7] = new HostPathSite();
@@ -309,7 +309,7 @@ class HostPathSiteSelector extends BaseSiteSelector
         $sites[7]->setHost('www.example.com');
         $sites[7]->setEnabledFrom($always);
         $sites[7]->setEnabledTo($always);
-        $sites[7]->setLocale('en_US');
+        $sites[7]->setSiteLocale('en_US');
 
         /* Site 8 - Relative path is a substring of the relative path of the other sites */
         $sites[8] = new HostPathSite();
@@ -320,7 +320,7 @@ class HostPathSiteSelector extends BaseSiteSelector
         $sites[8]->setEnabledFrom($always);
         $sites[8]->setEnabledTo($always);
         $sites[8]->setIsDefault(false);
-        $sites[8]->setLocale('en_GB');
+        $sites[8]->setSiteLocale('en_GB');
 
         /* Site 9 - www.example.org and no relative path */
         $sites[9] = new HostPathSite();
@@ -331,7 +331,7 @@ class HostPathSiteSelector extends BaseSiteSelector
         $sites[9]->setEnabledFrom($always);
         $sites[9]->setEnabledTo($always);
         $sites[9]->setIsDefault(false);
-        $sites[9]->setLocale('en_GB');
+        $sites[9]->setSiteLocale('en_GB');
 
         return $sites;
     }

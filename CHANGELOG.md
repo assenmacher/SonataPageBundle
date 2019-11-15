@@ -26,7 +26,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Added group icon to admin pages
 
 ### Fixed
-- Catch empty locale in exception listener
+- Catch empty siteLocale in exception listener
 - Make `sonata.page.kernel.exception_listener` service public
 
 ### Security

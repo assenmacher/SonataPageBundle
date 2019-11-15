@@ -42,7 +42,7 @@ class CreateSiteCommand extends BaseCommand
         $this->addOption('enabledFrom', null, InputOption::VALUE_OPTIONAL, 'Site.enabledFrom', null);
         $this->addOption('enabledTo', null, InputOption::VALUE_OPTIONAL, 'Site.enabledTo', null);
         $this->addOption('default', null, InputOption::VALUE_OPTIONAL, 'Site.default', null);
-        $this->addOption('locale', null, InputOption::VALUE_OPTIONAL, 'Site.locale', null);
+        $this->addOption('siteLocale', null, InputOption::VALUE_OPTIONAL, 'Site.siteLocale', null);
 
         $this->addOption('base-command', null, InputOption::VALUE_OPTIONAL, 'Site id', 'php app/console');
 
@@ -70,7 +70,7 @@ EOT
             'enabledFrom' => null,
             'enabledTo' => null,
             'default' => null,
-            'locale' => null,
+            'siteLocale' => null,
         ];
 
         foreach ($values as $name => $value) {
@@ -93,7 +93,7 @@ EOT
         $site->setEnabledFrom('-' === $values['enabledFrom'] ? null : new \DateTime($values['enabledFrom']));
         $site->setEnabledTo('-' === $values['enabledTo'] ? null : new \DateTime($values['enabledTo']));
         $site->setIsDefault(\in_array($values['default'], ['true', 1, '1'], true));
-        $site->setLocale('-' === $values['locale'] ? null : $values['locale']);
+        $site->setSiteLocale('-' === $values['siteLocale'] ? null : $values['siteLocale']);
         $site->setEnabled(\in_array($values['enabled'], ['true', 1, '1'], true));
 
         $info_enabledFrom = $site->getEnabledFrom() instanceof \DateTime ? $site->getEnabledFrom()->format('r') : 'ALWAYS';

@@ -510,16 +510,16 @@
                 <source>show.label_enabled_to</source>
                 <target>Abilitato fino al</target>
             </trans-unit>
-            <trans-unit id="128" resname="list.label_locale">
-                <source>list.label_locale</source>
+            <trans-unit id="128" resname="list.label_site_locale">
+                <source>list.label_site_locale</source>
                 <target>Lingua</target>
             </trans-unit>
-            <trans-unit id="129" resname="show.label_locale">
-                <source>show.label_locale</source>
+            <trans-unit id="129" resname="show.label_site_locale">
+                <source>show.label_site_locale</source>
                 <target>Lingua</target>
             </trans-unit>
-            <trans-unit id="130" resname="form.label_locale">
-                <source>form.label_locale</source>
+            <trans-unit id="130" resname="form.label_site_locale">
+                <source>form.label_site_locale</source>
                 <target>Lingua</target>
             </trans-unit>
             <trans-unit id="131" resname="form_site.label_seo">

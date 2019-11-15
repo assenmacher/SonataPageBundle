@@ -69,8 +69,8 @@ class HostPathSiteSelector extends BaseSiteSelector
         // no valid site, but on there is a default site for the current request
         if (!$this->site && $defaultSite) {
             $event->setResponse(new RedirectResponse($defaultSite->getUrl(), 301));
-        } elseif ($this->site && $this->site->getLocale()) {
-            $request->attributes->set('_locale', $this->site->getLocale());
+        } elseif ($this->site && $this->site->getSiteLocale()) {
+            $request->attributes->set('_locale', $this->site->getSiteLocale());
         }
     }
 

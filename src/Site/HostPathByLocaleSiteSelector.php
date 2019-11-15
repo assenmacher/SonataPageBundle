@@ -68,8 +68,8 @@ class HostPathByLocaleSiteSelector extends HostPathSiteSelector
             $defaultSite = $this->getPreferredSite($enabledSites, $request);
 
             $event->setResponse(new RedirectResponse($defaultSite->getUrl()));
-        } elseif ($this->site && $this->site->getLocale()) {
-            $request->attributes->set('_locale', $this->site->getLocale());
+        } elseif ($this->site && $this->site->getSiteLocale()) {
+            $request->attributes->set('_locale', $this->site->getSiteLocale());
         }
     }
 }

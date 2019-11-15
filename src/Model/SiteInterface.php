@@ -50,12 +50,12 @@ interface SiteInterface
     /**
      * @return string
      */
-    public function getLocale();
+    public function getSiteLocale();
 
     /**
-     * @param string $locale
+     * @param string $siteLocale
      */
-    public function setLocale($locale);
+    public function setSiteLocale($locale);
 
     /**
      * @return \DateTime

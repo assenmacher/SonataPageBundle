@@ -73,7 +73,7 @@ abstract class Site implements SiteInterface
     /**
      * @var string
      */
-    protected $locale;
+    protected $siteLocale;
 
     /**
      * @var string
@@ -315,17 +315,17 @@ abstract class Site implements SiteInterface
     /**
      * {@inheritdoc}
      */
-    public function setLocale($locale)
+    public function setSiteLocale($siteLocale)
     {
-        $this->locale = $locale;
+        $this->siteLocale = $siteLocale;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getLocale()
+    public function getSiteLocale()
     {
-        return $this->locale;
+        return $this->siteLocale;
     }
 
     /**

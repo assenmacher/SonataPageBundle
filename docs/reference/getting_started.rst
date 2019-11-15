@@ -22,7 +22,7 @@ or:
 
 .. code-block:: bash
 
-    bin/console  sonata:page:create-site --enabled=true --name=localhost --locale=- --host=localhost --relativePath=/ --enabledFrom=now --enabledTo="+10 years" --default=true
+    bin/console  sonata:page:create-site --enabled=true --name=localhost --siteLocale=- --host=localhost --relativePath=/ --enabledFrom=now --enabledTo="+10 years" --default=true
 
 The output might look like this::
 
@@ -30,7 +30,7 @@ The output might look like this::
     Please define a value for Site.host : localhost
     Please define a value for Site.relativePath : /
     Please define a value for Site.enabled : true
-    Please define a value for Site.locale : -
+    Please define a value for Site.siteLocale : -
     Please define a value for Site.enabledFrom : now
     Please define a value for Site.enabledTo : +10 years
     Please define a value for Site.default : true
@@ -75,7 +75,7 @@ The output might look like this::
 |              |          | match any other site (true values are 'true', 1, '1'; all other values        |
 |              |          | default to false).                                                            |
 +--------------+----------+-------------------------------------------------------------------------------+
-| locale       | string   | The default locale for the site (use '-' as the value if specifying the       |
+| siteLocale   | string   | The default locale for the site (use '-' as the value if specifying the   |
 |              |          | locale is not needed).                                                        |
 +--------------+----------+-------------------------------------------------------------------------------+
 

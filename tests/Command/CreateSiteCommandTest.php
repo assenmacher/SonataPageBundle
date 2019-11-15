@@ -72,7 +72,7 @@ class CreateSiteCommandTest extends TestCase
             '--enabledFrom' => 'now',
             '--enabledTo' => 'now',
             '--default' => true,
-            '--locale' => 'foo',
+            '--siteLocale' => 'foo',
             '--no-confirmation' => true,
         ]);
 
@@ -104,7 +104,7 @@ class CreateSiteCommandTest extends TestCase
             '--enabledFrom' => 'now',
             '--enabledTo' => 'now',
             '--default' => true,
-            '--locale' => 'foo',
+            '--siteLocale' => 'foo',
         ]);
 
         $this->assertRegExp('@Site creation cancelled !@', $commandTester->getDisplay());

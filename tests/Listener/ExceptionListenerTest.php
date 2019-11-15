@@ -154,7 +154,7 @@ class ExceptionListenerTest extends TestCase
 
         // mock a site
         $site = $this->createMock(SiteInterface::class);
-        $site->expects($this->exactly(3))->method('getLocale')->willReturn('fr');
+        $site->expects($this->exactly(3))->method('getSiteLocale')->willReturn('fr');
 
         // mock an error page
         $page = $this->createMock(PageInterface::class);

@@ -163,14 +163,14 @@ abstract class BaseSiteSelector implements SiteSelectorInterface
         }
 
         $sitesLocales = array_map(static function (SiteInterface $site) {
-            return $site->getLocale();
+            return $site->getSiteLocale();
         }, $sites);
 
         $language = $request->getPreferredLanguage($sitesLocales);
         $host = $request->getHost();
 
         foreach ($sites as $site) {
-            if (\in_array($site->getHost(), ['localhost', $host], true) && $language === $site->getLocale()) {
+            if (\in_array($site->getHost(), ['localhost', $host], true) && $language === $site->getSiteLocale()) {
                 return $site;
             }
         }

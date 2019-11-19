@@ -55,7 +55,7 @@ interface SiteInterface
     /**
      * @param string $siteLocale
      */
-    public function setSiteLocale($locale);
+    public function setSiteLocale($siteLocale);
 
     /**
      * @return \DateTime

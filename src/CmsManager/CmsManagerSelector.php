@@ -100,7 +100,7 @@ class CmsManagerSelector implements CmsManagerSelectorInterface, LogoutHandlerIn
     /**
      * @return SessionInterface
      */
-    private function getSession()
+    protected function getSession()
     {
         return $this->container->get('session');
     }
@@ -108,7 +108,7 @@ class CmsManagerSelector implements CmsManagerSelectorInterface, LogoutHandlerIn
     /**
      * @return Request|null
      */
-    private function getRequest()
+    protected function getRequest()
     {
         if ($this->container->has('request_stack')) {
             return $this->container->get('request_stack')->getCurrentRequest();

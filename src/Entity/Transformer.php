@@ -15,6 +15,7 @@ namespace Sonata\PageBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Sonata\BlockBundle\Model\BlockInterface;
 use Sonata\BlockBundle\Model\BlockManagerInterface;
 use Sonata\PageBundle\Model\PageInterface;
@@ -51,7 +52,7 @@ class Transformer implements TransformerInterface
     protected $children = [];
 
     /**
-     * @var RegistryInterface
+     * @var ManagerRegistry
      */
     protected $registry;
 
@@ -59,9 +60,9 @@ class Transformer implements TransformerInterface
      * @param SnapshotManagerInterface $snapshotManager
      * @param PageManagerInterface     $pageManager
      * @param BlockManagerInterface    $blockManager
-     * @param RegistryInterface        $registry
+     * @param ManagerRegistry        $registry
      */
-    public function __construct(SnapshotManagerInterface $snapshotManager, PageManagerInterface $pageManager, BlockManagerInterface $blockManager, RegistryInterface $registry)
+    public function __construct(SnapshotManagerInterface $snapshotManager, PageManagerInterface $pageManager, BlockManagerInterface $blockManager, ManagerRegistry $registry)
     {
         $this->snapshotManager = $snapshotManager;
         $this->pageManager = $pageManager;

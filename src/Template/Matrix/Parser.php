@@ -18,12 +18,13 @@ namespace Sonata\PageBundle\Template\Matrix;
  * computes string based template matrix to position/sise.
  *
  * @author Raphaël Benitte <raphael.benitte@fullsix.com>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class Parser
 {
     /**
      * @param string $matrix
-     * @param array  $mapping
      *
      * @throws \InvalidArgumentException
      *
@@ -36,7 +37,7 @@ class Parser
 
         $rows = preg_split("/\n/", $matrix);
         $rowCount = \count($rows);
-        if (0 === $rowCount || 0 === \strlen($rows[0])) {
+        if (0 === $rowCount || '' === $rows[0]) {
             throw new \InvalidArgumentException('Invalid template matrix, a matrix should contain at least one row');
         }
 
@@ -62,7 +63,7 @@ class Parser
                 } else {
                     // @todo handle non adjacent cells
                     if (false) {
-                        //throw new \InvalidArgumentException(sprintf('Invalid template matrix, non adjacent symbol found "%s" at row "%s", col "%s"', $symbol, $y, $x));
+                        // throw new \InvalidArgumentException(sprintf('Invalid template matrix, non adjacent symbol found "%s" at row "%s", col "%s"', $symbol, $y, $x));
                     }
                     $areas[$symbol]['width'] = $x - $areas[$symbol]['x'] + 1;
                     $areas[$symbol]['height'] = $y - $areas[$symbol]['y'] + 1;

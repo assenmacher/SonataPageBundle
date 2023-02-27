@@ -21,12 +21,12 @@ use Sonata\PageBundle\Cache\BlockJsCache;
 use Sonata\PageBundle\CmsManager\CmsManagerSelectorInterface;
 use Symfony\Component\Routing\RouterInterface;
 
-class BlockJsCacheTest extends TestCase
+final class BlockJsCacheTest extends TestCase
 {
     /**
      * @dataProvider getExceptionCacheKeys
      */
-    public function testExceptions($keys)
+    public function testExceptions($keys): void
     {
         $this->expectException(\RuntimeException::class);
 
@@ -38,10 +38,10 @@ class BlockJsCacheTest extends TestCase
 
         $cache = new BlockJsCache($router, $cmsManager, $blockRenderer, $contextManager);
 
-        $cache->get($keys, 'data');
+        $cache->get($keys);
     }
 
-    public static function getExceptionCacheKeys()
+    public static function getExceptionCacheKeys(): array
     {
         return [
             [[]],
@@ -54,11 +54,11 @@ class BlockJsCacheTest extends TestCase
         ];
     }
 
-    public function testInitCache()
+    public function testInitCache(): void
     {
         $router = $this->createMock(RouterInterface::class);
         $router
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('generate')
             ->willReturn('https://sonata-project.org/page/cache/js/block.js');
 
@@ -68,8 +68,8 @@ class BlockJsCacheTest extends TestCase
 
         $cache = new BlockJsCache($router, $cmsSelectorManager, $blockRenderer, $contextManager);
 
-        $this->assertTrue($cache->flush([]));
-        $this->assertTrue($cache->flushAll());
+        static::assertTrue($cache->flush([]));
+        static::assertTrue($cache->flushAll());
 
         $keys = [
             'block_id' => 4,
@@ -80,32 +80,32 @@ class BlockJsCacheTest extends TestCase
 
         $cacheElement = $cache->set($keys, 'data');
 
-        $this->assertInstanceOf(CacheElement::class, $cacheElement);
+        static::assertInstanceOf(CacheElement::class, $cacheElement);
 
-        $this->assertTrue($cache->has(['id' => 7]));
+        static::assertTrue($cache->has(['id' => 7]));
 
         $cacheElement = $cache->get($keys);
 
-        $this->assertInstanceOf(CacheElement::class, $cacheElement);
+        static::assertInstanceOf(CacheElement::class, $cacheElement);
 
         $expected = <<<'EXPECTED'
-<div id="block-cms-4" >
-    <script>
-        /*<![CDATA[*/
-            (function() {
-                var b = document.createElement("script");
-                b.type = "text/javascript";
-                b.async = true;
-                b.src = "https://sonata-project.org/page/cache/js/block.js";
-                var s = document.getElementsByTagName("script")[0];
-                s.parentNode.insertBefore(b, s);
-            })();
+            <div id="block-cms-4" >
+                <script>
+                    /*<![CDATA[*/
+                        (function() {
+                            var b = document.createElement("script");
+                            b.type = "text/javascript";
+                            b.async = true;
+                            b.src = "https://sonata-project.org/page/cache/js/block.js";
+                            var s = document.getElementsByTagName("script")[0];
+                            s.parentNode.insertBefore(b, s);
+                        })();
 
-        /*]]>*/
-    </script>
-</div>
-EXPECTED;
+                    /*]]>*/
+                </script>
+            </div>
+            EXPECTED;
 
-        $this->assertSame($expected, $cacheElement->getData()->getContent());
+        static::assertSame($expected, $cacheElement->getData()->getContent());
     }
 }

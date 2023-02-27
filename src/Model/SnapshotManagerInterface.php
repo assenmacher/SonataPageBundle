@@ -17,15 +17,17 @@ use Sonata\Doctrine\Model\ManagerInterface;
 use Sonata\Doctrine\Model\PageableManagerInterface;
 
 /**
+ * NEXT_MAJOR: Remove PageableManagerInterface extension.
+ *
  * Defines methods to interact with the persistency layer of a SnapshotInterface.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @method SnapshotPageProxyInterface createSnapshotPageProxy(TransformerInterface $transformer, SnapshotInterface $snapshot)
  */
 interface SnapshotManagerInterface extends ManagerInterface, PageableManagerInterface
 {
     /**
-     * @param array $criteria
-     *
      * @return SnapshotInterface
      */
     public function findEnableSnapshot(array $criteria);
@@ -34,7 +36,7 @@ interface SnapshotManagerInterface extends ManagerInterface, PageableManagerInte
      * @param array          $snapshots A snapshots array to enable
      * @param \DateTime|null $date      A date instance
      */
-    public function enableSnapshots(array $snapshots, \DateTime $date = null);
+    public function enableSnapshots(array $snapshots, ?\DateTime $date = null);
 
     /**
      * Cleanups the deprecated snapshots.
@@ -45,15 +47,4 @@ interface SnapshotManagerInterface extends ManagerInterface, PageableManagerInte
      * @return int The number of deleted rows
      */
     public function cleanup(PageInterface $page, $keep);
-
-    // NEXT_MAJOR: Uncomment this method
-    /*
-     * Create snapShotPageProxy instance.
-     *
-     * @param TransformerInterface $transformer
-     * @param SnapshotInterface    $snapshot
-     *
-     * @return SnapshotPageProxyInterface
-     */
-    // public function createSnapshotPageProxy(TransformerInterface $transformer, SnapshotInterface $snapshot);
 }

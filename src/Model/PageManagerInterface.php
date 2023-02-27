@@ -17,6 +17,8 @@ use Sonata\Doctrine\Model\ManagerInterface;
 use Sonata\Doctrine\Model\PageableManagerInterface;
 
 /**
+ * NEXT_MAJOR: Remove PageableManagerInterface extension.
+ *
  * Defines methods to interact with the persistency layer of a PageInterface.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
@@ -26,8 +28,7 @@ interface PageManagerInterface extends ManagerInterface, PageableManagerInterfac
     /**
      * Returns a page with the give slug.
      *
-     * @param SiteInterface $site
-     * @param string        $url
+     * @param string $url
      *
      * @return PageInterface
      */
@@ -36,16 +37,9 @@ interface PageManagerInterface extends ManagerInterface, PageableManagerInterfac
     /**
      * Returns an array of Pages Entity where the id is the key.
      *
-     * @param SiteInterface $site
-     *
      * @return array
      */
     public function loadPages(SiteInterface $site);
 
-    /**
-     * @param PageInterface $page
-     *
-     * @return mixed
-     */
     public function fixUrl(PageInterface $page);
 }

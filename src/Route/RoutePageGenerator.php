@@ -25,6 +25,8 @@ use Symfony\Component\Routing\RouterInterface;
  * This is the page generator service from existing routes.
  *
  * @author Vincent Composieux <vincent.composieux@gmail.com>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class RoutePageGenerator
 {
@@ -69,7 +71,7 @@ class RoutePageGenerator
      * @param OutputInterface $output A Symfony console output
      * @param bool            $clean  clean orphaned pages
      */
-    public function update(SiteInterface $site, OutputInterface $output = null, $clean = false)
+    public function update(SiteInterface $site, ?OutputInterface $output = null, $clean = false)
     {
         $message = sprintf(
             ' > <info>Updating core routes for site</info> : <comment>%s - %s</comment>',
@@ -98,6 +100,7 @@ class RoutePageGenerator
         // Iterate over declared routes from the routing mechanism
         foreach ($this->router->getRouteCollection()->all() as $name => $route) {
             $name = trim($name);
+            $displayName = $this->displayName($name);
 
             $knowRoutes[] = $name;
 
@@ -136,7 +139,7 @@ class RoutePageGenerator
 
                 $page = $this->pageManager->create([
                     'routeName' => $name,
-                    'name' => $name,
+                    'name' => $displayName,
                     'url' => $route->getPath(),
                     'site' => $site,
                     'requestMethod' => $requirements['_method'] ??
@@ -166,6 +169,7 @@ class RoutePageGenerator
         // Iterate over error pages
         foreach ($this->exceptionListener->getHttpErrorCodes() as $name) {
             $name = trim((string) $name);
+            $displayName = $this->displayName($name);
 
             $knowRoutes[] = $name;
 
@@ -177,7 +181,7 @@ class RoutePageGenerator
             if (!$page) {
                 $params = [
                     'routeName' => $name,
-                    'name' => $name,
+                    'name' => $displayName,
                     'decorate' => false,
                     'site' => $site,
                 ];
@@ -217,12 +221,14 @@ class RoutePageGenerator
         }
 
         if ($has && !$clean) {
-            $this->writeln($output, <<<'MSG'
-<error>
-  *WARNING* : Pages has been updated however some pages do not exist anymore.
-              You must remove them manually.
-</error>
-MSG
+            $this->writeln(
+                $output,
+                <<<'MSG'
+                    <error>
+                      *WARNING* : Pages has been updated however some pages do not exist anymore.
+                                  You must remove them manually.
+                    </error>
+                    MSG
             );
         }
     }
@@ -230,10 +236,10 @@ MSG
     /**
      * Output a Symfony console message with writeln() function.
      *
-     * @param OutputInterface $output  A Symfony console output instance
-     * @param string          $message A string message to output
+     * @param OutputInterface|null $output  A Symfony console output instance
+     * @param string               $message A string message to output
      */
-    protected function writeln(OutputInterface $output = null, $message)
+    protected function writeln(?OutputInterface $output, $message)
     {
         if ($output instanceof OutputInterface) {
             $output->writeln($message);
@@ -251,10 +257,11 @@ MSG
             if ('/' === $route->getPath()) {
                 $requirements = $route->getRequirements();
                 $name = trim($name);
+                $displayName = $this->displayName($name);
 
                 return $this->pageManager->create([
                     'routeName' => $name,
-                    'name' => $name,
+                    'name' => $displayName,
                     'url' => $route->getPath(),
                     'site' => $site,
                     'requestMethod' => $requirements['_method'] ?? 'GET|POST|HEAD|DELETE|PUT',
@@ -271,5 +278,10 @@ MSG
             'requestMethod' => 'GET|POST|HEAD|DELETE|PUT',
             'slug' => '/',
         ]);
+    }
+
+    private function displayName(string $name): string
+    {
+        return ucwords(trim(str_replace('_', ' ', $name)));
     }
 }

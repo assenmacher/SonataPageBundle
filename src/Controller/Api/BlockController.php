@@ -13,16 +13,22 @@ declare(strict_types=1);
 
 namespace Sonata\PageBundle\Controller\Api;
 
-use FOS\RestBundle\Controller\Annotations\View;
+use FOS\RestBundle\Controller\Annotations as Rest;
+use FOS\RestBundle\View\View;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Sonata\BlockBundle\Model\BlockInterface;
 use Sonata\BlockBundle\Model\BlockManagerInterface;
+use Sonata\PageBundle\Form\Type\ApiBlockType;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
+ * NEXT_MAJOR: Remove this file.
+ *
  * @author Vincent Composieux <vincent.composieux@gmail.com>
+ *
+ * @deprecated since sonata-project/page-bundle 3.24, to be removed in 4.0.
  */
 class BlockController extends FOSRestController
 {
@@ -36,10 +42,6 @@ class BlockController extends FOSRestController
      */
     protected $formFactory;
 
-    /**
-     * @param BlockManagerInterface $blockManager
-     * @param FormFactoryInterface  $formFactory
-     */
     public function __construct(BlockManagerInterface $blockManager, FormFactoryInterface $formFactory)
     {
         $this->blockManager = $blockManager;
@@ -52,7 +54,7 @@ class BlockController extends FOSRestController
      * @ApiDoc(
      *  resource=true,
      *  requirements={
-     *      {"name"="id", "dataType"="integer", "requirement"="\d+", "description"="block id"}
+     *      {"name"="id", "dataType"="string", "description"="Block identifier"}
      *  },
      *  output={"class"="Sonata\PageBundle\Model\BlockInterface", "groups"={"sonata_api_read"}},
      *  statusCodes={
@@ -61,9 +63,9 @@ class BlockController extends FOSRestController
      *  }
      * )
      *
-     * @View(serializerGroups={"sonata_api_read"}, serializerEnableMaxDepthChecks=true)
+     * @Rest\View(serializerGroups={"sonata_api_read"}, serializerEnableMaxDepthChecks=true)
      *
-     * @param $id
+     * @param string $id Block identifier
      *
      * @return BlockInterface
      */
@@ -77,7 +79,7 @@ class BlockController extends FOSRestController
      *
      * @ApiDoc(
      *  requirements={
-     *      {"name"="id", "dataType"="integer", "requirement"="\d+", "description"="block identifier"},
+     *      {"name"="id", "dataType"="string", "description"="Block identifier"},
      *  },
      *  input={"class"="sonata_page_api_form_block", "name"="", "groups"={"sonata_api_write"}},
      *  output={"class"="Sonata\PageBundle\Model\Block", "groups"={"sonata_api_read"}},
@@ -88,10 +90,10 @@ class BlockController extends FOSRestController
      *  }
      * )
      *
-     * @View(serializerGroups={"sonata_api_read"}, serializerEnableMaxDepthChecks=true)
+     * @Rest\View(serializerGroups={"sonata_api_read"}, serializerEnableMaxDepthChecks=true)
      *
-     * @param int     $id      A Block identifier
-     * @param Request $request A Symfony request
+     * @param string  $id      Block identifier
+     * @param Request $request Symfony request
      *
      * @throws NotFoundHttpException
      *
@@ -101,7 +103,7 @@ class BlockController extends FOSRestController
     {
         $block = $id ? $this->getBlock($id) : null;
 
-        $form = $this->formFactory->createNamed(null, 'sonata_page_api_form_block', $block, [
+        $form = $this->formFactory->createNamed(null, ApiBlockType::class, $block, [
             'csrf_protection' => false,
         ]);
 
@@ -123,7 +125,7 @@ class BlockController extends FOSRestController
      *
      * @ApiDoc(
      *  requirements={
-     *      {"name"="id", "dataType"="integer", "requirement"="\d+", "description"="block identifier"}
+     *      {"name"="id", "dataType"="string", "description"="Block identifier"}
      *  },
      *  statusCodes={
      *      200="Returned when block is successfully deleted",
@@ -132,11 +134,11 @@ class BlockController extends FOSRestController
      *  }
      * )
      *
-     * @param int $id A Block identifier
+     * @param string $id Block identifier
      *
      * @throws NotFoundHttpException
      *
-     * @return \FOS\RestBundle\View\View
+     * @return View
      */
     public function deleteBlockAction($id)
     {
@@ -150,7 +152,7 @@ class BlockController extends FOSRestController
     /**
      * Retrieves Block with id $id or throws an exception if it doesn't exist.
      *
-     * @param $id
+     * @param string $id
      *
      * @throws NotFoundHttpException
      *

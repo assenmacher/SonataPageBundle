@@ -16,7 +16,6 @@ namespace Sonata\PageBundle\Form\Type;
 use Sonata\PageBundle\Page\TemplateManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\FormTypeInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
@@ -24,6 +23,8 @@ use Symfony\Component\OptionsResolver\OptionsResolverInterface;
  * Select a template.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class TemplateChoiceType extends AbstractType
 {
@@ -32,17 +33,11 @@ class TemplateChoiceType extends AbstractType
      */
     protected $manager;
 
-    /**
-     * @param TemplateManagerInterface $manager
-     */
     public function __construct(TemplateManagerInterface $manager)
     {
         $this->manager = $manager;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureOptions(OptionsResolver $resolver)
     {
         $defaults = [
@@ -50,16 +45,13 @@ class TemplateChoiceType extends AbstractType
             'choice_translation_domain' => false,
         ];
 
-        // NEXT_MAJOR: Remove (when requirement of Symfony is >= 3.0)
-        if (method_exists(FormTypeInterface::class, 'setDefaultOptions')) {
-            $defaults['choices_as_values'] = true;
-        }
-
         $resolver->setDefaults($defaults);
     }
 
     /**
-     * {@inheritdoc}
+     * NEXT_MAJOR: remove this method.
+     *
+     * @deprecated since sonata-project/page-bundle 3.14, to be removed in version 4.0.
      */
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
@@ -79,24 +71,20 @@ class TemplateChoiceType extends AbstractType
         return $templates;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getParent()
     {
         return ChoiceType::class;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBlockPrefix()
     {
         return 'sonata_page_template';
     }
 
     /**
-     * {@inheritdoc}
+     * NEXT_MAJOR: remove this method.
+     *
+     * @deprecated since sonata-project/page-bundle 3.14, to be removed in version 4.0.
      */
     public function getName()
     {

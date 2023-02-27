@@ -32,6 +32,8 @@ use Symfony\Component\Templating\EngineInterface;
  * Render children pages.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class ChildrenPagesBlockService extends AbstractAdminBlockService
 {
@@ -46,10 +48,7 @@ class ChildrenPagesBlockService extends AbstractAdminBlockService
     protected $cmsManagerSelector;
 
     /**
-     * @param string                      $name
-     * @param EngineInterface             $templating
-     * @param SiteSelectorInterface       $siteSelector
-     * @param CmsManagerSelectorInterface $cmsManagerSelector
+     * @param string $name
      */
     public function __construct($name, EngineInterface $templating, SiteSelectorInterface $siteSelector, CmsManagerSelectorInterface $cmsManagerSelector)
     {
@@ -59,10 +58,7 @@ class ChildrenPagesBlockService extends AbstractAdminBlockService
         $this->cmsManagerSelector = $cmsManagerSelector;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function execute(BlockContextInterface $blockContext, Response $response = null)
+    public function execute(BlockContextInterface $blockContext, ?Response $response = null)
     {
         $settings = $blockContext->getSettings();
 
@@ -73,10 +69,13 @@ class ChildrenPagesBlockService extends AbstractAdminBlockService
         } elseif ($settings['pageId']) {
             $page = $settings['pageId'];
         } else {
+            $page = false;
             try {
-                $page = $cmsManager->getPage($this->siteSelector->retrieve(), '/');
+                $site = $this->siteSelector->retrieve();
+                if (null !== $site) {
+                    $page = $cmsManager->getPage($site, '/');
+                }
             } catch (PageNotFoundException $e) {
-                $page = false;
             }
         }
 
@@ -87,12 +86,9 @@ class ChildrenPagesBlockService extends AbstractAdminBlockService
         ], $response);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function buildEditForm(FormMapper $formMapper, BlockInterface $block)
+    public function buildEditForm(FormMapper $form, BlockInterface $block)
     {
-        $formMapper->add('settings', ImmutableArrayType::class, [
+        $form->add('settings', ImmutableArrayType::class, [
             'keys' => [
                 ['title', TextType::class, [
                   'required' => false,
@@ -111,8 +107,8 @@ class ChildrenPagesBlockService extends AbstractAdminBlockService
                   'label' => 'form.label_current',
                 ]],
                 ['pageId', PageSelectorType::class, [
-                    'model_manager' => $formMapper->getAdmin()->getModelManager(),
-                    'class' => $formMapper->getAdmin()->getClass(),
+                    'model_manager' => $form->getAdmin()->getModelManager(),
+                    'class' => $form->getAdmin()->getClass(),
                     'site' => $block->getPage()->getSite(),
                     'required' => false,
                     'label' => 'form.label_page',
@@ -126,17 +122,11 @@ class ChildrenPagesBlockService extends AbstractAdminBlockService
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getName()
     {
         return 'Children Page (core)';
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureSettings(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
@@ -150,25 +140,16 @@ class ChildrenPagesBlockService extends AbstractAdminBlockService
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function prePersist(BlockInterface $block)
     {
         $block->setSetting('pageId', \is_object($block->getSetting('pageId')) ? $block->getSetting('pageId')->getId() : null);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function preUpdate(BlockInterface $block)
     {
         $block->setSetting('pageId', \is_object($block->getSetting('pageId')) ? $block->getSetting('pageId')->getId() : null);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function load(BlockInterface $block)
     {
         if (is_numeric($block->getSetting('pageId', null))) {

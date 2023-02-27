@@ -20,7 +20,6 @@ use Sonata\PageBundle\Model\PageBlockInterface;
 use Sonata\PageBundle\Model\PageInterface;
 use Sonata\PageBundle\Model\SnapshotPageProxy;
 use Sonata\PageBundle\Site\SiteSelectorInterface;
-use Symfony\Bridge\Twig\AppVariable;
 use Symfony\Bridge\Twig\Extension\HttpKernelExtension;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Controller\ControllerReference;
@@ -35,55 +34,35 @@ use Twig\TwigFunction;
  * PageExtension.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class PageExtension extends AbstractExtension implements InitRuntimeInterface
 {
-    /**
-     * @var CmsManagerSelectorInterface
-     */
-    private $cmsManagerSelector;
+    private CmsManagerSelectorInterface $cmsManagerSelector;
 
-    /**
-     * @var SiteSelectorInterface
-     */
-    private $siteSelector;
+    private SiteSelectorInterface $siteSelector;
 
     /**
      * @var array
      */
     private $resources;
 
-    /**
-     * @var \Twig_Environment
-     */
-    private $environment;
+    private ?Environment $environment = null;
+
+    private RouterInterface $router;
+
+    private BlockHelper $blockHelper;
+
+    private HttpKernelExtension $httpKernelExtension;
+
+    private bool $hideDisabledBlocks;
 
     /**
-     * @var RouterInterface
-     */
-    private $router;
-
-    /**
-     * @var BlockHelper
-     */
-    private $blockHelper;
-
-    /**
-     * @var HttpKernelExtension
-     */
-    private $httpKernelExtension;
-
-    /**
-     * @var bool
-     */
-    private $hideDisabledBlocks;
-
-    /**
-     * @param CmsManagerSelectorInterface $cmsManagerSelector  A CMS manager selector
-     * @param SiteSelectorInterface       $siteSelector        A site selector
-     * @param RouterInterface             $router              The Router
-     * @param BlockHelper                 $blockHelper         The Block Helper
-     * @param HttpKernelExtension         $httpKernelExtension
+     * @param CmsManagerSelectorInterface $cmsManagerSelector A CMS manager selector
+     * @param SiteSelectorInterface       $siteSelector       A site selector
+     * @param RouterInterface             $router             The Router
+     * @param BlockHelper                 $blockHelper        The Block Helper
      * @param bool                        $hideDisabledBlocks
      */
     public function __construct(CmsManagerSelectorInterface $cmsManagerSelector, SiteSelectorInterface $siteSelector, RouterInterface $router, BlockHelper $blockHelper, HttpKernelExtension $httpKernelExtension, $hideDisabledBlocks = false)
@@ -96,9 +75,6 @@ class PageExtension extends AbstractExtension implements InitRuntimeInterface
         $this->hideDisabledBlocks = $hideDisabledBlocks;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getFunctions()
     {
         return [
@@ -110,16 +86,15 @@ class PageExtension extends AbstractExtension implements InitRuntimeInterface
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function initRuntime(Environment $environment)
     {
         $this->environment = $environment;
     }
 
     /**
-     * {@inheritdoc}
+     * NEXT_MAJOR: remove this method.
+     *
+     * @deprecated since sonata-project/page-bundle 3.14, to be removed in version 4.0.
      */
     public function getName()
     {
@@ -128,11 +103,10 @@ class PageExtension extends AbstractExtension implements InitRuntimeInterface
 
     /**
      * @param PageInterface $page
-     * @param array         $options
      *
      * @return string
      */
-    public function breadcrumb(PageInterface $page = null, array $options = [])
+    public function breadcrumb(?PageInterface $page = null, array $options = [])
     {
         if (!$page) {
             $page = $this->cmsManagerSelector->retrieve()->getCurrentPage();
@@ -154,10 +128,14 @@ class PageExtension extends AbstractExtension implements InitRuntimeInterface
             $breadcrumbs = $page->getParents();
 
             if ($options['force_view_home_page'] && (!isset($breadcrumbs[0]) || 'homepage' !== $breadcrumbs[0]->getRouteName())) {
+                $site = $this->siteSelector->retrieve();
+
+                $homePage = false;
                 try {
-                    $homePage = $this->cmsManagerSelector->retrieve()->getPageByRouteName($this->siteSelector->retrieve(), 'homepage');
+                    if (null !== $site) {
+                        $homePage = $this->cmsManagerSelector->retrieve()->getPageByRouteName($site, 'homepage');
+                    }
                 } catch (PageNotFoundException $e) {
-                    $homePage = false;
                 }
 
                 if ($homePage) {
@@ -178,7 +156,7 @@ class PageExtension extends AbstractExtension implements InitRuntimeInterface
      *
      * @param PageBlockInterface $block      Block service
      * @param array              $parameters Provide absolute or relative url ?
-     * @param bool               $absolute
+     * @param int                $absolute
      *
      * @return string
      */
@@ -196,7 +174,6 @@ class PageExtension extends AbstractExtension implements InitRuntimeInterface
     /**
      * @param string $name
      * @param null   $page
-     * @param array  $options
      *
      * @return Response
      */
@@ -209,7 +186,7 @@ class PageExtension extends AbstractExtension implements InitRuntimeInterface
         try {
             if (null === $page) {
                 $targetPage = $cms->getCurrentPage();
-            } elseif (!$page instanceof PageInterface && \is_string($page)) {
+            } elseif (null !== $site && !$page instanceof PageInterface && \is_string($page)) {
                 $targetPage = $cms->getInternalRoute($site, $page);
             } elseif ($page instanceof PageInterface) {
                 $targetPage = $page;
@@ -233,9 +210,6 @@ class PageExtension extends AbstractExtension implements InitRuntimeInterface
     }
 
     /**
-     * @param PageBlockInterface $block
-     * @param array              $options
-     *
      * @return string
      */
     public function renderBlock(PageBlockInterface $block, array $options = [])
@@ -285,17 +259,11 @@ class PageExtension extends AbstractExtension implements InitRuntimeInterface
             }
         }
 
-        // Simplify this when dropping twig-bridge < 3.2 support
-        if (method_exists(AppVariable::class, 'getToken')) {
-            return HttpKernelExtension::controller($controller, $attributes, $query);
-        }
-
-        return $this->httpKernelExtension->controller($controller, $attributes, $query);
+        return HttpKernelExtension::controller($controller, $attributes, $query);
     }
 
     /**
      * @param string $template
-     * @param array  $parameters
      *
      * @return string
      */

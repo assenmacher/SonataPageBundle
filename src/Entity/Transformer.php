@@ -24,10 +24,11 @@ use Sonata\PageBundle\Model\SnapshotInterface;
 use Sonata\PageBundle\Model\SnapshotManagerInterface;
 use Sonata\PageBundle\Model\SnapshotPageProxy;
 use Sonata\PageBundle\Model\TransformerInterface;
-use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
  * This class transform a SnapshotInterface into PageInterface.
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class Transformer implements TransformerInterface
 {
@@ -70,9 +71,6 @@ class Transformer implements TransformerInterface
         $this->registry = $registry;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function create(PageInterface $page)
     {
         $snapshot = $this->snapshotManager->create();
@@ -97,7 +95,13 @@ class Transformer implements TransformerInterface
             $snapshot->setParentId($page->getParent()->getId());
         }
 
+        // NEXT_MAJOR: Remove this "if" condition block.
         if ($page->getTarget()) {
+            @trigger_error(
+                'target page is deprecate since sonata-project/page-bundle 3.27.0'.
+                ', and it will be removed in 4.0',
+                \E_USER_DEPRECATED
+            );
             $snapshot->setTargetId($page->getTarget()->getId());
         }
 
@@ -116,7 +120,7 @@ class Transformer implements TransformerInterface
         $content['updated_at'] = $page->getUpdatedAt()->format('U');
         $content['slug'] = $page->getSlug();
         $content['parent_id'] = $page->getParent() ? $page->getParent()->getId() : null;
-        $content['target_id'] = $page->getTarget() ? $page->getTarget()->getId() : null;
+        $content['target_id'] = $page->getTarget() ? $page->getTarget()->getId() : null; // NEXT_MAJOR: Remove this line.
 
         $content['blocks'] = [];
         foreach ($page->getBlocks() as $block) {
@@ -132,9 +136,6 @@ class Transformer implements TransformerInterface
         return $snapshot;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function load(SnapshotInterface $snapshot)
     {
         $page = $this->pageManager->create();
@@ -155,7 +156,7 @@ class Transformer implements TransformerInterface
         $page->setJavascript($content['javascript']);
         $page->setStylesheet($content['stylesheet']);
         $page->setRawHeaders($content['raw_headers']);
-        $page->setTitle($content['title']);
+        $page->setTitle($content['title'] ?? null);
         $page->setMetaDescription($content['meta_description']);
         $page->setMetaKeyword($content['meta_keyword']);
         $page->setName($content['name']);
@@ -174,9 +175,6 @@ class Transformer implements TransformerInterface
         return $page;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function loadBlock(array $content, PageInterface $page)
     {
         $block = $this->blockManager->create();
@@ -185,11 +183,13 @@ class Transformer implements TransformerInterface
 
         $block->setPage($page);
         $block->setId($content['id']);
-        $block->setName($content['name']);
+        $block->setName($content['name'] ?? null);
         $block->setEnabled($content['enabled']);
-        $block->setPosition($content['position']);
+        if (isset($content['position'])) {
+            $block->setPosition($content['position']);
+        }
         $block->setSettings($content['settings']);
-        $block->setType($content['type']);
+        $block->setType($content['type'] ?? null);
 
         $createdAt = new \DateTime();
         $createdAt->setTimestamp((int) $content['created_at']);
@@ -206,17 +206,14 @@ class Transformer implements TransformerInterface
         return $block;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getChildren(PageInterface $parent)
+    public function getChildren(PageInterface $page)
     {
-        if (!isset($this->children[$parent->getId()])) {
-            $date = new \Datetime();
+        if (!isset($this->children[$page->getId()])) {
+            $date = new \DateTime();
             $parameters = [
                 'publicationDateStart' => $date,
                 'publicationDateEnd' => $date,
-                'parentId' => $parent->getId(),
+                'parentId' => $page->getId(),
             ];
 
             $manager = $this->registry->getManagerForClass($this->snapshotManager->getClass());
@@ -246,18 +243,16 @@ class Transformer implements TransformerInterface
                 $pages[$page->getId()] = $page;
             }
 
-            $this->children[$parent->getId()] = new ArrayCollection($pages);
+            $this->children[$page->getId()] = new ArrayCollection($pages);
         }
 
-        return $this->children[$parent->getId()];
+        return $this->children[$page->getId()];
     }
 
     /**
-     * @param array $content
-     *
-     * @return array
+     * NEXT_MAJOR: Remove this.
      */
-    protected function fixPageContent(array $content)
+    protected function fixPageContent(array $content): array
     {
         if (!\array_key_exists('title', $content)) {
             $content['title'] = null;
@@ -267,11 +262,9 @@ class Transformer implements TransformerInterface
     }
 
     /**
-     * @param array $content
-     *
-     * @return array
+     * NEXT_MAJOR: Remove this.
      */
-    protected function fixBlockContent(array $content)
+    protected function fixBlockContent(array $content): array
     {
         if (!\array_key_exists('name', $content)) {
             $content['name'] = null;
@@ -281,9 +274,7 @@ class Transformer implements TransformerInterface
     }
 
     /**
-     * @param BlockInterface $block
-     *
-     * @return array
+     * @return array<string, mixed>
      */
     protected function createBlocks(BlockInterface $block)
     {

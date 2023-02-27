@@ -26,18 +26,22 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
+ * NEXT_MAJOR: Remove this class.
+ *
  * @author Vincent Composieux <vincent.composieux@gmail.com>
+ *
+ * @group legacy
  */
-class AjaxControllerTest extends TestCase
+final class AjaxControllerTest extends TestCase
 {
-    public function testWithInvalidBlock()
+    public function testWithInvalidBlock(): void
     {
         $this->expectException(BlockNotFoundException::class);
 
         $cmsManager = $this->createMock(CmsManagerInterface::class);
 
         $selector = $this->createMock(CmsManagerSelectorInterface::class);
-        $selector->expects($this->once())->method('retrieve')->willReturn($cmsManager);
+        $selector->expects(static::once())->method('retrieve')->willReturn($cmsManager);
 
         $renderer = $this->createMock(BlockRendererInterface::class);
 
@@ -50,23 +54,23 @@ class AjaxControllerTest extends TestCase
         $controller->execute($request, 10, 12);
     }
 
-    public function testRenderer()
+    public function testRenderer(): void
     {
         $block = $this->createMock(BlockInterface::class);
 
         $cmsManager = $this->createMock(CmsManagerInterface::class);
-        $cmsManager->expects($this->once())->method('getBlock')->willReturn($block);
+        $cmsManager->expects(static::once())->method('getBlock')->willReturn($block);
 
         $selector = $this->createMock(CmsManagerSelectorInterface::class);
-        $selector->expects($this->once())->method('retrieve')->willReturn($cmsManager);
+        $selector->expects(static::once())->method('retrieve')->willReturn($cmsManager);
 
         $renderer = $this->createMock(BlockRendererInterface::class);
-        $renderer->expects($this->once())->method('render')->willReturn(new Response());
+        $renderer->expects(static::once())->method('render')->willReturn(new Response());
 
         $blockContext = $this->createMock(BlockContextInterface::class);
 
         $contextManager = $this->createMock(BlockContextManagerInterface::class);
-        $contextManager->expects($this->once())->method('get')->willReturn($blockContext);
+        $contextManager->expects(static::once())->method('get')->willReturn($blockContext);
 
         $controller = new AjaxController($selector, $renderer, $contextManager);
 
@@ -74,6 +78,6 @@ class AjaxControllerTest extends TestCase
 
         $response = $controller->execute($request, 10, 12);
 
-        $this->assertInstanceOf(Response::class, $response);
+        static::assertInstanceOf(Response::class, $response);
     }
 }

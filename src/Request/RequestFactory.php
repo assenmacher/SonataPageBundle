@@ -14,11 +14,13 @@ declare(strict_types=1);
 namespace Sonata\PageBundle\Request;
 
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Kernel;
 
+/**
+ * @final since sonata-project/page-bundle 3.26
+ */
 class RequestFactory
 {
-    private static $types = [
+    private static array $types = [
         'host' => Request::class,
         'host_with_path' => SiteRequest::class,
         'host_with_path_by_locale' => SiteRequest::class,
@@ -60,16 +62,11 @@ class RequestFactory
      */
     private static function configureFactory($type)
     {
-        if (version_compare(Kernel::VERSION, '2.5', '<')) {
-            // nothing to configure as Request::setFactory require SF > 2.5
-            return;
-        }
-
         if (!\in_array($type, ['host_with_path', 'host_with_path_by_locale'], true)) {
             return;
         }
 
-        Request::setFactory(static function (
+        Request::setFactory(static fn (
             array $query = [],
             array $request = [],
             array $attributes = [],
@@ -77,9 +74,7 @@ class RequestFactory
             array $files = [],
             array $server = [],
             $content = null
-        ) {
-            return new SiteRequest($query, $request, $attributes, $cookies, $files, $server, $content);
-        });
+        ) => new SiteRequest($query, $request, $attributes, $cookies, $files, $server, $content));
     }
 
     /**

@@ -16,9 +16,9 @@ namespace Sonata\PageBundle\Tests\Model;
 use PHPUnit\Framework\TestCase;
 use Sonata\PageBundle\Model\Template;
 
-class TemplateTest extends TestCase
+final class TemplateTest extends TestCase
 {
-    public function testArea()
+    public function testArea(): void
     {
         $template = new Template('page', 'template.twig');
 
@@ -32,7 +32,7 @@ class TemplateTest extends TestCase
                 'shared' => false,
             ],
         ];
-        $this->assertSame($template->getContainers(), $expected);
+        static::assertSame($template->getContainers(), $expected);
 
         $template->addContainer('zone_B', [
             'shared' => true,
@@ -44,10 +44,10 @@ class TemplateTest extends TestCase
             'placement' => [],
             'shared' => true,
         ];
-        $this->assertSame($template->getContainers(), $expected);
+        static::assertSame($template->getContainers(), $expected);
     }
 
-    public function testGetContainer()
+    public function testGetContainer(): void
     {
         $template = new Template('page', 'template.twig', ['header' => [
             'name' => 'Header',
@@ -62,6 +62,6 @@ class TemplateTest extends TestCase
             'shared' => false,
         ];
 
-        $this->assertSame($expected, $template->getContainer('header'));
+        static::assertSame($expected, $template->getContainer('header'));
     }
 }

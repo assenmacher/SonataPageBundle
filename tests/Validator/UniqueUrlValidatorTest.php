@@ -24,22 +24,22 @@ use Symfony\Component\Validator\Context\ExecutionContext;
 use Symfony\Component\Validator\Validator\ContextualValidatorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class UniqueUrlValidatorTest extends TestCase
+final class UniqueUrlValidatorTest extends TestCase
 {
     /**
      * @group legacy
      */
-    public function testValidateWithNoPageFound()
+    public function testValidateWithNoPageFound(): void
     {
         $site = $this->createMock(SiteInterface::class);
 
         $page = $this->createMock(PageInterface::class);
-        $page->expects($this->exactly(2))->method('getSite')->willReturn($site);
-        $page->expects($this->exactly(2))->method('isError')->willReturn(false);
+        $page->expects(static::exactly(2))->method('getSite')->willReturn($site);
+        $page->expects(static::exactly(2))->method('isError')->willReturn(false);
 
         $manager = $this->createMock(PageManagerInterface::class);
-        $manager->expects($this->once())->method('fixUrl');
-        $manager->expects($this->once())->method('findBy')->willReturn([$page]);
+        $manager->expects(static::once())->method('fixUrl');
+        $manager->expects(static::once())->method('findBy')->willReturn([$page]);
 
         $context = $this->getContext();
 
@@ -49,21 +49,21 @@ class UniqueUrlValidatorTest extends TestCase
         $validator->validate($page, new UniqueUrl());
     }
 
-    public function testValidateWithPageFound()
+    public function testValidateWithPageFound(): void
     {
         $site = $this->createMock(SiteInterface::class);
 
         $page = $this->createMock(PageInterface::class);
-        $page->expects($this->exactly(2))->method('getSite')->willReturn($site);
-        $page->expects($this->exactly(2))->method('isError')->willReturn(false);
-        $page->expects($this->any())->method('getUrl')->willReturn('/salut');
+        $page->expects(static::exactly(2))->method('getSite')->willReturn($site);
+        $page->expects(static::exactly(2))->method('isError')->willReturn(false);
+        $page->method('getUrl')->willReturn('/salut');
 
         $pageFound = $this->createMock(PageInterface::class);
-        $pageFound->expects($this->any())->method('getUrl')->willReturn('/salut');
+        $pageFound->method('getUrl')->willReturn('/salut');
 
         $manager = $this->createMock(PageManagerInterface::class);
-        $manager->expects($this->once())->method('fixUrl');
-        $manager->expects($this->once())->method('findBy')->willReturn([$page, $pageFound]);
+        $manager->expects(static::once())->method('fixUrl');
+        $manager->expects(static::once())->method('findBy')->willReturn([$page, $pageFound]);
 
         $context = $this->getContext();
 
@@ -73,22 +73,22 @@ class UniqueUrlValidatorTest extends TestCase
         $validator->validate($page, new UniqueUrl());
     }
 
-    public function testValidateWithRootUrlAndNoParent()
+    public function testValidateWithRootUrlAndNoParent(): void
     {
         $site = $this->createMock(SiteInterface::class);
 
         $page = $this->createMock(PageInterface::class);
-        $page->expects($this->exactly(2))->method('getSite')->willReturn($site);
-        $page->expects($this->exactly(2))->method('isError')->willReturn(false);
-        $page->expects($this->exactly(1))->method('getParent')->willReturn(null);
-        $page->expects($this->any())->method('getUrl')->willReturn('/');
+        $page->expects(static::exactly(2))->method('getSite')->willReturn($site);
+        $page->expects(static::exactly(2))->method('isError')->willReturn(false);
+        $page->expects(static::once())->method('getParent')->willReturn(null);
+        $page->method('getUrl')->willReturn('/');
 
         $pageFound = $this->createMock(PageInterface::class);
-        $pageFound->expects($this->any())->method('getUrl')->willReturn('/');
+        $pageFound->method('getUrl')->willReturn('/');
 
         $manager = $this->createMock(PageManagerInterface::class);
-        $manager->expects($this->once())->method('fixUrl');
-        $manager->expects($this->once())->method('findBy')->willReturn([$page, $pageFound]);
+        $manager->expects(static::once())->method('fixUrl');
+        $manager->expects(static::once())->method('findBy')->willReturn([$page, $pageFound]);
 
         $context = $this->getContext();
 
@@ -98,15 +98,15 @@ class UniqueUrlValidatorTest extends TestCase
         $validator->validate($page, new UniqueUrl());
     }
 
-    public function testValidateWithPageDynamic()
+    public function testValidateWithPageDynamic(): void
     {
         $site = $this->createMock(SiteInterface::class);
 
         $page = $this->createMock(PageInterface::class);
-        $page->expects($this->once())->method('getSite')->willReturn($site);
-        $page->expects($this->once())->method('isError')->willReturn(false);
-        $page->expects($this->once())->method('isDynamic')->willReturn(true);
-        $page->expects($this->any())->method('getUrl')->willReturn('/salut');
+        $page->expects(static::once())->method('getSite')->willReturn($site);
+        $page->expects(static::once())->method('isError')->willReturn(false);
+        $page->expects(static::once())->method('isDynamic')->willReturn(true);
+        $page->method('getUrl')->willReturn('/salut');
 
         $manager = $this->createMock(PageManagerInterface::class);
 
@@ -118,7 +118,7 @@ class UniqueUrlValidatorTest extends TestCase
         $validator->validate($page, new UniqueUrl());
     }
 
-    private function getContext()
+    private function getContext(): ExecutionContext
     {
         $translator = $this->createMock(TranslatorInterface::class);
         $validator = $this->createMock(ValidatorInterface::class);
@@ -129,7 +129,7 @@ class UniqueUrlValidatorTest extends TestCase
         $context->setGroup('MyGroup');
         $context->setNode('InvalidValue', null, null, 'property.path');
         $context->setConstraint(new UniqueUrl());
-        $validator->expects($this->any())
+        $validator
             ->method('inContext')
             ->with($context)
             ->willReturn($contextualValidator);

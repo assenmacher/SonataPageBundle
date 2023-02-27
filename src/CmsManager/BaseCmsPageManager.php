@@ -34,76 +34,50 @@ abstract class BaseCmsPageManager implements CmsManagerInterface
      */
     protected $blocks = [];
 
-    /**
-     * {@inheritdoc}
-     */
     public function getCurrentPage()
     {
         return $this->currentPage;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setCurrentPage(PageInterface $page)
     {
         $this->currentPage = $page;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBlocks()
     {
         return $this->blocks;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getPageByUrl(SiteInterface $site, $url)
+    public function getPageByUrl(SiteInterface $site, $slug)
     {
-        return $this->getPageBy($site, 'url', $url);
+        return $this->getPageBy($site, 'url', $slug);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPageByRouteName(SiteInterface $site, $routeName)
     {
         return $this->getPageBy($site, 'routeName', $routeName);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPageByPageAlias(SiteInterface $site, $pageAlias)
     {
         return $this->getPageBy($site, 'pageAlias', $pageAlias);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPageByName(SiteInterface $site, $name)
     {
         return $this->getPageBy($site, 'name', $name);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPageById($id)
     {
         return $this->getPageBy(null, 'id', $id);
     }
 
     /**
-     * @param SiteInterface|null $site
-     * @param string             $fieldName
-     * @param mixed              $value
+     * @param string $fieldName
      *
      * @return PageInterface
      */
-    abstract protected function getPageBy(SiteInterface $site = null, $fieldName, $value);
+    abstract protected function getPageBy(?SiteInterface $site, $fieldName, $value);
 }

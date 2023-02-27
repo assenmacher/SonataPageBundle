@@ -21,6 +21,11 @@ namespace Sonata\PageBundle\Model;
 abstract class Page implements PageInterface
 {
     /**
+     * @var mixed
+     */
+    protected $id;
+
+    /**
      * @var \DateTime
      */
     protected $createdAt;
@@ -36,12 +41,12 @@ abstract class Page implements PageInterface
     protected $routeName;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $pageAlias;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $type;
 
@@ -51,52 +56,52 @@ abstract class Page implements PageInterface
     protected $name;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $title;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $slug;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $url;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $customUrl;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $requestMethod;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $metaKeyword;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $metaDescription;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $javascript;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $stylesheet;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $rawHeaders;
 
@@ -116,12 +121,12 @@ abstract class Page implements PageInterface
     protected $blocks;
 
     /**
-     * @deprecated This property is deprecated since version 2.4 and will be removed in 3.0
+     * @deprecated This property is deprecated since sonata-project/page-bundle 2.4 and will be removed in 4.0
      */
     protected $sources;
 
     /**
-     * @var PageInterface
+     * @var PageInterface|null
      */
     protected $parent;
 
@@ -131,7 +136,11 @@ abstract class Page implements PageInterface
     protected $parents;
 
     /**
-     * @var PageInterface
+     * @var pageInterface|null
+     *
+     * NEXT_MAJOR: Remove this property
+     *
+     * @deprecated since 3.27 and it will be removed on 4.0
      */
     protected $target;
 
@@ -146,7 +155,7 @@ abstract class Page implements PageInterface
     protected $snapshots;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $templateCode;
 
@@ -161,7 +170,7 @@ abstract class Page implements PageInterface
     protected $decorate = true;
 
     /**
-     * @var SiteInterface
+     * @var SiteInterface|null
      */
     protected $site;
 
@@ -192,17 +201,11 @@ abstract class Page implements PageInterface
         $this->edited = true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function __toString()
     {
         return $this->getName() ?: '-';
     }
 
-    /**
-     * @return mixed
-     */
     public static function getSlugifyMethod()
     {
         return self::$slugifyMethod;
@@ -216,33 +219,21 @@ abstract class Page implements PageInterface
         self::$slugifyMethod = $slugifyMethod;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setId($id)
     {
         $this->id = $id;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setRouteName($routeName)
     {
         $this->routeName = $routeName;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getRouteName()
     {
         return $this->routeName;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setPageAlias($pageAlias)
     {
         if ('_page_alias_' !== substr((string) $pageAlias, 0, 12)) {
@@ -252,177 +243,111 @@ abstract class Page implements PageInterface
         $this->pageAlias = $pageAlias;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPageAlias()
     {
         return $this->pageAlias;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setType($type)
     {
         $this->type = $type;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getType()
     {
         return $this->type;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setEnabled($enabled)
     {
         $this->enabled = $enabled;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getEnabled()
     {
         return $this->enabled;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setName($name)
     {
         $this->name = $name;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getName()
     {
         return $this->name;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setSlug($slug)
     {
         $this->slug = self::slugify(trim((string) $slug));
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getSlug()
     {
         return $this->slug;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setCustomUrl($customUrl)
     {
         $this->customUrl = $customUrl;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getCustomUrl()
     {
         return $this->customUrl;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setRequestMethod($requestMethod)
+    public function setRequestMethod($method)
     {
-        $this->requestMethod = $requestMethod;
+        $this->requestMethod = $method;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getRequestMethod()
     {
         return $this->requestMethod;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setMetaKeyword($metaKeyword)
     {
         $this->metaKeyword = $metaKeyword;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getMetaKeyword()
     {
         return $this->metaKeyword;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setMetaDescription($metaDescription)
     {
         $this->metaDescription = $metaDescription;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getMetaDescription()
     {
         return $this->metaDescription;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setJavascript($javascript)
     {
         $this->javascript = $javascript;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getJavascript()
     {
         return $this->javascript;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setStylesheet($stylesheet)
     {
         $this->stylesheet = $stylesheet;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getStylesheet()
     {
         return $this->stylesheet;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setRawHeaders($rawHeaders)
     {
         $headers = $this->getHeadersAsArray($rawHeaders);
@@ -430,31 +355,22 @@ abstract class Page implements PageInterface
         $this->setHeaders($headers);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getRawHeaders()
     {
         return $this->rawHeaders;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function addHeader($name, $header)
+    public function addHeader($name, $value)
     {
         $headers = $this->getHeaders();
 
-        $headers[$name] = $header;
+        $headers[$name] = $value;
 
         $this->headers = $headers;
 
         $this->rawHeaders = $this->getHeadersAsString($headers);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setHeaders(array $headers = [])
     {
         $this->headers = [];
@@ -464,9 +380,6 @@ abstract class Page implements PageInterface
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getHeaders()
     {
         if (null === $this->headers) {
@@ -477,41 +390,26 @@ abstract class Page implements PageInterface
         return $this->headers;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setCreatedAt(\DateTime $createdAt = null)
+    public function setCreatedAt(?\DateTime $createdAt = null)
     {
         $this->createdAt = $createdAt;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getCreatedAt()
     {
         return $this->createdAt;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setUpdatedAt(\DateTime $updatedAt = null)
+    public function setUpdatedAt(?\DateTime $updatedAt = null)
     {
         $this->updatedAt = $updatedAt;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getUpdatedAt()
     {
         return $this->updatedAt;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function addChildren(PageInterface $children)
     {
         $this->children[] = $children;
@@ -519,57 +417,42 @@ abstract class Page implements PageInterface
         $children->setParent($this);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getChildren()
     {
         return $this->children;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setChildren($children)
     {
         $this->children = $children;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getSnapshot()
     {
         return $this->snapshots && $this->snapshots[0] ? $this->snapshots[0] : null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getSnapshots()
     {
         return $this->snapshots;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setSnapshots($snapshots)
     {
         $this->snapshots = $snapshots;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getTarget()
     {
+        @trigger_error(
+            'target page is deprecate since sonata-project/page-bundle 3.27.0'.
+            ', and it will be removed in 4.0',
+            \E_USER_DEPRECATED
+        );
+
         return $this->target;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function addSnapshot(SnapshotInterface $snapshot)
     {
         $this->snapshots[] = $snapshot;
@@ -578,46 +461,36 @@ abstract class Page implements PageInterface
     }
 
     /**
-     * Set target.
-     *
      * @param PageInterface $target
      */
-    public function setTarget(PageInterface $target = null)
+    public function setTarget(?PageInterface $target = null)
     {
+        @trigger_error(
+            'target page is deprecate since sonata-project/page-bundle 3.27.0'.
+            ', and it will be removed in 4.0',
+            \E_USER_DEPRECATED
+        );
+
         $this->target = $target;
     }
 
-    /**
-     * Add blocks.
-     *
-     * @param PageBlockInterface $blocks
-     */
-    public function addBlocks(PageBlockInterface $blocks)
+    public function addBlocks(PageBlockInterface $block)
     {
-        $blocks->setPage($this);
+        $block->setPage($this);
 
-        $this->blocks[] = $blocks;
+        $this->blocks[] = $block;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBlocks()
     {
         return $this->blocks;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setParent(PageInterface $parent = null)
+    public function setParent(?PageInterface $parent = null)
     {
         $this->parent = $parent;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getParent($level = -1)
     {
         if (-1 === $level) {
@@ -633,17 +506,11 @@ abstract class Page implements PageInterface
         return $parents[$level] ?? null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setParents(array $parents)
     {
         $this->parents = $parents;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getParents()
     {
         if (!$this->parents) {
@@ -661,17 +528,11 @@ abstract class Page implements PageInterface
         return $this->parents;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setTemplateCode($templateCode)
     {
         $this->templateCode = $templateCode;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getTemplateCode()
     {
         return $this->templateCode;
@@ -691,89 +552,56 @@ abstract class Page implements PageInterface
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setDecorate($decorate)
     {
         $this->decorate = $decorate;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getDecorate()
     {
         return $this->decorate;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isHybrid()
     {
-        return self::PAGE_ROUTE_CMS_NAME !== $this->getRouteName() && !$this->isInternal();
+        return PageInterface::PAGE_ROUTE_CMS_NAME !== $this->getRouteName() && !$this->isInternal();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isCms()
     {
-        return self::PAGE_ROUTE_CMS_NAME === $this->getRouteName() && !$this->isInternal();
+        return PageInterface::PAGE_ROUTE_CMS_NAME === $this->getRouteName() && !$this->isInternal();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isInternal()
     {
         return '_page_internal_' === substr($this->getRouteName(), 0, 15);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isDynamic()
     {
         return $this->isHybrid() && false !== strpos($this->getUrl(), '{');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isError()
     {
         return '_page_internal_error_' === substr($this->getRouteName(), 0, 21);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setPosition($position)
     {
         $this->position = $position;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPosition()
     {
         return $this->position;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setUrl($url)
     {
         $this->url = $url;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getUrl()
     {
         return $this->url;
@@ -807,7 +635,7 @@ abstract class Page implements PageInterface
             $text = strtolower($text);
 
             // remove unwanted characters
-            $text = preg_replace('~[^-\w]+~', '', $text);
+            $text = preg_replace('~[^\\-\w]+~', '', $text);
 
             return $text;
         }
@@ -857,9 +685,6 @@ abstract class Page implements PageInterface
         return $blocks;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function hasRequestMethod($method)
     {
         $method = strtoupper($method);
@@ -871,49 +696,31 @@ abstract class Page implements PageInterface
         return !$this->getRequestMethod() || false !== strpos($this->getRequestMethod(), $method);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setSite(SiteInterface $site)
+    public function setSite(?SiteInterface $site = null)
     {
         $this->site = $site;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getSite()
     {
         return $this->site;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setEdited($edited)
     {
         $this->edited = $edited;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getEdited()
     {
         return $this->edited;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setTitle($title)
     {
         $this->title = $title;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getTitle()
     {
         return $this->title;
@@ -966,7 +773,7 @@ abstract class Page implements PageInterface
 
         foreach (explode("\r\n", (string) $rawHeaders) as $header) {
             if (false !== strpos($header, ':')) {
-                list($name, $headerStr) = explode(':', $header, 2);
+                [$name, $headerStr] = explode(':', $header, 2);
                 $headers[trim($name)] = trim($headerStr);
             }
         }

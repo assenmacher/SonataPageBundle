@@ -27,6 +27,8 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
  * cms manager upon user permission.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class RequestListener
 {
@@ -60,8 +62,6 @@ class RequestListener
     /**
      * Filter the `core.request` event to decorated the action.
      *
-     * @param GetResponseEvent $event
-     *
      * @throws InternalErrorException
      * @throws PageNotFoundException
      */
@@ -86,7 +86,7 @@ class RequestListener
         $site = $this->siteSelector->retrieve();
 
         if (!$site) {
-            throw new InternalErrorException('No site available for the current request with uri '.htmlspecialchars($request->getUri(), ENT_QUOTES));
+            throw new InternalErrorException('No site available for the current request with uri '.htmlspecialchars($request->getUri(), \ENT_QUOTES));
         }
 
         if ($site->getSiteLocale() && $site->getSiteLocale() !== $request->get('_locale')) {

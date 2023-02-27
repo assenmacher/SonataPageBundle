@@ -21,6 +21,8 @@ use Symfony\Component\HttpFoundation\Response;
  * Templates management and rendering.
  *
  * @author Olivier Paradis <paradis.olivier@gmail.com>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class TemplateManager implements TemplateManagerInterface
 {
@@ -67,17 +69,11 @@ class TemplateManager implements TemplateManagerInterface
         $this->defaultParameters = $defaultParameters;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function add($code, Template $template)
     {
         $this->templates[$code] = $template;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function get($code)
     {
         if (!isset($this->templates[$code])) {
@@ -87,42 +83,27 @@ class TemplateManager implements TemplateManagerInterface
         return $this->templates[$code];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setDefaultTemplateCode($code)
     {
         $this->defaultTemplateCode = $code;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getDefaultTemplateCode()
     {
         return $this->defaultTemplateCode;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setAll($templates)
     {
         $this->templates = $templates;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getAll()
     {
         return $this->templates;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function renderResponse($code, array $parameters = [], Response $response = null)
+    public function renderResponse($code, array $parameters = [], ?Response $response = null)
     {
         return $this->engine->renderResponse(
             $this->getTemplatePath($code),

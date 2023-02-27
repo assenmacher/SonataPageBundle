@@ -27,18 +27,18 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 /**
  * @author Stephen Leavitt <stephen.leavitt@sonyatv.com>
  */
-class HostSiteSelectorTest extends TestCase
+final class HostSiteSelectorTest extends TestCase
 {
     /**
      * @dataProvider siteProvider
      */
-    public function testSite(string $expectedName, string $url)
+    public function testSite(string $expectedName, string $url): void
     {
         // Retrieve the site that would be matched from the request
-        list($site, $event) = $this->performHandleKernelRequestTest($url);
+        [$site, $event] = $this->performHandleKernelRequestTest($url);
 
         // Ensure we retrieved the correct site.
-        $this->assertSame($expectedName, $site->getName());
+        static::assertSame($expectedName, $site->getName());
     }
 
     public function siteProvider(): \Generator
@@ -62,7 +62,7 @@ class HostSiteSelectorTest extends TestCase
         $request = Request::create($url);
 
         // Ensure request locale is null
-        $this->assertNull($request->attributes->get('_locale'));
+        static::assertNull($request->attributes->get('_locale'));
 
         $event = new GetResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST);
 
@@ -79,7 +79,7 @@ class HostSiteSelectorTest extends TestCase
         $site = $siteSelector->retrieve();
 
         // Ensure request locale matches site locale
-        $this->assertSame($site->getSiteLocale(), $request->attributes->get('_locale'));
+        static::assertSame($site->getSiteLocale(), $request->attributes->get('_locale'));
 
         return [
             $site,
@@ -88,7 +88,7 @@ class HostSiteSelectorTest extends TestCase
     }
 }
 
-class HostSite extends BaseSite
+final class HostSite extends BaseSite
 {
     /**
      * @var int
@@ -96,8 +96,6 @@ class HostSite extends BaseSite
     protected $id;
 
     /**
-     * Get id.
-     *
      * @return int $id
      */
     public function getId()
@@ -106,7 +104,7 @@ class HostSite extends BaseSite
     }
 }
 
-class HostSiteSelector extends BaseSiteSelector
+final class HostSiteSelector extends BaseSiteSelector
 {
     /**
      * Camelize a string.
@@ -114,14 +112,14 @@ class HostSiteSelector extends BaseSiteSelector
      * @static
      *
      * @param string $property
-     *
-     * @return string
      */
-    public static function _camelize($property)
+    public static function _camelize($property): string
     {
-        return preg_replace_callback('/(^|[_. ])+(.)/', static function ($match) {
-            return ('.' === $match[1] ? '_' : '').strtoupper($match[2]);
-        }, $property);
+        return preg_replace_callback(
+            '/(^|[_. ])+(.)/',
+            static fn ($match) => ('.' === $match[1] ? '_' : '').strtoupper($match[2]),
+            $property
+        );
     }
 
     /**
@@ -139,10 +137,8 @@ class HostSiteSelector extends BaseSiteSelector
 
     /**
      * @param array $params
-     *
-     * @return array
      */
-    protected function _findSites($params)
+    protected function _findSites($params): array
     {
         $all_sites = $this->_getAllSites();
 
@@ -173,10 +169,7 @@ class HostSiteSelector extends BaseSiteSelector
         return $matched_sites;
     }
 
-    /**
-     * @return array
-     */
-    protected function _getAllSites()
+    protected function _getAllSites(): array
     {
         $always = null;
         $now = new \DateTime();
@@ -272,8 +265,6 @@ class HostSiteSelector extends BaseSiteSelector
     /**
      * @param object $object
      * @param string $fieldName
-     *
-     * @return mixed
      */
     protected function _getFieldValue($object, $fieldName)
     {
@@ -286,7 +277,7 @@ class HostSiteSelector extends BaseSiteSelector
 
         foreach ($getters as $getter) {
             if (method_exists($object, $getter)) {
-                return \call_user_func([$object, $getter]);
+                return $object->$getter();
             }
         }
 
@@ -294,6 +285,6 @@ class HostSiteSelector extends BaseSiteSelector
             return $object->{$fieldName};
         }
 
-        throw new NoValueException(sprintf('Unable to retrieve the value of `%s`', $this->getName()));
+        throw new NoValueException(sprintf('Unable to retrieve the value of `%s`', $fieldName));
     }
 }

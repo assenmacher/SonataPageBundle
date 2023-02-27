@@ -20,22 +20,19 @@ use Sonata\PageBundle\Model\Template;
 use Sonata\PageBundle\Page\TemplateManagerInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class TemplateChoiceTypeTest extends TestCase
+final class TemplateChoiceTypeTest extends TestCase
 {
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
+     * @var MockObject&TemplateManagerInterface
      */
     protected $manager;
 
-    /**
-     * @var TemplateChoiceType
-     */
-    protected $type;
+    protected TemplateChoiceType $type;
 
     /**
      * setup each unit test.
      */
-    public function setUp()
+    protected function setUp(): void
     {
         $this->manager = $this->createMock(TemplateManagerInterface::class);
         $this->type = new TemplateChoiceType($this->manager);
@@ -44,17 +41,20 @@ class TemplateChoiceTypeTest extends TestCase
     /**
      * Test getting options.
      */
-    public function testGetOptions()
+    public function testGetOptions(): void
     {
-        $this->manager->expects($this->atLeastOnce())->method('getAll')->willReturn([
+        $this->manager->expects(static::atLeastOnce())->method('getAll')->willReturn([
             'my_template' => $this->getMockTemplate('Template 1'),
         ]);
 
         $this->type->configureOptions(new OptionsResolver());
 
         $this->type->getTemplates();
-        $this->assertSame(['Template 1' => 'my_template'], $this->type->getTemplates(),
-            'Should return an array of templates provided by the template manager');
+        static::assertSame(
+            ['Template 1' => 'my_template'],
+            $this->type->getTemplates(),
+            'Should return an array of templates provided by the template manager'
+        );
     }
 
     /**
@@ -63,8 +63,8 @@ class TemplateChoiceTypeTest extends TestCase
     protected function getMockTemplate(string $name, string $path = 'path/to/file'): MockObject
     {
         $template = $this->createMock(Template::class);
-        $template->expects($this->any())->method('getName')->willReturn($name);
-        $template->expects($this->any())->method('getPath')->willReturn($path);
+        $template->method('getName')->willReturn($name);
+        $template->method('getPath')->willReturn($path);
 
         return $template;
     }

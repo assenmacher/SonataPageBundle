@@ -393,6 +393,9 @@
                     url:  formAction + '&' + $.param({'composer': 1}),
                     data: $form.serialize(),
                     type: formMethod,
+                    headers: {
+                        Accept: 'text/html, application/xhtml+xml;'
+                    },
                     success: function (resp) {
                         if (resp.result && resp.result === 'ok' && resp.objectId) {
                             var createdEvent = $.Event('blockcreated');
@@ -464,7 +467,7 @@
 
                 if (self.isFormControlTypeByName(formControlName, 'name')) {
                     $nameFormControl = $formControl;
-                    $title.html('<input type="text" class="page-composer__container__child__name__input" value="' + $title.text() + '">');
+                    $title.html('<input type="text" class="page-composer__container__child__name__input" value="' + $title.text().trim() + '">');
                     $input = $title.find('input');
                     $input.bind("propertychange keyup input paste", function (e) {
                         $nameFormControl.val($input.val());
@@ -488,6 +491,9 @@
                     url:     url,
                     data:    $form.serialize(),
                     type:    method,
+                    headers: {
+                        Accept: 'text/html, application/xhtml+xml;'
+                    },
                     success: function (resp) {
                         $loader.hide();
                         if (resp.result && resp.result === 'ok') {
@@ -701,7 +707,7 @@
                 $blockTypeSelectorLoader.css('display', 'inline-block');
 
                 var blockType      = $blockTypeSelectorSelect.val(),
-                    blockTypeLabel = $blockTypeSelectorSelect.find('option:selected').text();
+                    blockTypeLabel = $blockTypeSelectorSelect.find('option:selected').text().trim();
 
                 $.ajax({
                     url:     blockTypeSelectorUrl,
@@ -792,15 +798,16 @@
                     revert:            true,
                     connectToSortable: '.page-composer__container__children',
                     accept: function (source) {
-                        var blockWhitelist = $(this).attr('data-block-whitelist');
-                        if (blockWhitelist === '') {
+                        // NEXT_MAJOR: Remove the 'data-block-whitelist' from here and the min.js
+                        var blockAllowlist = $(this).attr('data-block-allowlist') || $(this).attr('data-block-whitelist');
+                        if (blockAllowlist === '') {
                             return true;
                         }
 
-                        blockWhitelist = blockWhitelist.split(',');
+                        blockAllowlist = blockAllowlist.split(',');
                         var sourceBlockType = $(source).attr('data-block-type');
 
-                        return blockWhitelist.indexOf(sourceBlockType) !== -1;
+                        return blockAllowlist.indexOf(sourceBlockType) !== -1;
                     },
                     drop: function (event, ui) {
                         var droppedBlockId = ui.draggable.attr('data-block-id');

@@ -13,7 +13,9 @@ declare(strict_types=1);
 
 namespace Sonata\PageBundle\DependencyInjection;
 
-use Sonata\EasyExtendsBundle\Mapper\DoctrineCollector;
+use Sonata\Doctrine\Mapper\Builder\OptionsBuilder;
+use Sonata\Doctrine\Mapper\DoctrineCollector;
+use Sonata\EasyExtendsBundle\Mapper\DoctrineCollector as DeprecatedDoctrineCollector;
 use Sonata\PageBundle\Model\Template;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
@@ -26,22 +28,29 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 /**
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class SonataPageExtension extends Extension implements PrependExtensionInterface
 {
     public function prepend(ContainerBuilder $container)
     {
+        $bundles = $container->getParameter('kernel.bundles');
+
+        // add custom form widgets
         if ($container->hasExtension('twig')) {
-            // add custom form widgets
-            $container->prependExtensionConfig('twig', [
-                'form_themes' => ['@SonataCore/Form/datepicker.html.twig'],
-            ]);
+            if (isset($bundles['SonataCoreBundle'])) {
+                $container->prependExtensionConfig('twig', [
+                    'form_themes' => ['@SonataCore/Form/datepicker.html.twig'],
+                ]);
+            } elseif (isset($bundles['SonataFormBundle'])) {
+                $container->prependExtensionConfig('twig', [
+                    'form_themes' => ['@SonataForm/Form/datepicker.html.twig'],
+                ]);
+            }
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function load(array $configs, ContainerBuilder $container)
     {
         $processor = new Processor();
@@ -60,7 +69,8 @@ class SonataPageExtension extends Extension implements PrependExtensionInterface
             'getRequestContext',
         ]);
 
-        if (isset($bundles['FOSRestBundle'], $bundles['NelmioApiDocBundle'])) {
+        // NEXT_MAJOR: Remove this condition and remove all configuration files related to this.
+        if (isset($bundles['FOSRestBundle'], $bundles['NelmioApiDocBundle'], $bundles['JMSSerializerBundle'])) {
             $loader->load('serializer.xml');
 
             $loader->load('api_controllers.xml');
@@ -80,15 +90,21 @@ class SonataPageExtension extends Extension implements PrependExtensionInterface
         $loader->load('block.xml');
         $loader->load('orm.xml');
         $loader->load('form.xml');
-        $loader->load('cache.xml');
         $loader->load('twig.xml');
         $loader->load('http_kernel.xml');
+        // @NEXT_MAJOR: Remove this load, and consumer.xml file
         $loader->load('consumer.xml');
+        $loader->load('service.xml');
         $loader->load('validators.xml');
         $loader->load('command.xml');
+        $loader->load('slugify.xml');
+
+        if ($config['cache'] && isset($bundles['SonataCacheBundle'])) {
+            $loader->load('cache.xml');
+            $this->configureCache($container, $config);
+        }
 
         $this->configureMultisite($container, $config);
-        $this->configureCache($container, $config);
         $this->configureTemplates($container, $config);
         $this->configureExceptions($container, $config);
         $this->configurePageDefaults($container, $config);
@@ -105,7 +121,13 @@ class SonataPageExtension extends Extension implements PrependExtensionInterface
             ->replaceArgument(1, $config['ignore_route_patterns'])
             ->replaceArgument(2, $config['ignore_uri_patterns']);
 
-        $this->registerDoctrineMapping($config);
+        if (isset($bundles['SonataDoctrineBundle'])) {
+            $this->registerSonataDoctrineMapping($config);
+        } else {
+            // NEXT MAJOR: Remove this line and throw error when not registering SonataDoctrineBundle
+            $this->registerDoctrineMapping($config);
+        }
+
         $this->registerParameters($container, $config);
     }
 
@@ -162,17 +184,26 @@ class SonataPageExtension extends Extension implements PrependExtensionInterface
     }
 
     /**
-     * Registers doctrine mapping on concrete page entities.
+     * NEXT_MAJOR: Remove this method.
      *
-     * @param array $config
+     * Registers doctrine mapping on concrete page entities.
      */
     public function registerDoctrineMapping(array $config)
     {
+        @trigger_error(
+            'Using SonataEasyExtendsBundle is deprecated since sonata-project/page-bundle 3.19. Please register SonataDoctrineBundle as a bundle instead.',
+            \E_USER_DEPRECATED
+        );
+
         if (!class_exists($config['class']['page'])) {
             return;
         }
 
-        $collector = DoctrineCollector::getInstance();
+        /**
+         * @phpstan-ignore-next-line
+         * @psalm-suppress UndefinedClass
+         */
+        $collector = DeprecatedDoctrineCollector::getInstance();
 
         $collector->addAssociation($config['class']['page'], 'mapOneToMany', [
             'fieldName' => 'children',
@@ -458,6 +489,11 @@ class SonataPageExtension extends Extension implements PrependExtensionInterface
      */
     public function configureCache(ContainerBuilder $container, array $config)
     {
+        @trigger_error(
+            'Using SonataCacheBundle is deprecated since sonata-project/page-bundle 3.27 and will be removed in 4.x',
+            \E_USER_DEPRECATED
+        );
+
         if (isset($config['caches']['esi'])) {
             $container
                 ->getDefinition('sonata.page.cache.esi')
@@ -512,5 +548,142 @@ class SonataPageExtension extends Extension implements PrependExtensionInterface
         // set the default page service to use when no page type has been set. (backward compatibility)
         $definition = $container->getDefinition('sonata.page.page_service_manager');
         $definition->addMethodCall('setDefault', [new Reference($config['default_page_service'])]);
+    }
+
+    private function registerSonataDoctrineMapping(array $config): void
+    {
+        if (!class_exists($config['class']['page'])) {
+            return;
+        }
+
+        $collector = DoctrineCollector::getInstance();
+
+        $collector->addAssociation(
+            $config['class']['page'],
+            'mapOneToMany',
+            OptionsBuilder::createOneToMany('children', $config['class']['page'])
+                ->cascade(['persist'])
+                ->mappedBy('parent')
+                ->addOrder('position', 'ASC')
+        );
+
+        $collector->addAssociation(
+            $config['class']['page'],
+            'mapOneToMany',
+            OptionsBuilder::createOneToMany('blocks', $config['class']['block'])
+                ->cascade(['remove', 'persist', 'refresh', 'merge', 'detach'])
+                ->mappedBy('page')
+                ->addOrder('position', 'ASC')
+        );
+
+        $collector->addAssociation(
+            $config['class']['page'],
+            'mapManyToOne',
+            OptionsBuilder::createManyToOne('site', $config['class']['site'])
+                ->cascade(['persist'])
+                ->addJoin([
+                    'name' => 'site_id',
+                    'referencedColumnName' => 'id',
+                    'onDelete' => 'CASCADE',
+                ])
+        );
+
+        $collector->addAssociation(
+            $config['class']['page'],
+            'mapManyToOne',
+            OptionsBuilder::createManyToOne('parent', $config['class']['page'])
+                ->cascade(['persist'])
+                ->inversedBy('children')
+                ->addJoin([
+                    'name' => 'parent_id',
+                    'referencedColumnName' => 'id',
+                    'onDelete' => 'CASCADE',
+                ])
+        );
+
+        $collector->addAssociation(
+            $config['class']['page'],
+            'mapOneToMany',
+            OptionsBuilder::createOneToMany('sources', $config['class']['page'])
+                ->mappedBy('target')
+        );
+
+        $collector->addAssociation(
+            $config['class']['page'],
+            'mapManyToOne',
+            OptionsBuilder::createManyToOne('target', $config['class']['page'])
+                ->cascade(['persist'])
+                ->inversedBy('sources')
+                ->addJoin([
+                    'name' => 'target_id',
+                    'referencedColumnName' => 'id',
+                    'onDelete' => 'CASCADE',
+                ])
+        );
+
+        $collector->addAssociation(
+            $config['class']['block'],
+            'mapOneToMany',
+            OptionsBuilder::createOneToMany('children', $config['class']['block'])
+                ->cascade(['remove', 'persist'])
+                ->mappedBy('parent')
+                ->orphanRemoval()
+                ->addOrder('position', 'ASC')
+        );
+
+        $collector->addAssociation(
+            $config['class']['block'],
+            'mapManyToOne',
+            OptionsBuilder::createManyToOne('parent', $config['class']['block'])
+                ->inversedBy('children')
+                ->addJoin([
+                    'name' => 'parent_id',
+                    'referencedColumnName' => 'id',
+                    'onDelete' => 'CASCADE',
+                ])
+        );
+
+        $collector->addAssociation(
+            $config['class']['block'],
+            'mapManyToOne',
+            OptionsBuilder::createManyToOne('page', $config['class']['page'])
+                ->cascade(['persist'])
+                ->inversedBy('blocks')
+                ->addJoin([
+                    'name' => 'page_id',
+                    'referencedColumnName' => 'id',
+                    'onDelete' => 'CASCADE',
+                ])
+        );
+
+        $collector->addAssociation(
+            $config['class']['snapshot'],
+            'mapManyToOne',
+            OptionsBuilder::createManyToOne('site', $config['class']['site'])
+                ->cascade(['persist'])
+                ->addJoin([
+                    'name' => 'site_id',
+                    'referencedColumnName' => 'id',
+                    'onDelete' => 'CASCADE',
+                ])
+        );
+
+        $collector->addAssociation(
+            $config['class']['snapshot'],
+            'mapManyToOne',
+            OptionsBuilder::createManyToOne('page', $config['class']['page'])
+                ->cascade(['persist'])
+                ->addJoin([
+                    'name' => 'page_id',
+                    'referencedColumnName' => 'id',
+                    'onDelete' => 'CASCADE',
+                ])
+        );
+
+        $collector->addIndex($config['class']['snapshot'], 'idx_snapshot_dates_enabled', [
+            'publication_date_start',
+            'publication_date_end',
+            'enabled',
+        ]);
     }
 }

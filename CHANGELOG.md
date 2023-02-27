@@ -2,6 +2,293 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.29.0](https://github.com/sonata-project/SonataPageBundle/compare/3.28.0...3.29.0) - 2022-09-08
+### Deprecated
+- [[#1595](https://github.com/sonata-project/SonataPageBundle/pull/1595)] Deprecated `assets` option from sonata_page config file ([@eerison](https://github.com/eerison))
+
+## [3.28.0](https://github.com/sonata-project/SonataPageBundle/compare/3.27.0...3.28.0) - 2022-08-15
+### Deprecated
+- [[#1511](https://github.com/sonata-project/SonataPageBundle/pull/1511)] Deprecate `slugify_service` configuration option. ([@jordisala1991](https://github.com/jordisala1991))
+
+### Fixed
+- [[#1536](https://github.com/sonata-project/SonataPageBundle/pull/1536)] SnapshotManager Cleanup Query if there are no Snapshots to keep ([@Hanmac](https://github.com/Hanmac))
+
+## [3.27.0](https://github.com/sonata-project/SonataPageBundle/compare/3.26.0...3.27.0) - 2022-07-26
+### Added
+- [[#1418](https://github.com/sonata-project/SonataPageBundle/pull/1418)] Added `CreateSnapshotService` to create snapshots ([@eerison](https://github.com/eerison))
+- [[#1418](https://github.com/sonata-project/SonataPageBundle/pull/1418)] Added `CreateSnapshotBySiteInterface` ([@eerison](https://github.com/eerison))
+- [[#1418](https://github.com/sonata-project/SonataPageBundle/pull/1418)] Added `CreateSnapshotByPageInterface` ([@eerison](https://github.com/eerison))
+
+### Changed
+- [[#1446](https://github.com/sonata-project/SonataPageBundle/pull/1446)] Updated SnapshotManger to use QueryBuilder instead of native SQL ([@Hanmac](https://github.com/Hanmac))
+- [[#1427](https://github.com/sonata-project/SonataPageBundle/pull/1427)] Make Cache dependency optional ([@Hanmac](https://github.com/Hanmac))
+
+### Deprecated
+- [[#1461](https://github.com/sonata-project/SonataPageBundle/pull/1461)] Deprecated `DumpPageCommand::class` ([@eerison](https://github.com/eerison))
+- [[#1461](https://github.com/sonata-project/SonataPageBundle/pull/1461)] Deprecated `RenderBlockCommand::class` ([@eerison](https://github.com/eerison))
+- [[#1459](https://github.com/sonata-project/SonataPageBundle/pull/1459)] Deprecated `Mustache:class` generator ([@eerison](https://github.com/eerison))
+- [[#1434](https://github.com/sonata-project/SonataPageBundle/pull/1434)] Deprecated `CleanupSnapshotConsumer` class ([@eerison](https://github.com/eerison))
+- [[#1434](https://github.com/sonata-project/SonataPageBundle/pull/1434)] Deprecated `CleanupSnapshotsConsumer` class ([@eerison](https://github.com/eerison))
+- [[#1434](https://github.com/sonata-project/SonataPageBundle/pull/1434)] Deprecated `--mode` option for `sonata:page:cleanup-snapshots` ([@eerison](https://github.com/eerison))
+- [[#1434](https://github.com/sonata-project/SonataPageBundle/pull/1434)] Deprecated `--base-console` option for `sonata:page:cleanup-snapshots` ([@eerison](https://github.com/eerison))
+- [[#1434](https://github.com/sonata-project/SonataPageBundle/pull/1434)] Deprecated `--site=all` option  for `sonata:page:cleanup-snapshots` ([@eerison](https://github.com/eerison))
+- [[#1434](https://github.com/sonata-project/SonataPageBundle/pull/1434)] Deprecated `--base-console` option  for `sonata:page:create-snapshots` ([@eerison](https://github.com/eerison))
+- [[#1434](https://github.com/sonata-project/SonataPageBundle/pull/1434)] Deprecated `--site=all` option  for `sonata:page:create-snapshots` ([@eerison](https://github.com/eerison))
+- [[#1434](https://github.com/sonata-project/SonataPageBundle/pull/1434)] Deprecated `--site=all` option  for `sonata:page:update-core-routes` ([@eerison](https://github.com/eerison))
+- [[#1434](https://github.com/sonata-project/SonataPageBundle/pull/1434)] Deprecated `BaseCommand::class` ([@eerison](https://github.com/eerison))
+- [[#1482](https://github.com/sonata-project/SonataPageBundle/pull/1482)] Deprecated target page code from `src/Command/CloneSiteCommand.php` ([@eerison](https://github.com/eerison))
+- [[#1482](https://github.com/sonata-project/SonataPageBundle/pull/1482)] Deprecated target page code from `src/Entity/Transformer.php` ([@eerison](https://github.com/eerison))
+- [[#1482](https://github.com/sonata-project/SonataPageBundle/pull/1482)] Deprecated `src/Model/Page::target` property ([@eerison](https://github.com/eerison))
+- [[#1482](https://github.com/sonata-project/SonataPageBundle/pull/1482)] Deprecated `src/Model/Page::getTarget()` method ([@eerison](https://github.com/eerison))
+- [[#1482](https://github.com/sonata-project/SonataPageBundle/pull/1482)] Deprecated `src/Model/Page::setTarget()` method ([@eerison](https://github.com/eerison))
+- [[#1482](https://github.com/sonata-project/SonataPageBundle/pull/1482)] Deprecated `src/Model/PageInterface::getTarget()` method ([@eerison](https://github.com/eerison))
+- [[#1482](https://github.com/sonata-project/SonataPageBundle/pull/1482)] Deprecated `src/Model/PageInterface::setTarget()` method ([@eerison](https://github.com/eerison))
+- [[#1482](https://github.com/sonata-project/SonataPageBundle/pull/1482)] Deprecated `src/Model/Snapshot::target` property ([@eerison](https://github.com/eerison))
+- [[#1482](https://github.com/sonata-project/SonataPageBundle/pull/1482)] Deprecated `src/Model/Snapshot::targetId` property ([@eerison](https://github.com/eerison))
+- [[#1482](https://github.com/sonata-project/SonataPageBundle/pull/1482)] Deprecated `src/Model/Snapshot::getTarget()` method ([@eerison](https://github.com/eerison))
+- [[#1482](https://github.com/sonata-project/SonataPageBundle/pull/1482)] Deprecated `src/Model/Snapshot::setTarget()` method ([@eerison](https://github.com/eerison))
+- [[#1482](https://github.com/sonata-project/SonataPageBundle/pull/1482)] Deprecated `src/Model/Snapshot::getTargetId()` method ([@eerison](https://github.com/eerison))
+- [[#1482](https://github.com/sonata-project/SonataPageBundle/pull/1482)] Deprecated `src/Model/Snapshot::setTargetId()` method ([@eerison](https://github.com/eerison))
+- [[#1482](https://github.com/sonata-project/SonataPageBundle/pull/1482)] Deprecated `src/Model/SnapshotPageProxy::target` property ([@eerison](https://github.com/eerison))
+- [[#1482](https://github.com/sonata-project/SonataPageBundle/pull/1482)] Deprecated `src/Model/SnapshotPageProxy::getTargetId()` method ([@eerison](https://github.com/eerison))
+- [[#1482](https://github.com/sonata-project/SonataPageBundle/pull/1482)] Deprecated `src/Model/SnapshotPageProxy::setTargetId()` method ([@eerison](https://github.com/eerison))
+- [[#1482](https://github.com/sonata-project/SonataPageBundle/pull/1482)] Deprecated `src/Page/PageServiceManager::createResponse()` method ([@eerison](https://github.com/eerison))
+- [[#1476](https://github.com/sonata-project/SonataPageBundle/pull/1476)] Deprecated the command `MigrateToJsonTypeCommand::class` ([@eerison](https://github.com/eerison))
+- [[#1476](https://github.com/sonata-project/SonataPageBundle/pull/1476)] Deprecated the command `MigrateBlockNameSettingCommand::class` ([@eerison](https://github.com/eerison))
+- [[#1435](https://github.com/sonata-project/SonataPageBundle/pull/1435)] Deprecated `BlockEsiCache`, `BlockJsCache` and `BlockSsiCache`. ([@Hanmac](https://github.com/Hanmac))
+- [[#1418](https://github.com/sonata-project/SonataPageBundle/pull/1418)] Deprecated `async` mode in `CreateSnapshotsCommand` ([@eerison](https://github.com/eerison))
+- [[#1418](https://github.com/sonata-project/SonataPageBundle/pull/1418)] Deprecated `sonata.notification.backend` code into `SiteAdminController` ([@eerison](https://github.com/eerison))
+- [[#1418](https://github.com/sonata-project/SonataPageBundle/pull/1418)] Deprecated `sonata.notification.backend` code into `PageAdminController` ([@eerison](https://github.com/eerison))
+- [[#1418](https://github.com/sonata-project/SonataPageBundle/pull/1418)] Deprecated `sendMessage` and `$backend` property into the `CreateSnapshotAdminExtension` ([@eerison](https://github.com/eerison))
+
+### Removed
+- [[#1429](https://github.com/sonata-project/SonataPageBundle/pull/1429)] Remove `symfony/debug` dependency as it is deprecated. ([@Hanmac](https://github.com/Hanmac))
+
+## [3.26.0](https://github.com/sonata-project/SonataPageBundle/compare/3.25.0...3.26.0) - 2021-12-28
+### Added
+- [[#1392](https://github.com/sonata-project/SonataPageBundle/pull/1392)] Add `SnapshotInterface::getId()` method ([@core23](https://github.com/core23))
+- [[#1369](https://github.com/sonata-project/SonataPageBundle/pull/1369)] Added `Sonata\BlockBundle\Model\BlockManagerInterface` ([@core23](https://github.com/core23))
+
+### Changed
+- [[#1392](https://github.com/sonata-project/SonataPageBundle/pull/1392)] Mark all classes as final ([@core23](https://github.com/core23))
+
+### Deprecated
+- [[#1369](https://github.com/sonata-project/SonataPageBundle/pull/1369)] Deprecated `Sonata\BlockBundle\Model\BlockManagerInterface` usage ([@core23](https://github.com/core23))
+
+## [3.25.0](https://github.com/sonata-project/SonataPageBundle/compare/3.24.0...3.25.0) - 2021-12-04
+### Added
+- [[#1382](https://github.com/sonata-project/SonataPageBundle/pull/1382)] Added PHPStan and Psalm. ([@jordisala1991](https://github.com/jordisala1991))
+
+## [3.24.0](https://github.com/sonata-project/SonataPageBundle/compare/3.23.0...3.24.0) - 2021-11-06
+### Deprecated
+- [[#1365](https://github.com/sonata-project/SonataPageBundle/pull/1365)] Deprecated ReST API with FOSRest, Nelmio Api Docs and JMS Serializer. ([@wbloszyk](https://github.com/wbloszyk))
+
+### Fixed
+- [[#1377](https://github.com/sonata-project/SonataPageBundle/pull/1377)] Block validation in edit mode ([@VincentLanglet](https://github.com/VincentLanglet))
+
+## [3.23.0](https://github.com/sonata-project/SonataPageBundle/compare/3.22.3...3.23.0) - 2021-08-22
+### Added
+- [[#1341](https://github.com/sonata-project/SonataPageBundle/pull/1341)] Support for `SonataCacheBundle` v3 ([@VincentLanglet](https://github.com/VincentLanglet))
+- [[#1341](https://github.com/sonata-project/SonataPageBundle/pull/1341)] Support for PHP 8 ([@VincentLanglet](https://github.com/VincentLanglet))
+- [[#1341](https://github.com/sonata-project/SonataPageBundle/pull/1341)] Some return type hint to `BlockEsiCache`, `BlockJsCache` and `BlockSsiCache` ([@VincentLanglet](https://github.com/VincentLanglet))
+
+### Changed
+- [[#1341](https://github.com/sonata-project/SonataPageBundle/pull/1341)] `BlockEsiCache::__construct()` signature ([@VincentLanglet](https://github.com/VincentLanglet))
+- [[#1341](https://github.com/sonata-project/SonataPageBundle/pull/1341)] `BlockSsiCache::__construct` signature ([@VincentLanglet](https://github.com/VincentLanglet))
+
+### Removed
+- [[#1341](https://github.com/sonata-project/SonataPageBundle/pull/1341)] Support for `SonataCacheBundle` v2 ([@VincentLanglet](https://github.com/VincentLanglet))
+- [[#1341](https://github.com/sonata-project/SonataPageBundle/pull/1341)] Support for `SonataCache` v1 ([@VincentLanglet](https://github.com/VincentLanglet))
+
+## [3.22.3](https://github.com/sonata-project/SonataPageBundle/compare/3.22.2...3.22.3) - 2021-07-15
+### Fixed
+- [[#1323](https://github.com/sonata-project/SonataPageBundle/pull/1323)] Page composer block validation ([@VincentLanglet](https://github.com/VincentLanglet))
+- [[#1275](https://github.com/sonata-project/SonataPageBundle/pull/1275)] Ignore metadata setup on SiteSelector, not whole site detection. ([@BadPixxel](https://github.com/BadPixxel))
+
+## [3.22.2](https://github.com/sonata-project/SonataPageBundle/compare/3.22.1...3.22.2) - 2021-05-26
+### Fixed
+- [[#1310](https://github.com/sonata-project/SonataPageBundle/pull/1310)] Fixed creating `sonata_page_admin` twig variable only when `SonataAdminBundle` is loaded. ([@franmomu](https://github.com/franmomu))
+
+## [3.22.1](https://github.com/sonata-project/SonataPageBundle/compare/3.22.0...3.22.1) - 2021-05-18
+### Fixed
+- [[#1305](https://github.com/sonata-project/SonataPageBundle/pull/1305)] Do not load `api_form.xml` if `JMSSerializerBundle` is not installed ([@4c0n](https://github.com/4c0n))
+- [[#1306](https://github.com/sonata-project/SonataPageBundle/pull/1306)] Added missing Dutch translation value. ([@4c0n](https://github.com/4c0n))
+
+## [3.22.0](https://github.com/sonata-project/SonataPageBundle/compare/3.21.1...3.22.0) - 2021-04-19
+### Added
+- [[#1293](https://github.com/sonata-project/SonataPageBundle/pull/1293)] Added `CreateSnapshotAdminExtension::postRemove()` method in order to create a snapshot when a block is deleted. ([@gremo](https://github.com/gremo))
+- [[#1297](https://github.com/sonata-project/SonataPageBundle/pull/1297)] Added `sonata_page_admin` Twig global variable which holds `sonata.page.admin.page` service ([@franmomu](https://github.com/franmomu))
+
+### Fixed
+- [[#1296](https://github.com/sonata-project/SonataPageBundle/pull/1296)] Fixed using deprecated Twig tags ([@franmomu](https://github.com/franmomu))
+- [[#1296](https://github.com/sonata-project/SonataPageBundle/pull/1296)] Fixed references to deprecated `sonata.core.slugify.cocur` and changed them to `sonata.page.slugify.cocur` ([@franmomu](https://github.com/franmomu))
+- [[#1295](https://github.com/sonata-project/SonataPageBundle/pull/1295)] Fixed deprecations using commands because of not returning `int` ([@franmomu](https://github.com/franmomu))
+
+### Removed
+- [[#1297](https://github.com/sonata-project/SonataPageBundle/pull/1297)] Removed deprecations from `sonata-project/admin-bundle` using `sonata_admin` Twig global variable ([@franmomu](https://github.com/franmomu))
+- [[#1284](https://github.com/sonata-project/SonataPageBundle/pull/1284)] Remove admin deprecations ([@core23](https://github.com/core23))
+
+## [3.21.1](https://github.com/sonata-project/SonataPageBundle/compare/3.21.0...3.21.1) - 2021-03-21
+### Fixed
+- [[#1283](https://github.com/sonata-project/SonataPageBundle/pull/1283)] Catch null errors when accessing request ([@core23](https://github.com/core23))
+- [[#1283](https://github.com/sonata-project/SonataPageBundle/pull/1283)] Catch null errors when loading unknown block ([@core23](https://github.com/core23))
+
+## [3.21.0](https://github.com/sonata-project/SonataPageBundle/compare/3.20.0...3.21.0) - 2021-02-15
+### Added
+- [[#1250](https://github.com/sonata-project/SonataPageBundle/pull/1250)] Added support for `doctrine/persistence` 2 ([@core23](https://github.com/core23))
+
+### Changed
+- [[#1230](https://github.com/sonata-project/SonataPageBundle/pull/1230)] Update Dutch translations ([@zghosts](https://github.com/zghosts))
+
+## [3.20.0](https://github.com/sonata-project/SonataPageBundle/compare/3.19.0...3.20.0) - 2020-12-05
+### Added
+- [[#1202](https://github.com/sonata-project/SonataPageBundle/pull/1202)] Support for sonata-project/datagrid-bundle v3 ([@wbloszyk](https://github.com/wbloszyk))
+
+### Changed
+- [[#1209](https://github.com/sonata-project/SonataPageBundle/pull/1209)] Replace mentions of 'whitelist' with 'allowlist' ([@jlt10](https://github.com/jlt10))
+
+### Fixed
+- [[#1242](https://github.com/sonata-project/SonataPageBundle/pull/1242)] Newly created snapshot does not effect on all previous snapshots end dates only the last one ([@haivala](https://github.com/haivala))
+
+## [3.19.0](https://github.com/sonata-project/SonataPageBundle/compare/3.18.0...3.19.0) - 2020-09-04
+### Added
+- [[#1175](https://github.com/sonata-project/SonataPageBundle/pull/1175)] Support for "friendsofsymfony/rest-bundle:^3.0" ([@wbloszyk](https://github.com/wbloszyk))
+- [[#1173](https://github.com/sonata-project/SonataPageBundle/pull/1173)] Added public alias `Sonata\PageBundle\Controller\Api\BlockController` for `sonata.page.controller.api.block` service ([@wbloszyk](https://github.com/wbloszyk))
+- [[#1173](https://github.com/sonata-project/SonataPageBundle/pull/1173)] Added public alias `Sonata\PageBundle\Controller\Api\PageController` for `sonata.page.controller.api.page` service ([@wbloszyk](https://github.com/wbloszyk))
+- [[#1173](https://github.com/sonata-project/SonataPageBundle/pull/1173)] Added public alias `Sonata\PageBundle\Controller\Api\SiteController` for `sonata.page.controller.api.site` service ([@wbloszyk](https://github.com/wbloszyk))
+- [[#1173](https://github.com/sonata-project/SonataPageBundle/pull/1173)] Added public alias `Sonata\PageBundle\Controller\Api\SnapshotController` for `sonata.page.controller.api.snapshot` service ([@wbloszyk](https://github.com/wbloszyk))
+
+### Change
+- [[#1175](https://github.com/sonata-project/SonataPageBundle/pull/1175)] Support for deprecated "rest" routing type in favor for xml ([@wbloszyk](https://github.com/wbloszyk))
+
+### Changed
+- [[#1162](https://github.com/sonata-project/SonataPageBundle/pull/1162)] SonataEasyExtendsBundle is now optional, using SonataDoctrineBundle is preferred ([@jordisala1991](https://github.com/jordisala1991))
+
+### Deprecated
+- [[#1162](https://github.com/sonata-project/SonataPageBundle/pull/1162)] Using SonataEasyExtendsBundle to add Doctrine mapping information ([@jordisala1991](https://github.com/jordisala1991))
+
+### Fixed
+- [[#1195](https://github.com/sonata-project/SonataPageBundle/pull/1195)] Fixed support for string model identifiers at Open API definitions ([@wbloszyk](https://github.com/wbloszyk))
+- [[#1173](https://github.com/sonata-project/SonataPageBundle/pull/1173)] Fix RestFul API - `Class could not be determined for Controller identified` Error ([@wbloszyk](https://github.com/wbloszyk))
+- [[#1170](https://github.com/sonata-project/SonataPageBundle/pull/1170)] Fix `Twig\Extra\String\StringExtension` optional auto-registration to avoid duplication `twig.extension` service ([@wbloszyk](https://github.com/wbloszyk))
+
+### Removed
+- [[#1195](https://github.com/sonata-project/SonataPageBundle/pull/1195)] Removed requirements that were only allowing integers for model identifiers at Open API definitions ([@wbloszyk](https://github.com/wbloszyk))
+
+## [3.18.0](https://github.com/sonata-project/SonataPageBundle/compare/3.17.3...3.18.0) - 2020-06-29
+### Added
+- [[#1166](https://github.com/sonata-project/SonataPageBundle/pull/1166)] Added
+  `twig/string-extra` dependency. ([@wbloszyk](https://github.com/wbloszyk))
+
+### Changed
+- [[#1166](https://github.com/sonata-project/SonataPageBundle/pull/1166)]
+  Changed use of `truncate` filter with `u` filter.
+([@wbloszyk](https://github.com/wbloszyk))
+
+### Fixed
+- [[#1156](https://github.com/sonata-project/SonataPageBundle/pull/1156)] Fix
+  wrong root node ([@wbloszyk](https://github.com/wbloszyk))
+
+### Removed
+- [[#1156](https://github.com/sonata-project/SonataPageBundle/pull/1156)]
+  Remove support for Symfony <4.4 ([@wbloszyk](https://github.com/wbloszyk))
+- [[#1156](https://github.com/sonata-project/SonataPageBundle/pull/1156)]
+  Remove SonataCoreBundle dependencies
+([@wbloszyk](https://github.com/wbloszyk))
+
+## [3.17.3](https://github.com/sonata-project/SonataPageBundle/compare/3.17.2...3.17.3) - 2020-06-22
+### Fixed
+- [[#1165](https://github.com/sonata-project/SonataPageBundle/pull/1165)] Fix
+  mysql database schema ([@wbloszyk](https://github.com/wbloszyk))
+
+### Removed
+- [[#1165](https://github.com/sonata-project/SonataPageBundle/pull/1165)]
+  Remove support for mssql database ([@wbloszyk](https://github.com/wbloszyk))
+
+## [3.17.2](https://github.com/sonata-project/SonataPageBundle/compare/3.17.1...3.17.2) - 2020-05-20
+### Fixed
+- fixed sql to work with mssql
+- Fix switch parent
+
+## [3.17.1](https://github.com/sonata-project/SonataPageBundle/compare/3.17.0...3.17.1) - 2020-05-08
+### Fixed
+- Truncate texts in page composer
+- Fix invalid html in page block
+- Ignore subrequests in `SiteSelector`
+
+## [3.17.0](https://github.com/sonata-project/SonataPageBundle/compare/3.16.0...3.17.0) - 2020-05-01
+### Fixed
+- Catch possible null error when retriving site
+- Redirecting after batch snapshot
+- Missing var type declaration
+
+### Removed
+- Support for Symfony < 4.3
+
+## [3.16.0](https://github.com/sonata-project/SonataPageBundle/compare/3.15.1...3.16.0) - 2020-03-25
+### Changed
+- Removed underscores in page names when calling `sonata:page:update-core-route`
+
+### Removed
+- Dependency on `cocur/slugify`
+
+## [3.15.1](https://github.com/sonata-project/SonataPageBundle/compare/3.15.0...3.15.1) - 2020-03-14
+### Fixed
+- Fix page actions for symfony 4
+
+## [3.15.0](https://github.com/sonata-project/SonataPageBundle/compare/3.14.0...3.15.0) - 2020-01-27
+### Changed
+- Re-allow SF DI>4.4.0
+- Upgrade matthiasnoback/symfony-dependency-injection-test to ^4.0
+
+## [3.14.0](https://github.com/sonata-project/SonataPageBundle/compare/3.13.0...3.14.0) - 2020-01-12
+### Changed
+- `BlockInteractor` constructor's argument $registry is now an instance of
+  `Doctrine\Persistence\ManagerRegistry`
+- `Transformer` constructor's argument $registry is now an instance of
+  `Doctrine\Persistence\ManagerRegistry`
+
+### Fixed
+- deprecations from `doctrine/persistence`
+
+## [3.13.0](https://github.com/sonata-project/SonataPageBundle/compare/3.12.0...3.13.0) - 2019-10-21
+### Added
+- Add missing translation for admin menu
+- Added missing translation for blocks
+- Add more `@method` annotation to propagate new methods of
+  `SnapshotManagerInterface`
+
+### Fixed
+- Fixed `DecoratorStrategy` compatibility with `symfony/http-foundation` >= 3.4.31
+- Match PHPDoc with doctrine model
+
+### Changed
+- Add `internal` as default context for technical blocks
+- Use correct translation domain for page blocks
+
+### Removed
+- Remove translation call for empty block descriptions
+- Remove superfluous PHPDoc
+
+## [3.12.0](https://github.com/sonata-project/SonataPageBundle/compare/3.11.1...3.12.0) - 2019-10-03
+### Added
+- Added missing German translation
+- Added support for new `EditableBlockService`
+
+### Changed
+- Match PHPDoc with doctrine model
+- Increased block type length to 255 chars
+
+### Removed
+- Removed superfluous PHPDoc
+- Removed routing deprecations
+
+## [3.11.1](https://github.com/sonata-project/SonataPageBundle/compare/3.11.0...3.11.1) - 2019-05-28
+
+### Fixed
+- compare with a different value type in the `treeAction`
+- Fixed missing macro call in `breadcrumb.html.twig`
+
 ## [3.11.0](https://github.com/sonata-project/SonataPageBundle/compare/3.10.0...3.11.0) - 2019-14-17
 ### Added
 - Add `|trans()` to `child.name|default(service.name)` in `compose_preview.html.twig`
@@ -75,7 +362,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - The internal page name is not used as a seo title fallback anymore
 - make services explicit public
- 
+
 ### Fixed
 - Fix for getRuntime on Symfony older than 3.4
 - Fixed missing import

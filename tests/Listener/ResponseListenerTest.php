@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Sonata\PageBundle\Tests\Listener;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Sonata\PageBundle\CmsManager\CmsManagerInterface;
 use Sonata\PageBundle\CmsManager\CmsManagerSelectorInterface;
@@ -27,43 +28,45 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
-class ResponseListenerTest extends TestCase
+final class ResponseListenerTest extends TestCase
 {
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
+     * @var MockObject&DecoratorStrategyInterface
      */
-    protected $decoratorStrategy;
+    private $decoratorStrategy;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
+     * @var MockObject&PageServiceManagerInterface
      */
-    protected $pageServiceManager;
+    private $pageServiceManager;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
+     * @var MockObject&CmsManagerInterface
      */
-    protected $cmsManager;
+    private $cmsManager;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
+     * @var MockObject&CmsManagerSelectorInterface
      */
-    protected $cmsSelector;
+    private $cmsSelector;
 
     /**
-     * @var ResponseListener
+     * @var MockObject&EngineInterface
      */
-    protected $listener;
+    private $templating;
+
+    private ResponseListener $listener;
 
     /**
      * setup unit test.
      */
-    public function setUp()
+    protected function setUp(): void
     {
         $this->decoratorStrategy = $this->createMock(DecoratorStrategyInterface::class);
         $this->pageServiceManager = $this->createMock(PageServiceManagerInterface::class);
         $this->cmsManager = $this->createMock(CmsManagerInterface::class);
         $this->cmsSelector = $this->createMock(CmsManagerSelectorInterface::class);
-        $this->cmsSelector->expects($this->once())->method('retrieve')->willReturn($this->cmsManager);
+        $this->cmsSelector->expects(static::once())->method('retrieve')->willReturn($this->cmsManager);
         $this->templating = $this->createMock(EngineInterface::class);
 
         $this->listener = new ResponseListener(
@@ -77,15 +80,15 @@ class ResponseListenerTest extends TestCase
     /**
      * Test the listener without a page.
      */
-    public function testWithoutPage()
+    public function testWithoutPage(): void
     {
         $this->expectException(InternalErrorException::class);
 
         // mocked decorator strategy should accept to decorate
-        $this->decoratorStrategy->expects($this->once())->method('isDecorable')->willReturn(true);
+        $this->decoratorStrategy->expects(static::once())->method('isDecorable')->willReturn(true);
 
         // mocked cms manager should return the mock page
-        $this->cmsManager->expects($this->once())->method('getCurrentPage')->willReturn(null);
+        $this->cmsManager->expects(static::once())->method('getCurrentPage')->willReturn(null);
 
         $this->listener->onCoreResponse(
             $this->getMockEvent('content')
@@ -95,15 +98,15 @@ class ResponseListenerTest extends TestCase
     /**
      * Test that the  listener does not mess up with response when a page is non decorable.
      */
-    public function testPageIsNonDecorable()
+    public function testPageIsNonDecorable(): void
     {
-        $this->decoratorStrategy->expects($this->once())->method('isDecorable')->willReturn(false);
+        $this->decoratorStrategy->expects(static::once())->method('isDecorable')->willReturn(false);
 
         $event = $this->getMockEvent('content');
 
         $this->listener->onCoreResponse($event);
 
-        $this->assertSame(
+        static::assertSame(
             'content',
             $event->getResponse()->getContent(),
             'response should not be altered when non-decorable'
@@ -113,26 +116,26 @@ class ResponseListenerTest extends TestCase
     /**
      * Test that the listener correctly decorates the response content when a page is decorable.
      */
-    public function testPageIsDecorable()
+    public function testPageIsDecorable(): void
     {
         // a response content
         $content = 'inner';
 
         // a mock page entity that accepts to be decorated
         $page = $this->createMock(PageInterface::class);
-        $page->expects($this->once())->method('isHybrid')->willReturn(true);
-        $page->expects($this->once())->method('getDecorate')->willReturn(true);
+        $page->expects(static::once())->method('isHybrid')->willReturn(true);
+        $page->expects(static::once())->method('getDecorate')->willReturn(true);
 
         // mocked cms manager should return the mock page
-        $this->cmsManager->expects($this->once())->method('getCurrentPage')->willReturn($page);
+        $this->cmsManager->expects(static::once())->method('getCurrentPage')->willReturn($page);
 
         // mocked decorator strategy should accept to decorate
-        $this->decoratorStrategy->expects($this->once())->method('isDecorable')->willReturn(true);
+        $this->decoratorStrategy->expects(static::once())->method('isDecorable')->willReturn(true);
 
         // a mock page service manager that decorates a response
-        $this->pageServiceManager->expects($this->once())
+        $this->pageServiceManager->expects(static::once())
             ->method('execute')
-            ->with($this->equalTo($page), $this->anything(), ['content' => $content])
+            ->with(static::equalTo($page), static::anything(), ['content' => $content])
             ->willReturnCallback(static function (PageInterface $page, Request $request, array $params, Response $response) {
                 $response->setContent(sprintf('outer "%s" outer', $params['content']));
 
@@ -144,32 +147,32 @@ class ResponseListenerTest extends TestCase
 
         $this->listener->onCoreResponse($event);
 
-        $this->assertSame('outer "inner" outer', $event->getResponse()->getContent());
+        static::assertSame('outer "inner" outer', $event->getResponse()->getContent());
     }
 
     /**
      * Test that the listener correctly alters the http headers when the editor is enabled.
      */
-    public function testPageIsEditor()
+    public function testPageIsEditor(): void
     {
-        $this->cmsSelector->expects($this->once())->method('isEditor')->willReturn(true);
+        $this->cmsSelector->expects(static::once())->method('isEditor')->willReturn(true);
         $event = $this->getMockEvent('inner');
 
         $this->listener->onCoreResponse($event);
 
-        $this->assertFalse($event->getResponse()->isCacheable(), 'Should not be cacheable in editor mode');
+        static::assertFalse($event->getResponse()->isCacheable(), 'Should not be cacheable in editor mode');
 
         // assert a cookie has been set in the response headers
         $cookies = $event->getResponse()->headers->getCookies();
         $foundCookie = false;
         foreach ($cookies as $cookie) {
             if ('sonata_page_is_editor' === $cookie->getName()) {
-                $this->assertSame('1', $cookie->getValue());
+                static::assertSame('1', $cookie->getValue());
                 $foundCookie = true;
             }
         }
 
-        $this->assertTrue($foundCookie, 'Should have found the editor mode cookie');
+        static::assertTrue($foundCookie, 'Should have found the editor mode cookie');
     }
 
     /**

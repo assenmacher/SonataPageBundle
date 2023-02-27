@@ -17,10 +17,11 @@ use Psr\Log\LoggerInterface;
 use Sonata\PageBundle\CmsManager\CmsManagerSelectorInterface;
 use Sonata\PageBundle\CmsManager\DecoratorStrategyInterface;
 use Sonata\PageBundle\Exception\InternalErrorException;
+use Sonata\PageBundle\Model\PageInterface;
 use Sonata\PageBundle\Page\PageServiceManagerInterface;
 use Sonata\PageBundle\Site\SiteSelectorInterface;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Templating\EngineInterface;
@@ -29,6 +30,8 @@ use Symfony\Component\Templating\EngineInterface;
  * ExceptionListener.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class ExceptionListener
 {
@@ -87,7 +90,7 @@ class ExceptionListener
      * @param array                       $httpErrorCodes     An array of http error codes' routes
      * @param LoggerInterface|null        $logger             Logger instance
      */
-    public function __construct(SiteSelectorInterface $siteSelector, CmsManagerSelectorInterface $cmsManagerSelector, $debug, EngineInterface $templating, PageServiceManagerInterface $pageServiceManager, DecoratorStrategyInterface $decoratorStrategy, array $httpErrorCodes, LoggerInterface $logger = null)
+    public function __construct(SiteSelectorInterface $siteSelector, CmsManagerSelectorInterface $cmsManagerSelector, $debug, EngineInterface $templating, PageServiceManagerInterface $pageServiceManager, DecoratorStrategyInterface $decoratorStrategy, array $httpErrorCodes, ?LoggerInterface $logger = null)
     {
         $this->siteSelector = $siteSelector;
         $this->cmsManagerSelector = $cmsManagerSelector;
@@ -129,7 +132,7 @@ class ExceptionListener
      * @throws \RuntimeException      When site is not found, check your state database
      * @throws InternalErrorException When you do not configure page for http error code
      *
-     * @return \Sonata\PageBundle\Model\PageInterface
+     * @return PageInterface
      */
     public function getErrorCodePage($statusCode)
     {
@@ -150,13 +153,11 @@ class ExceptionListener
     /**
      * Handles a kernel exception.
      *
-     * @param GetResponseForExceptionEvent $event
-     *
      * @throws \Exception
      */
-    public function onKernelException(GetResponseForExceptionEvent $event)
+    public function onKernelException(ExceptionEvent $event)
     {
-        if ($event->getException() instanceof NotFoundHttpException && $this->cmsManagerSelector->isEditor()) {
+        if ($event->getThrowable() instanceof NotFoundHttpException && $this->cmsManagerSelector->isEditor()) {
             $pathInfo = $event->getRequest()->getPathInfo();
 
             // can only create a CMS page, so the '_route' must be null
@@ -176,7 +177,7 @@ class ExceptionListener
             }
         }
 
-        if ($event->getException() instanceof InternalErrorException) {
+        if ($event->getThrowable() instanceof InternalErrorException) {
             $this->handleInternalError($event);
         } else {
             $this->handleNativeError($event);
@@ -185,21 +186,19 @@ class ExceptionListener
 
     /**
      * Handles an internal error.
-     *
-     * @param GetResponseForExceptionEvent $event
      */
-    private function handleInternalError(GetResponseForExceptionEvent $event)
+    private function handleInternalError(ExceptionEvent $event)
     {
         if (false === $this->debug) {
-            $this->logger->error($event->getException()->getMessage(), [
-                'exception' => $event->getException(),
+            $this->logger->error($event->getThrowable()->getMessage(), [
+                'exception' => $event->getThrowable(),
             ]);
 
             return;
         }
 
         $content = $this->templating->render('@SonataPage/internal_error.html.twig', [
-            'exception' => $event->getException(),
+            'exception' => $event->getThrowable(),
         ]);
 
         $event->setResponse(new Response($content, 500));
@@ -207,12 +206,8 @@ class ExceptionListener
 
     /**
      * Handles a native error.
-     *
-     * @param GetResponseForExceptionEvent $event
-     *
-     * @throws mixed
      */
-    private function handleNativeError(GetResponseForExceptionEvent $event)
+    private function handleNativeError(ExceptionEvent $event)
     {
         if (true === $this->debug) {
             return;
@@ -224,7 +219,7 @@ class ExceptionListener
 
         $this->status = true;
 
-        $exception = $event->getException();
+        $exception = $event->getThrowable();
         $statusCode = $exception instanceof HttpExceptionInterface ? $exception->getStatusCode() : 500;
 
         $cmsManager = $this->cmsManagerSelector->retrieve();
@@ -263,7 +258,7 @@ class ExceptionListener
         } catch (\Exception $e) {
             $this->logException($exception, $e);
 
-            $event->setException($e);
+            $event->setThrowable($e);
             $this->handleInternalError($event);
 
             return;

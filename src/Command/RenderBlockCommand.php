@@ -21,32 +21,34 @@ use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Migrates the name setting of all blocks into a code setting.
+ *
+ * @final since sonata-project/page-bundle 3.26
+ *
+ * NEXT_MAJOR: Remove this class
+ *
+ * @deprecated since 3.27, and it will be removed in 4.0.
  */
 class RenderBlockCommand extends BaseCommand
 {
-    /**
-     * {@inheritdoc}
-     */
     public function configure()
     {
         $this->setName('sonata:page:render-block');
         $this->setDescription('Dump page information');
         $this->setHelp(
-'Dump page information
+            <<<HELP
+                Dump page information
 
-Available manager:
- - sonata.page.cms.snapshot
- - sonata.page.cms.page
-');
+                Available manager:
+                 - sonata.page.cms.snapshot
+                 - sonata.page.cms.page
+                HELP
+        );
 
         $this->addArgument('manager', InputArgument::REQUIRED, 'The manager service id');
         $this->addArgument('page_id', InputArgument::REQUIRED, 'The page id');
         $this->addArgument('block_id', InputArgument::REQUIRED, 'The page id');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $manager = $this->getContainer()->get($input->getArgument('manager'));
@@ -67,14 +69,14 @@ Available manager:
         $output->writeln(sprintf('  > Id: %d - type: %s - name: %s', $block->getId(), $block->getType(), $block->getName()));
 
         foreach ($block->getSettings() as $name => $value) {
-            $output->writeln(sprintf('   >> %s: %s', $name, json_encode($value)));
+            $output->writeln(sprintf('   >> %s: %s', $name, json_encode($value, \JSON_THROW_ON_ERROR)));
         }
 
         $context = $this->getContainer()->get('sonata.block.context_manager')->get($block);
 
         $output->writeln("\n<info>BlockContext Information</info>");
         foreach ($context->getSettings() as $name => $value) {
-            $output->writeln(sprintf('   >> %s: %s', $name, json_encode($value)));
+            $output->writeln(sprintf('   >> %s: %s', $name, json_encode($value, \JSON_THROW_ON_ERROR)));
         }
 
         $output->writeln("\n<info>Response Output</info>");
@@ -87,5 +89,21 @@ Available manager:
         $output->writeln($this->getContainer()->get('sonata.block.renderer')->render($context));
 
         $this->getContainer()->leaveScope('request');
+
+        return 0;
+    }
+
+    public function run(InputInterface $input, OutputInterface $output)
+    {
+        @trigger_error(
+            sprintf(
+                'This %s is deprecated since sonata-project/page-bundle 3.27.0'.
+                ' and it will be removed in 4.0',
+                self::class
+            ),
+            \E_USER_DEPRECATED
+        );
+
+        return parent::run($input, $output);
     }
 }

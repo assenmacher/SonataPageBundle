@@ -16,15 +16,15 @@ namespace Sonata\PageBundle\Tests\Request;
 use PHPUnit\Framework\TestCase;
 use Sonata\PageBundle\Request\SiteRequest;
 
-class SiteRequestTest extends TestCase
+final class SiteRequestTest extends TestCase
 {
-    public function testSiteRequest()
+    public function testSiteRequest(): void
     {
         $request = new SiteRequest();
         $request->setBaseUrl('folder/app_dev.php');
         $request->setPathInfo('/path-info');
 
-        $this->assertSame('folder/app_dev.php', $request->getBaseUrl());
-        $this->assertSame('/path-info', $request->getPathInfo());
+        static::assertSame('folder/app_dev.php', $request->getBaseUrl());
+        static::assertSame('/path-info', $request->getPathInfo());
     }
 }

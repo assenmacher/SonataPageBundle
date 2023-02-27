@@ -17,9 +17,9 @@ use PHPUnit\Framework\TestCase;
 use Sonata\PageBundle\DependencyInjection\Configuration;
 use Symfony\Component\Config\Definition\Processor;
 
-class ConfigurationTest extends TestCase
+final class ConfigurationTest extends TestCase
 {
-    public function testPageWithMatrix()
+    public function testPageWithMatrix(): void
     {
         $processor = new Processor();
 
@@ -162,14 +162,14 @@ class ConfigurationTest extends TestCase
                     'block' => 'Application\\Sonata\\PageBundle\\Entity\\Block',
                     'site' => 'Application\\Sonata\\PageBundle\\Entity\\Site',
             ],
-            'slugify_service' => 'sonata.core.slugify.native',
             'direct_publication' => false,
+            'cache' => true,
         ];
 
-        $this->assertSame($expected, $config);
+        static::assertSame($expected, $config);
     }
 
-    public function testPageWithoutMatrix()
+    public function testPageWithoutMatrix(): void
     {
         $processor = new Processor();
 
@@ -253,8 +253,9 @@ class ConfigurationTest extends TestCase
                 'site' => 'Application\\Sonata\\PageBundle\\Entity\\Site',
             ],
             'direct_publication' => false,
+            'cache' => true,
         ];
 
-        $this->assertSame($expected, $config);
+        static::assertSame($expected, $config);
     }
 }

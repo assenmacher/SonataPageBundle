@@ -14,14 +14,20 @@ declare(strict_types=1);
 namespace Sonata\PageBundle\Admin;
 
 use Sonata\AdminBundle\Datagrid\ListMapper;
+use Sonata\AdminBundle\Datagrid\ProxyQueryInterface;
 use Sonata\AdminBundle\Form\FormMapper;
-use Sonata\BlockBundle\Block\BaseBlockService;
+use Sonata\BlockBundle\Block\BlockServiceInterface;
+use Sonata\BlockBundle\Block\Service\EditableBlockService;
+use Sonata\BlockBundle\Model\BlockInterface;
 use Sonata\PageBundle\Entity\BaseBlock;
+use Sonata\PageBundle\Mapper\PageFormMapper;
 
 /**
  * Admin class for shared Block model.
  *
  * @author Romain Mouillard <romain.mouillard@gmail.com>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class SharedBlockAdmin extends BaseBlockAdmin
 {
@@ -30,29 +36,18 @@ class SharedBlockAdmin extends BaseBlockAdmin
      */
     protected $classnameLabel = 'shared_block';
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBaseRoutePattern()
     {
         return sprintf('%s/%s', parent::getBaseRoutePattern(), 'shared');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBaseRouteName()
     {
         return sprintf('%s/%s', parent::getBaseRouteName(), 'shared');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function createQuery($context = 'list')
+    protected function configureQuery(ProxyQueryInterface $query): ProxyQueryInterface
     {
-        $query = parent::createQuery($context);
-
         // Filter on blocks without page and parents
         $rootAlias = current($query->getRootAliases());
         $query->andWhere($query->expr()->isNull($rootAlias.'.page'));
@@ -61,49 +56,77 @@ class SharedBlockAdmin extends BaseBlockAdmin
         return $query;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function configureListFields(ListMapper $listMapper)
+    protected function configureListFields(ListMapper $list)
     {
-        $listMapper
+        $list
             ->addIdentifier('name')
             ->add('type')
             ->add('enabled', null, ['editable' => true])
-            ->add('updatedAt')
-        ;
+            ->add('updatedAt');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function configureFormFields(FormMapper $formMapper)
+    protected function configureFormFields(FormMapper $form)
     {
         /** @var BaseBlock $block */
         $block = $this->getSubject();
 
         // New block
-        if (null === $block->getId()) {
+        if (null === $block->getId() && $this->hasRequest()) {
             $block->setType($this->request->get('type'));
         }
 
-        $formMapper
+        $form
             ->with('form.field_group_general')
                 ->add('name', null, ['required' => true])
                 ->add('enabled')
             ->end();
 
-        $formMapper->with('form.field_group_options');
+        $form->with('form.field_group_options');
 
-        /** @var BaseBlockService $service */
-        $service = $this->blockManager->get($block);
+        $this->configureBlockFields($form, $block);
 
-        if ($block->getId() > 0) {
-            $service->buildEditForm($formMapper, $block);
-        } else {
-            $service->buildCreateForm($formMapper, $block);
+        $form->end();
+    }
+
+    private function configureBlockFields(FormMapper $form, BlockInterface $block): void
+    {
+        $blockType = $block->getType();
+
+        if (null === $blockType || !$this->blockManager->has($blockType)) {
+            return;
         }
 
-        $formMapper->end();
+        $service = $this->blockManager->get($block);
+
+        if (!$service instanceof BlockServiceInterface) {
+            throw new \RuntimeException(sprintf(
+                'The block "%s" is not a valid %s',
+                $blockType,
+                BlockServiceInterface::class
+            ));
+        }
+
+        if ($service instanceof EditableBlockService) {
+            $blockMapper = new PageFormMapper($form);
+            if ($block->getId() > 0) {
+                $service->configureEditForm($blockMapper, $block);
+            } else {
+                $service->configureCreateForm($blockMapper, $block);
+            }
+        } else {
+            @trigger_error(
+                sprintf(
+                    'Editing a block service that doesn\'t implement %s is deprecated since sonata-project/page-bundle 3.12.0 and will not be allowed with version 4.0.',
+                    EditableBlockService::class
+                ),
+                \E_USER_DEPRECATED
+            );
+
+            if ($block->getId() > 0) {
+                $service->buildEditForm($form, $block);
+            } else {
+                $service->buildCreateForm($form, $block);
+            }
+        }
     }
 }

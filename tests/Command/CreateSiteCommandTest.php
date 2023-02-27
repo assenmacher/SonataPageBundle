@@ -11,11 +11,10 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Sonata\Test\PageBundle\Command;
+namespace Sonata\PageBundle\Tests\Command;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Prophecy\Argument;
-use Prophecy\Prophecy\ObjectProphecy;
 use Sonata\PageBundle\Command\CreateSiteCommand;
 use Sonata\PageBundle\Model\SiteManagerInterface;
 use Sonata\PageBundle\Tests\Model\Site;
@@ -27,39 +26,40 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * @author Ahmet Akbana <ahmetakbana@gmail.com>
+ *
+ * NEXT_MAJOR: Remove this legacy group
+ *
+ * @group legacy
  */
-class CreateSiteCommandTest extends TestCase
+final class CreateSiteCommandTest extends TestCase
 {
-    /**
-     * @var Application|ObjectProphecy
-     */
-    private $application;
+    private Application $application;
 
     /**
-     * @var SiteManagerInterface|ObjectProphecy
+     * @var MockObject&SiteManagerInterface
      */
     private $siteManager;
 
-    protected function setUp()
+    protected function setUp(): void
     {
-        $this->siteManager = $this->prophesize(SiteManagerInterface::class);
+        $this->siteManager = $this->createMock(SiteManagerInterface::class);
 
-        $container = $this->prophesize(ContainerInterface::class);
-        $container->get('sonata.page.manager.site')->willReturn($this->siteManager->reveal());
+        $container = $this->createStub(ContainerInterface::class);
+        $container->method('get')->with('sonata.page.manager.site')->willReturn($this->siteManager);
 
         $command = new CreateSiteCommand();
-        $command->setContainer($container->reveal());
+        $command->setContainer($container);
 
         $this->application = new Application();
         $this->application->add($command);
     }
 
-    public function testExecuteWithNoConfirmation()
+    public function testExecuteWithNoConfirmation(): void
     {
         $site = new Site();
 
-        $this->siteManager->create()->willReturn($site);
-        $this->siteManager->save($site)->shouldBeCalled();
+        $this->siteManager->method('create')->willReturn($site);
+        $this->siteManager->expects(static::once())->method('save')->with($site);
 
         $command = $this->application->find('sonata:page:create-site');
         $commandTester = new CommandTester($command);
@@ -76,23 +76,23 @@ class CreateSiteCommandTest extends TestCase
             '--no-confirmation' => true,
         ]);
 
-        $this->assertRegExp('@Site created !@', $commandTester->getDisplay());
+        static::assertMatchesRegularExpression('@Site created !@', $commandTester->getDisplay());
     }
 
-    public function testExecuteWithoutNoConfirmation()
+    public function testExecuteWithoutNoConfirmation(): void
     {
         $site = new Site();
 
-        $this->siteManager->create()->willReturn($site);
-        $this->siteManager->save($site)->shouldNotbeCalled();
+        $this->siteManager->method('create')->willReturn($site);
+        $this->siteManager->expects(static::never())->method('save')->with($site);
 
-        $questionHelper = $this->prophesize(QuestionHelper::class);
-        $questionHelper->getName()->willReturn('question');
-        $questionHelper->ask(Argument::any(), Argument::any(), Argument::any())->willReturn(false);
-        $questionHelper->setHelperSet(Argument::any())->willReturn(true);
+        $questionHelper = $this->createStub(QuestionHelper::class);
+        $questionHelper->method('getName')->willReturn('question');
+        $questionHelper->method('ask')->willReturn(false);
+        $questionHelper->method('setHelperSet')->willReturn(true);
 
         $command = $this->application->find('sonata:page:create-site');
-        $command->setHelperSet(new HelperSet([$questionHelper->reveal()]));
+        $command->setHelperSet(new HelperSet([$questionHelper]));
 
         $commandTester = new CommandTester($command);
         $commandTester->execute([
@@ -107,6 +107,6 @@ class CreateSiteCommandTest extends TestCase
             '--siteLocale' => 'foo',
         ]);
 
-        $this->assertRegExp('@Site creation cancelled !@', $commandTester->getDisplay());
+        static::assertMatchesRegularExpression('@Site creation cancelled !@', $commandTester->getDisplay());
     }
 }

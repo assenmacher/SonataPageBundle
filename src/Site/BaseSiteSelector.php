@@ -44,7 +44,7 @@ abstract class BaseSiteSelector implements SiteSelectorInterface
     protected $seoPage;
 
     /**
-     * @var SiteInterface
+     * @var SiteInterface|null
      */
     protected $site;
 
@@ -60,32 +60,20 @@ abstract class BaseSiteSelector implements SiteSelectorInterface
         $this->seoPage = $seoPage;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function retrieve()
     {
         return $this->site;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getRequestContext()
     {
         return new RequestContext();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function onKernelRequestRedirect(GetResponseEvent $event)
     {
     }
 
-    /**
-     * {@inheritdoc}
-     */
     final public function onKernelRequest(GetResponseEvent $event)
     {
         if (!$this->decoratorStrategy->isRouteUriDecorable($event->getRequest()->getPathInfo())) {
@@ -94,7 +82,7 @@ abstract class BaseSiteSelector implements SiteSelectorInterface
 
         $this->handleKernelRequest($event);
 
-        if ($this->site) {
+        if ($event->isMasterRequest() && $this->site) {
             if ($this->site->getTitle()) {
                 $this->seoPage->setTitle($this->site->getTitle());
             }
@@ -162,9 +150,7 @@ abstract class BaseSiteSelector implements SiteSelectorInterface
             return;
         }
 
-        $sitesLocales = array_map(static function (SiteInterface $site) {
-            return $site->getSiteLocale();
-        }, $sites);
+        $sitesLocales = array_map(static fn (SiteInterface $site) => $site->getSiteLocale(), $sites);
 
         $language = $request->getPreferredLanguage($sitesLocales);
         $host = $request->getHost();

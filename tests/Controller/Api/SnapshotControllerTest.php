@@ -21,35 +21,39 @@ use Sonata\PageBundle\Model\SnapshotManagerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
+ * NEXT_MAJOR: Remove this class.
+ *
  * @author Benoit de Jacobet <benoit.de-jacobet@ekino.com>
+ *
+ * @group legacy
  */
-class SnapshotControllerTest extends TestCase
+final class SnapshotControllerTest extends TestCase
 {
-    public function testGetSnapshotsAction()
+    public function testGetSnapshotsAction(): void
     {
         $snapshotManager = $this->createMock(SnapshotManagerInterface::class);
-        $snapshotManager->expects($this->once())->method('getPager')->willReturn([]);
+        $snapshotManager->expects(static::once())->method('getPager')->willReturn([]);
 
         $paramFetcher = $this->getMockBuilder(ParamFetcherInterface::class)
             ->setMethods(['setController', 'get', 'all'])
             ->getMock();
 
-        $paramFetcher->expects($this->exactly(3))->method('get');
-        $paramFetcher->expects($this->once())->method('all')->willReturn([]);
+        $paramFetcher->expects(static::exactly(3))->method('get');
+        $paramFetcher->expects(static::once())->method('all')->willReturn([]);
 
-        $this->assertSame([], $this->createSnapshotController(null, $snapshotManager)
+        static::assertSame([], $this->createSnapshotController(null, $snapshotManager)
             ->getSnapshotsAction($paramFetcher));
     }
 
-    public function testGetSnapshotAction()
+    public function testGetSnapshotAction(): void
     {
         $snapshot = $this->createMock(SnapshotInterface::class);
 
-        $this->assertSame($snapshot, $this->createSnapshotController($snapshot)
+        static::assertSame($snapshot, $this->createSnapshotController($snapshot)
             ->getSnapshotAction(1));
     }
 
-    public function testGetSnapshotActionNotFoundException()
+    public function testGetSnapshotActionNotFoundException(): void
     {
         $this->expectException(NotFoundHttpException::class);
         $this->expectExceptionMessage('Snapshot (1) not found');
@@ -57,40 +61,37 @@ class SnapshotControllerTest extends TestCase
         $this->createSnapshotController()->getSnapshotAction(1);
     }
 
-    public function testDeleteSnapshotAction()
+    public function testDeleteSnapshotAction(): void
     {
         $snapshot = $this->createMock(SnapshotInterface::class);
 
         $snapshotManager = $this->createMock(SnapshotManagerInterface::class);
-        $snapshotManager->expects($this->once())->method('delete');
+        $snapshotManager->expects(static::once())->method('delete');
 
         $view = $this->createSnapshotController($snapshot, $snapshotManager)
             ->deleteSnapshotAction(1);
 
-        $this->assertSame(['deleted' => true], $view);
+        static::assertSame(['deleted' => true], $view);
     }
 
-    public function testDeletePageInvalidAction()
+    public function testDeletePageInvalidAction(): void
     {
         $this->expectException(NotFoundHttpException::class);
 
         $snapshotManager = $this->createMock(SnapshotManagerInterface::class);
-        $snapshotManager->expects($this->never())->method('delete');
+        $snapshotManager->expects(static::never())->method('delete');
 
         $this->createSnapshotController(null, $snapshotManager)
             ->deleteSnapshotAction(1);
     }
 
-    /**
-     * @return SnapshotController
-     */
-    public function createSnapshotController($snapshot = null, $snapshotManager = null)
+    public function createSnapshotController($snapshot = null, $snapshotManager = null): SnapshotController
     {
         if (null === $snapshotManager) {
             $snapshotManager = $this->createMock(SnapshotManagerInterface::class);
         }
         if (null !== $snapshot) {
-            $snapshotManager->expects($this->once())->method('findOneBy')->willReturn($snapshot);
+            $snapshotManager->expects(static::once())->method('findOneBy')->willReturn($snapshot);
         }
 
         return new SnapshotController($snapshotManager);

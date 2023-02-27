@@ -15,18 +15,18 @@ namespace Sonata\PageBundle\Tests\Admin;
 
 use Knp\Menu\MenuFactory;
 use PHPUnit\Framework\TestCase;
-use Prophecy\Argument;
 use Sonata\AdminBundle\Route\RouteGeneratorInterface;
 use Sonata\PageBundle\Admin\PageAdmin;
 use Sonata\PageBundle\Controller\PageController;
+use Sonata\PageBundle\Model\PageInterface;
 use Sonata\PageBundle\Model\Site;
 use Sonata\PageBundle\Tests\Model\Page;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-class PageAdminTest extends TestCase
+final class PageAdminTest extends TestCase
 {
-    public function testTabMenuHasLinksWithSubSite()
+    public function testTabMenuHasLinksWithSubSite(): void
     {
         $request = new Request(['id' => 42]);
         $admin = new PageAdmin(
@@ -37,21 +37,19 @@ class PageAdminTest extends TestCase
         $admin->setMenuFactory(new MenuFactory());
         $admin->setRequest($request);
 
-        $site = $this->prophesize(Site::class);
-        $site->getRelativePath()->willReturn('/my-subsite');
+        $site = $this->createStub(Site::class);
+        $site->method('getRelativePath')->willReturn('/my-subsite');
 
-        $page = $this->prophesize(Page::class);
-        $page->getRouteName()->willReturn(Page::PAGE_ROUTE_CMS_NAME);
-        $page->getUrl()->willReturn('/my-page');
-        $page->isHybrid()->willReturn(false);
-        $page->isInternal()->willReturn(false);
-        $page->getSite()->willReturn($site->reveal());
-        $admin->setSubject($page->reveal());
+        $page = new Page();
+        $page->setRouteName(PageInterface::PAGE_ROUTE_CMS_NAME);
+        $page->setUrl('/my-page');
+        $page->setSite($site);
+        $admin->setSubject($page);
 
-        $routeGenerator = $this->prophesize(RouteGeneratorInterface::class);
-        $routeGenerator->generateMenuUrl(
+        $routeGenerator = $this->createMock(RouteGeneratorInterface::class);
+        $routeGenerator->method('generateMenuUrl')->with(
             $admin,
-            Argument::any(),
+            static::anything(),
             ['id' => 42],
             UrlGeneratorInterface::ABSOLUTE_PATH
         )->willReturn([
@@ -60,14 +58,14 @@ class PageAdminTest extends TestCase
             'routeAbsolute' => true,
         ]);
 
-        $routeGenerator->generate(
+        $routeGenerator->expects(static::once())->method('generate')->with(
             'page_slug',
             ['path' => '/my-subsite/my-page']
-        )->shouldBeCalled();
+        );
 
-        $admin->setRouteGenerator($routeGenerator->reveal());
-        $admin->setSubject($page->reveal());
+        $admin->setRouteGenerator($routeGenerator);
+        $admin->setSubject($page);
 
-        $admin->buildTabMenu('edit');
+        $admin->getSideMenu('edit');
     }
 }

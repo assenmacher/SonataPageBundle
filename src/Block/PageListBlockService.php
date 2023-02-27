@@ -19,7 +19,7 @@ use Sonata\BlockBundle\Block\Service\AbstractAdminBlockService;
 use Sonata\BlockBundle\Meta\Metadata;
 use Sonata\BlockBundle\Model\BlockInterface;
 use Sonata\Form\Type\ImmutableArrayType;
-use Sonata\PageBundle\Model\Page;
+use Sonata\PageBundle\Model\PageInterface;
 use Sonata\PageBundle\Model\PageManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -27,6 +27,9 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ * @final since sonata-project/page-bundle 3.26
+ */
 class PageListBlockService extends AbstractAdminBlockService
 {
     /**
@@ -35,9 +38,7 @@ class PageListBlockService extends AbstractAdminBlockService
     protected $pageManager;
 
     /**
-     * @param string               $name
-     * @param EngineInterface      $templating
-     * @param PageManagerInterface $pageManager
+     * @param string $name
      */
     public function __construct($name, EngineInterface $templating, PageManagerInterface $pageManager)
     {
@@ -46,12 +47,9 @@ class PageListBlockService extends AbstractAdminBlockService
         $this->pageManager = $pageManager;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function buildEditForm(FormMapper $formMapper, BlockInterface $block)
+    public function buildEditForm(FormMapper $form, BlockInterface $block)
     {
-        $formMapper->add('settings', ImmutableArrayType::class, [
+        $form->add('settings', ImmutableArrayType::class, [
             'keys' => [
                 ['title', TextType::class, [
                     'label' => 'form.label_title',
@@ -81,13 +79,10 @@ class PageListBlockService extends AbstractAdminBlockService
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function execute(BlockContextInterface $blockContext, Response $response = null)
+    public function execute(BlockContextInterface $blockContext, ?Response $response = null)
     {
         $pageList = $this->pageManager->findBy([
-            'routeName' => Page::PAGE_ROUTE_CMS_NAME,
+            'routeName' => PageInterface::PAGE_ROUTE_CMS_NAME,
         ]);
 
         $systemElements = $this->pageManager->findBy([
@@ -104,9 +99,6 @@ class PageListBlockService extends AbstractAdminBlockService
         ], $response);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureSettings(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
@@ -119,12 +111,9 @@ class PageListBlockService extends AbstractAdminBlockService
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBlockMetadata($code = null)
     {
-        return new Metadata($this->getName(), (null !== $code ? $code : $this->getName()), false, 'SonataPageBundle', [
+        return new Metadata($this->getName(), $code ?? $this->getName(), false, 'SonataPageBundle', [
             'class' => 'fa fa-home',
         ]);
     }

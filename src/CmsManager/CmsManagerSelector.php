@@ -27,6 +27,8 @@ use Symfony\Component\Security\Http\Logout\LogoutHandlerInterface;
  *   - sonata.page.cms.snapshot if the user is a standard user.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class CmsManagerSelector implements CmsManagerSelectorInterface, LogoutHandlerInterface
 {
@@ -36,16 +38,13 @@ class CmsManagerSelector implements CmsManagerSelectorInterface, LogoutHandlerIn
     protected $container;
 
     /**
-     * @param ContainerInterface $container
+     * @psalm-suppress ContainerDependency
      */
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function retrieve()
     {
         if ($this->isEditor()) {
@@ -57,9 +56,6 @@ class CmsManagerSelector implements CmsManagerSelectorInterface, LogoutHandlerIn
         return $manager;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isEditor()
     {
         /*
@@ -75,9 +71,6 @@ class CmsManagerSelector implements CmsManagerSelectorInterface, LogoutHandlerIn
         return $sessionAvailable && $session->get('sonata/page/isEditor', false);
     }
 
-    /**
-     * @param InteractiveLoginEvent $event
-     */
     public function onSecurityInteractiveLogin(InteractiveLoginEvent $event)
     {
         if ($this->container->get('security.token_storage')->getToken() &&
@@ -86,9 +79,6 @@ class CmsManagerSelector implements CmsManagerSelectorInterface, LogoutHandlerIn
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function logout(Request $request, Response $response, TokenInterface $token)
     {
         $this->getSession()->set('sonata/page/isEditor', false);

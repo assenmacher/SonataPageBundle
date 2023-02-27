@@ -24,18 +24,22 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
+ * NEXT_MAJOR: Remove this class.
+ *
  * @author Vincent Composieux <vincent.composieux@gmail.com>
+ *
+ * @group legacy
  */
-class BlockControllerTest extends TestCase
+final class BlockControllerTest extends TestCase
 {
-    public function testGetBlockAction()
+    public function testGetBlockAction(): void
     {
         $block = $this->createMock(BlockInterface::class);
 
-        $this->assertSame($block, $this->createBlockController($block)->getBlockAction(1));
+        static::assertSame($block, $this->createBlockController($block)->getBlockAction(1));
     }
 
-    public function testGetBlockActionNotFoundException()
+    public function testGetBlockActionNotFoundException(): void
     {
         $this->expectException(NotFoundHttpException::class);
         $this->expectExceptionMessage('Block (42) not found');
@@ -43,77 +47,74 @@ class BlockControllerTest extends TestCase
         $this->createBlockController()->getBlockAction(42);
     }
 
-    public function testPutBlockAction()
+    public function testPutBlockAction(): void
     {
         $block = $this->createMock(BlockInterface::class);
 
         $blockManager = $this->createMock(BlockManagerInterface::class);
-        $blockManager->expects($this->once())->method('save')->willReturn($block);
+        $blockManager->expects(static::once())->method('save')->willReturn($block);
 
         $form = $this->createMock(Form::class);
-        $form->expects($this->once())->method('handleRequest');
-        $form->expects($this->once())->method('isValid')->willReturn(true);
-        $form->expects($this->once())->method('getData')->willReturn($block);
+        $form->expects(static::once())->method('handleRequest');
+        $form->expects(static::once())->method('isValid')->willReturn(true);
+        $form->expects(static::once())->method('getData')->willReturn($block);
 
         $formFactory = $this->createMock(FormFactoryInterface::class);
-        $formFactory->expects($this->once())->method('createNamed')->willReturn($form);
+        $formFactory->expects(static::once())->method('createNamed')->willReturn($form);
 
         $block = $this->createBlockController($block, $blockManager, $formFactory)->putBlockAction(1, new Request());
 
-        $this->assertInstanceOf(BlockInterface::class, $block);
+        static::assertInstanceOf(BlockInterface::class, $block);
     }
 
-    public function testPutBlockInvalidAction()
+    public function testPutBlockInvalidAction(): void
     {
         $block = $this->createMock(BlockInterface::class);
 
         $blockManager = $this->createMock(BlockManagerInterface::class);
-        $blockManager->expects($this->never())->method('save')->willReturn($block);
+        $blockManager->expects(static::never())->method('save')->willReturn($block);
 
         $form = $this->createMock(Form::class);
-        $form->expects($this->once())->method('handleRequest');
-        $form->expects($this->once())->method('isValid')->willReturn(false);
+        $form->expects(static::once())->method('handleRequest');
+        $form->expects(static::once())->method('isValid')->willReturn(false);
 
         $formFactory = $this->createMock(FormFactoryInterface::class);
-        $formFactory->expects($this->once())->method('createNamed')->willReturn($form);
+        $formFactory->expects(static::once())->method('createNamed')->willReturn($form);
 
         $view = $this->createBlockController($block, $blockManager, $formFactory)->putBlockAction(1, new Request());
 
-        $this->assertInstanceOf(FormInterface::class, $view);
+        static::assertInstanceOf(FormInterface::class, $view);
     }
 
-    public function testDeleteBlockAction()
+    public function testDeleteBlockAction(): void
     {
         $block = $this->createMock(BlockInterface::class);
 
         $blockManager = $this->createMock(BlockManagerInterface::class);
-        $blockManager->expects($this->once())->method('delete');
+        $blockManager->expects(static::once())->method('delete');
 
         $view = $this->createBlockController($block, $blockManager)->deleteBlockAction(1);
 
-        $this->assertSame(['deleted' => true], $view);
+        static::assertSame(['deleted' => true], $view);
     }
 
-    public function testDeleteBlockInvalidAction()
+    public function testDeleteBlockInvalidAction(): void
     {
         $this->expectException(NotFoundHttpException::class);
 
         $blockManager = $this->createMock(BlockManagerInterface::class);
-        $blockManager->expects($this->never())->method('delete');
+        $blockManager->expects(static::never())->method('delete');
 
         $this->createBlockController(null, $blockManager)->deleteBlockAction(1);
     }
 
-    /**
-     * @return BlockController
-     */
-    public function createBlockController($block = null, $blockManager = null, $formFactory = null)
+    public function createBlockController($block = null, $blockManager = null, $formFactory = null): BlockController
     {
         if (null === $blockManager) {
             $blockManager = $this->createMock(BlockManagerInterface::class);
         }
         if (null !== $block) {
-            $blockManager->expects($this->once())->method('findOneBy')->willReturn($block);
+            $blockManager->expects(static::once())->method('findOneBy')->willReturn($block);
         }
         if (null === $formFactory) {
             $formFactory = $this->createMock(FormFactoryInterface::class);

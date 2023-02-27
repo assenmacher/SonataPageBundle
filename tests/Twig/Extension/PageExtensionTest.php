@@ -21,23 +21,22 @@ use Sonata\PageBundle\Model\PageInterface;
 use Sonata\PageBundle\Model\SiteInterface;
 use Sonata\PageBundle\Site\SiteSelectorInterface;
 use Sonata\PageBundle\Twig\Extension\PageExtension;
-use Symfony\Bridge\Twig\AppVariable;
 use Symfony\Bridge\Twig\Extension\HttpKernelExtension;
 use Symfony\Bundle\FrameworkBundle\Templating\GlobalVariables;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
 use Twig\Environment;
 
-class PageExtensionTest extends TestCase
+final class PageExtensionTest extends TestCase
 {
-    public function testAjaxUrl()
+    public function testAjaxUrl(): void
     {
         $router = $this->createMock(RouterInterface::class);
-        $router->expects($this->once())->method('generate')->willReturn('/foo/bar');
+        $router->expects(static::once())->method('generate')->willReturn('/foo/bar');
 
         $block = $this->createMock(PageBlockInterface::class);
         $block
-            ->expects($this->exactly(2))
+            ->expects(static::exactly(2))
             ->method('getPage')
             ->willReturn($this->createMock(PageInterface::class));
 
@@ -49,13 +48,13 @@ class PageExtensionTest extends TestCase
             $this->createMock(HttpKernelExtension::class)
         );
 
-        $this->assertSame('/foo/bar', $extension->ajaxUrl($block));
+        static::assertSame('/foo/bar', $extension->ajaxUrl($block));
     }
 
     /**
      * @doesNotPerformAssertions
      */
-    public function testController()
+    public function testController(): void
     {
         $site = $this->createMock(SiteInterface::class);
         $site->method('getRelativePath')->willReturn('/foo/bar');
@@ -80,21 +79,13 @@ class PageExtensionTest extends TestCase
         );
         $extension->initRuntime($twigEnvironment);
 
-        if (!method_exists(AppVariable::class, 'getToken')) {
-            $httpKernelExtension->expects($this->once())->method('controller')->with(
-                'foo',
-                ['pathInfo' => '/foo/bar/'],
-                []
-            );
-        }
-
         $extension->controller('foo');
     }
 
     /**
      * @doesNotPerformAssertions
      */
-    public function testControllerWithoutSite()
+    public function testControllerWithoutSite(): void
     {
         $request = $this->createMock(Request::class);
         $request->method('getPathInfo')->willReturn('/');
@@ -113,10 +104,6 @@ class PageExtensionTest extends TestCase
             $httpKernelExtension = $this->createMock(HttpKernelExtension::class)
         );
         $extension->initRuntime($twigEnvironment);
-
-        if (!method_exists(AppVariable::class, 'getToken')) {
-            $httpKernelExtension->expects($this->once())->method('controller')->with('bar', [], []);
-        }
 
         $extension->controller('bar');
     }

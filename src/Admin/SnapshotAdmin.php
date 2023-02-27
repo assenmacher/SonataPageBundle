@@ -24,97 +24,77 @@ use Sonata\Form\Type\DateTimePickerType;
  * Admin definition for the Snapshot class.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class SnapshotAdmin extends AbstractAdmin
 {
     protected $classnameLabel = 'Snapshot';
 
     /**
-     * @var CacheManagerInterface
+     * @var CacheManagerInterface|null
      */
     protected $cacheManager;
 
-    /**
-     * {@inheritdoc}
-     */
     protected $accessMapping = [
         'batchToggleEnabled' => 'EDIT',
     ];
 
-    /**
-     * {@inheritdoc}
-     */
-    public function configureListFields(ListMapper $listMapper)
+    public function configureListFields(ListMapper $list)
     {
-        $listMapper
+        $list
             ->addIdentifier('url')
             ->add('enabled')
             ->add('publicationDateStart')
-            ->add('publicationDateEnd')
-        ;
+            ->add('publicationDateEnd');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function configureDatagridFilters(DatagridMapper $datagridMapper)
+    public function configureDatagridFilters(DatagridMapper $filter)
     {
-        $datagridMapper
+        $filter
             ->add('routeName');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function configureFormFields(FormMapper $formMapper)
+    public function configureFormFields(FormMapper $form)
     {
-        $formMapper
+        $form
             ->add('enabled', null, ['required' => false])
             ->add('publicationDateStart', DateTimePickerType::class, ['dp_side_by_side' => true])
-            ->add('publicationDateEnd', DateTimePickerType::class, ['required' => false, 'dp_side_by_side' => true])
-        ;
+            ->add('publicationDateEnd', DateTimePickerType::class, ['required' => false, 'dp_side_by_side' => true]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getBatchActions()
+    public function postUpdate($object)
     {
-        $actions = parent::getBatchActions();
+        if (null !== $this->cacheManager) {
+            $this->cacheManager->invalidate([
+                'page_id' => $object->getPage()->getId(),
+            ]);
+        }
+    }
+
+    public function postPersist($object)
+    {
+        if (null !== $this->cacheManager) {
+            $this->cacheManager->invalidate([
+                'page_id' => $object->getPage()->getId(),
+            ]);
+        }
+    }
+
+    public function setCacheManager(CacheManagerInterface $cacheManager)
+    {
+        $this->cacheManager = $cacheManager;
+    }
+
+    protected function configureBatchActions($actions): array
+    {
+        $actions = parent::configureBatchActions($actions);
 
         $actions['toggle_enabled'] = [
-            'label' => $this->trans('toggle_enabled'),
+            'label' => 'toggle_enabled',
             'ask_confirmation' => true,
         ];
 
         return $actions;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function postUpdate($object)
-    {
-        $this->cacheManager->invalidate([
-            'page_id' => $object->getPage()->getId(),
-        ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function postPersist($object)
-    {
-        $this->cacheManager->invalidate([
-            'page_id' => $object->getPage()->getId(),
-        ]);
-    }
-
-    /**
-     * @param CacheManagerInterface $cacheManager
-     */
-    public function setCacheManager(CacheManagerInterface $cacheManager)
-    {
-        $this->cacheManager = $cacheManager;
     }
 }

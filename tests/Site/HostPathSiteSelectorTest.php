@@ -29,24 +29,24 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 /**
  * @author Stephen Leavitt <stephen.leavitt@sonyatv.com>
  */
-class HostPathSiteSelectorTest extends TestCase
+final class HostPathSiteSelectorTest extends TestCase
 {
     /**
      * @dataProvider siteProvider
      */
-    public function testSite(string $expectedName, string $url, string $expectedPath = '/')
+    public function testSite(string $expectedName, string $url, string $expectedPath = '/'): void
     {
         // Retrieve the site that would be matched from the request
-        list($site, $event) = $this->performHandleKernelRequestTest($url);
+        [$site, $event] = $this->performHandleKernelRequestTest($url);
 
         // Ensure we retrieved the correct site.
-        $this->assertSame($expectedName, $site->getName());
+        static::assertSame($expectedName, $site->getName());
 
         // Ensure request path info
-        $this->assertSame($expectedPath, $event->getRequest()->getPathInfo());
+        static::assertSame($expectedPath, $event->getRequest()->getPathInfo());
 
         // Ensure request locale matches site locale
-        $this->assertSame($site->getSiteLocale(), $event->getRequest()->attributes->get('_locale'));
+        static::assertSame($site->getSiteLocale(), $event->getRequest()->attributes->get('_locale'));
     }
 
     public function siteProvider(): \Generator
@@ -64,28 +64,28 @@ class HostPathSiteSelectorTest extends TestCase
     /**
      * @dataProvider siteWithRedirectProvider
      */
-    public function testSiteWithRedirect(string $expectedRedirectUri, string $url, string $path)
+    public function testSiteWithRedirect(string $expectedRedirectUri, string $url, string $path): void
     {
         // Retrieve the site that would be matched from the request
-        list($site, $event) = $this->performHandleKernelRequestTest($url);
+        [$site, $event] = $this->performHandleKernelRequestTest($url);
 
         // Ensure no site was retrieved
-        $this->assertNull($site);
+        static::assertNull($site);
 
         // Retrieve the event's response object
         $response = $event->getResponse();
 
         // Ensure the response was a redirect to the default site
-        $this->assertInstanceOf(RedirectResponse::class, $response);
+        static::assertInstanceOf(RedirectResponse::class, $response);
 
         // Ensure the redirect url
-        $this->assertSame($expectedRedirectUri, $response->getTargetUrl());
+        static::assertSame($expectedRedirectUri, $response->getTargetUrl());
 
         // Ensure request path info
-        $this->assertSame($path, $event->getRequest()->getPathInfo());
+        static::assertSame($path, $event->getRequest()->getPathInfo());
 
         // Ensure request locale is null
-        $this->assertNull($event->getRequest()->attributes->get('_locale'));
+        static::assertNull($event->getRequest()->attributes->get('_locale'));
     }
 
     public function siteWithRedirectProvider(): \Generator
@@ -105,7 +105,7 @@ class HostPathSiteSelectorTest extends TestCase
         $request = SiteRequest::create($url);
 
         // Ensure request locale is null
-        $this->assertNull($request->attributes->get('_locale'));
+        static::assertNull($request->attributes->get('_locale'));
 
         $event = new GetResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST);
 
@@ -128,7 +128,7 @@ class HostPathSiteSelectorTest extends TestCase
     }
 }
 
-class HostPathSite extends BaseSite
+final class HostPathSite extends BaseSite
 {
     /**
      * @var int
@@ -136,8 +136,6 @@ class HostPathSite extends BaseSite
     protected $id;
 
     /**
-     * Get id.
-     *
      * @return int $id
      */
     public function getId()
@@ -146,7 +144,7 @@ class HostPathSite extends BaseSite
     }
 }
 
-class HostPathSiteSelector extends BaseSiteSelector
+final class HostPathSiteSelector extends BaseSiteSelector
 {
     /**
      * Camelize a string.
@@ -154,14 +152,14 @@ class HostPathSiteSelector extends BaseSiteSelector
      * @static
      *
      * @param string $property
-     *
-     * @return string
      */
-    public static function _camelize($property)
+    public static function _camelize($property): string
     {
-        return preg_replace_callback('/(^|[_. ])+(.)/', static function ($match) {
-            return ('.' === $match[1] ? '_' : '').strtoupper($match[2]);
-        }, $property);
+        return preg_replace_callback(
+            '/(^|[_. ])+(.)/',
+            static fn ($match) => ('.' === $match[1] ? '_' : '').strtoupper($match[2]),
+            $property
+        );
     }
 
     /**
@@ -175,12 +173,7 @@ class HostPathSiteSelector extends BaseSiteSelector
         ]);
     }
 
-    /**
-     * @param array $params
-     *
-     * @return array
-     */
-    protected function _findSites(array $params)
+    protected function _findSites(array $params): array
     {
         $all_sites = $this->_getAllSites();
 
@@ -211,10 +204,7 @@ class HostPathSiteSelector extends BaseSiteSelector
         return $matched_sites;
     }
 
-    /**
-     * @return array
-     */
-    protected function _getAllSites()
+    protected function _getAllSites(): array
     {
         $always = null;
         $now = new \DateTime();
@@ -339,8 +329,6 @@ class HostPathSiteSelector extends BaseSiteSelector
     /**
      * @param object $object
      * @param string $fieldName
-     *
-     * @return mixed
      */
     protected function _getFieldValue($object, $fieldName)
     {
@@ -353,7 +341,7 @@ class HostPathSiteSelector extends BaseSiteSelector
 
         foreach ($getters as $getter) {
             if (method_exists($object, $getter)) {
-                return \call_user_func([$object, $getter]);
+                return $object->$getter();
             }
         }
 
@@ -361,6 +349,6 @@ class HostPathSiteSelector extends BaseSiteSelector
             return $object->{$fieldName};
         }
 
-        throw new NoValueException(sprintf('Unable to retrieve the value of `%s`', $this->getName()));
+        throw new NoValueException(sprintf('Unable to retrieve the value of `%s`', $fieldName));
     }
 }

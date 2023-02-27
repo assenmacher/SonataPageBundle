@@ -22,34 +22,36 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Migrates the name setting of all blocks into a code setting.
+ *
+ * @final since sonata-project/page-bundle 3.26
+ *
+ * NEXT_MAJOR: Remove this class
+ *
+ * @deprecated since 3.27, and it will be removed in 4.0.
  */
 class DumpPageCommand extends BaseCommand
 {
-    /**
-     * {@inheritdoc}
-     */
     public function configure()
     {
         $this->setName('sonata:page:dump-page');
         $this->setDescription('Dump page information');
         $this->setHelp(
-'Dump page information
+            <<<HELP
+                Dump page information
 
-Available managers:
- - sonata.page.cms.snapshot
- - sonata.page.cms.page
+                Available managers:
+                 - sonata.page.cms.snapshot
+                 - sonata.page.cms.page
 
-You can use the --extended option to dump block configuration
-');
+                You can use the --extended option to dump block configuration
+                HELP
+        );
 
         $this->addArgument('manager', InputArgument::REQUIRED, 'The manager service id');
         $this->addArgument('page_id', InputArgument::REQUIRED, 'The page id');
         $this->addOption('extended', null, InputOption::VALUE_NONE, 'Extended information');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $manager = $this->getContainer()->get($input->getArgument('manager'));
@@ -77,17 +79,18 @@ You can use the --extended option to dump block configuration
         foreach ($page->getBlocks() as $block) {
             $this->renderBlock($block, $output, $input->getOption('extended'));
         }
+
+        return 0;
     }
 
     /**
-     * @param BlockInterface  $block
-     * @param OutputInterface $output
-     * @param bool            $extended
-     * @param int             $space
+     * @param bool $extended
+     * @param int  $space
      */
     public function renderBlock(BlockInterface $block, OutputInterface $output, $extended, $space = 0)
     {
-        $output->writeln(sprintf('%s <comment>> Id: %d - type: %s - name: %s</comment>',
+        $output->writeln(sprintf(
+            '%s <comment>> Id: %d - type: %s - name: %s</comment>',
             str_repeat('  ', $space),
             $block->getId(),
             $block->getType(),
@@ -104,5 +107,19 @@ You can use the --extended option to dump block configuration
         foreach ($block->getChildren() as $block) {
             $this->renderBlock($block, $output, $extended, $space + 1);
         }
+    }
+
+    public function run(InputInterface $input, OutputInterface $output)
+    {
+        @trigger_error(
+            sprintf(
+                'This %s is deprecated since sonata-project/page-bundle 3.27.0'.
+                ' and it will be removed in 4.0',
+                self::class
+            ),
+            \E_USER_DEPRECATED
+        );
+
+        return parent::run($input, $output);
     }
 }

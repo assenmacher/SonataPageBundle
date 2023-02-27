@@ -23,6 +23,8 @@ use Sonata\PageBundle\Model\PageInterface;
  * This class interacts with blocks.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class BlockInteractor implements BlockInteractorInterface
 {
@@ -42,7 +44,7 @@ class BlockInteractor implements BlockInteractorInterface
     protected $blockManager;
 
     /**
-     * @param ManagerRegistry     $registry     Doctrine registry
+     * @param ManagerRegistry       $registry     Doctrine registry
      * @param BlockManagerInterface $blockManager Block manager
      */
     public function __construct(ManagerRegistry $registry, BlockManagerInterface $blockManager)
@@ -51,9 +53,6 @@ class BlockInteractor implements BlockInteractorInterface
         $this->registry = $registry;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBlock($id)
     {
         $blocks = $this->getEntityManager()->createQueryBuilder()
@@ -69,9 +68,6 @@ class BlockInteractor implements BlockInteractorInterface
         return \count($blocks) > 0 ? $blocks[0] : false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBlocksById(PageInterface $page)
     {
         $blocks = $this->getEntityManager()
@@ -84,9 +80,6 @@ class BlockInteractor implements BlockInteractorInterface
         return $blocks;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function saveBlocksPosition(array $data = [], $partial = true)
     {
         $em = $this->getEntityManager();
@@ -94,7 +87,7 @@ class BlockInteractor implements BlockInteractorInterface
 
         try {
             foreach ($data as $block) {
-                if (!$block['id'] or !\array_key_exists('position', $block) or !$block['parent_id'] or !$block['page_id']) {
+                if (!$block['id'] || !\array_key_exists('position', $block) || !$block['parent_id'] || !$block['page_id']) {
                     continue;
                 }
 
@@ -112,10 +105,7 @@ class BlockInteractor implements BlockInteractorInterface
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function createNewContainer(array $values = [], \Closure $alter = null)
+    public function createNewContainer(array $values = [], ?\Closure $alter = null)
     {
         $container = $this->blockManager->create();
         $container->setEnabled($values['enabled'] ?? true);
@@ -149,9 +139,6 @@ class BlockInteractor implements BlockInteractorInterface
         return $container;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function loadPageBlocks(PageInterface $page)
     {
         if (isset($this->pageBlocksLoaded[$page->getId()])) {

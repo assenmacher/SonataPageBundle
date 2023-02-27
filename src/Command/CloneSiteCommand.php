@@ -28,9 +28,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class CloneSiteCommand extends BaseCommand
 {
-    /**
-     * {@inheritdoc}
-     */
     public function configure()
     {
         $this
@@ -42,9 +39,6 @@ final class CloneSiteCommand extends BaseCommand
             ->addOption('only-hybrid', 'oh', InputOption::VALUE_OPTIONAL, 'only clone hybrid pages', false);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
         if (!$input->getOption('source-id')) {
@@ -64,9 +58,6 @@ final class CloneSiteCommand extends BaseCommand
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         if ($input->getOption('only-hybrid')) {
@@ -76,11 +67,12 @@ final class CloneSiteCommand extends BaseCommand
             $hybridOnly = false;
         }
 
+        $siteManager = $this->getContainer()->get('sonata.page.manager.site');
         /** @var SiteInterface $sourceSite */
-        $sourceSite = $this->getSiteManager()->find($input->getOption('source-id'));
+        $sourceSite = $siteManager->find($input->getOption('source-id'));
 
         /** @var SiteInterface $destSite */
-        $destSite = $this->getSiteManager()->find($input->getOption('dest-id'));
+        $destSite = $siteManager->find($input->getOption('dest-id'));
 
         $pageClones = [];
         $blockClones = [];
@@ -144,7 +136,14 @@ final class CloneSiteCommand extends BaseCommand
                 }
             }
 
+            // NEXT_MAJOR: Remove this target condition block.
             if ($page->getTarget()) {
+                @trigger_error(
+                    'target page is deprecate since sonata-project/page-bundle 3.27.0'.
+                    ', and it will be removed in 4.0',
+                    \E_USER_DEPRECATED
+                );
+
                 if (\array_key_exists($page->getTarget()->getId(), $pageClones)) {
                     $output->writeln(
                         sprintf(
@@ -188,18 +187,18 @@ final class CloneSiteCommand extends BaseCommand
         }
 
         $output->writeln('<info>done!</info>');
+
+        return 0;
     }
 
     /**
      * Prints a list of all available sites.
-     *
-     * @param OutputInterface $output
      */
     private function listAllSites(OutputInterface $output)
     {
         $output->writeln(sprintf(' % 5s - % -30s - %s', 'ID', 'Name', 'Url'));
 
-        $sites = $this->getSiteManager()->findAll();
+        $sites = $this->getContainer()->get('sonata.page.manager.site')->findAll();
 
         foreach ($sites as $site) {
             $output->writeln(sprintf(' % 5s - % -30s - %s', $site->getId(), $site->getName(), $site->getUrl()));

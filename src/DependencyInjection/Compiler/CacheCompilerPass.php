@@ -21,12 +21,11 @@ use Symfony\Component\DependencyInjection\Reference;
  * CacheCompilerPass.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class CacheCompilerPass implements CompilerPassInterface
 {
-    /**
-     * {@inheritdoc}
-     */
     public function process(ContainerBuilder $container)
     {
         $services = [];

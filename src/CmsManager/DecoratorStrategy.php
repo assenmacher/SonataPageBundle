@@ -22,6 +22,8 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
  * on the current request.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class DecoratorStrategy implements DecoratorStrategyInterface
 {
@@ -40,11 +42,6 @@ class DecoratorStrategy implements DecoratorStrategyInterface
      */
     protected $ignoreUriPatterns;
 
-    /**
-     * @param array $ignoreRoutes
-     * @param array $ignoreRoutePatterns
-     * @param array $ignoreUriPatterns
-     */
     public function __construct(array $ignoreRoutes, array $ignoreRoutePatterns, array $ignoreUriPatterns)
     {
         $this->ignoreRoutes = $ignoreRoutes;
@@ -52,25 +49,22 @@ class DecoratorStrategy implements DecoratorStrategyInterface
         $this->ignoreUriPatterns = $ignoreUriPatterns;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isDecorable(Request $request, $requestType, Response $response)
     {
         if (HttpKernelInterface::MASTER_REQUEST !== $requestType) {
             return false;
         }
 
-        if ('text/html' !== (substr($response->headers->get('Content-Type') ?: 'text/html', 0, 9))) {
+        if ('text/html' !== substr($response->headers->get('Content-Type') ?: 'text/html', 0, 9)) {
             return false;
         }
 
-        if (true === $response->headers->get('x-sonata-page-not-decorable', false)) {
+        if ('1' === $response->headers->get('x-sonata-page-not-decorable', '0')) {
             return false;
         }
 
         // the main controller explicitly force the the page to be decorate
-        if (true === $response->headers->get('x-sonata-page-decorable', false)) {
+        if ('1' === $response->headers->get('x-sonata-page-decorable', '0')) {
             return true;
         }
 
@@ -85,17 +79,11 @@ class DecoratorStrategy implements DecoratorStrategyInterface
         return $this->isRequestDecorable($request);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isRequestDecorable(Request $request)
     {
         return $this->isRouteNameDecorable($request->get('_route')) && $this->isRouteUriDecorable($request->getPathInfo());
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isRouteNameDecorable($routeName)
     {
         if (!$routeName) {
@@ -117,9 +105,6 @@ class DecoratorStrategy implements DecoratorStrategyInterface
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isRouteUriDecorable($uri)
     {
         foreach ($this->ignoreUriPatterns as $uriPattern) {

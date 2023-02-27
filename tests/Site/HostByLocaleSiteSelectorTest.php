@@ -24,9 +24,9 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 /**
  * @author Rémi Marseille <marseille@ekino.com>
  */
-class HostByLocaleSiteSelectorTest extends BaseLocaleSiteSelectorTest
+final class HostByLocaleSiteSelectorTest extends BaseLocaleSiteSelectorTest
 {
-    protected function setUp()
+    protected function setUp(): void
     {
         $siteManager = $this->createMock(SiteManagerInterface::class);
         $decoratorStrategy = $this->createMock(DecoratorStrategyInterface::class);
@@ -41,18 +41,18 @@ class HostByLocaleSiteSelectorTest extends BaseLocaleSiteSelectorTest
     /**
      * Tests handleKernelRequest method selects the site /en.
      */
-    public function testHandleKernelRequestSelectsEn()
+    public function testHandleKernelRequestSelectsEn(): void
     {
         $kernel = $this->createMock(HttpKernelInterface::class);
         $request = SiteRequest::create('http://www.example.com');
 
         // Ensure request locale is null
-        $this->assertNull($request->attributes->get('_locale'));
+        static::assertNull($request->attributes->get('_locale'));
 
         $event = new GetResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST);
 
         $this->siteSelector
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('getSites')
             ->with($request)
             ->willReturn($this->getSites());
@@ -60,18 +60,18 @@ class HostByLocaleSiteSelectorTest extends BaseLocaleSiteSelectorTest
         $this->siteSelector->handleKernelRequest($event);
 
         // Ensure request locale is en
-        $this->assertSame('en', $request->attributes->get('_locale'));
+        static::assertSame('en', $request->attributes->get('_locale'));
 
         $site = $this->getSite();
 
         // Ensure we retrieved the site "/en"
-        $this->assertSame('/en', $site->getRelativePath());
+        static::assertSame('/en', $site->getRelativePath());
     }
 
     /**
      * Tests handleKernelRequest method selects the site /fr.
      */
-    public function testHandleKernelRequestSelectsFr()
+    public function testHandleKernelRequestSelectsFr(): void
     {
         $kernel = $this->createMock(HttpKernelInterface::class);
         $request = SiteRequest::create('http://www.example.com', 'GET', [], [], [], [
@@ -79,12 +79,12 @@ class HostByLocaleSiteSelectorTest extends BaseLocaleSiteSelectorTest
         ]);
 
         // Ensure request locale is null
-        $this->assertNull($request->attributes->get('_locale'));
+        static::assertNull($request->attributes->get('_locale'));
 
         $event = new GetResponseEvent($kernel, $request, HttpKernelInterface::MASTER_REQUEST);
 
         $this->siteSelector
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('getSites')
             ->with($request)
             ->willReturn($this->getSites());
@@ -92,11 +92,11 @@ class HostByLocaleSiteSelectorTest extends BaseLocaleSiteSelectorTest
         $this->siteSelector->handleKernelRequest($event);
 
         // Ensure request locale is fr
-        $this->assertSame('fr', $request->attributes->get('_locale'));
+        static::assertSame('fr', $request->attributes->get('_locale'));
 
         $site = $this->getSite();
 
         // Ensure we retrieved the site "/fr"
-        $this->assertSame('/fr', $site->getRelativePath());
+        static::assertSame('/fr', $site->getRelativePath());
     }
 }

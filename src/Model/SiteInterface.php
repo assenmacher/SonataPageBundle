@@ -48,34 +48,28 @@ interface SiteInterface
     public function getHost();
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getSiteLocale();
 
     /**
-     * @param string $siteLocale
+     * @param string|null $locale
      */
-    public function setSiteLocale($siteLocale);
+    public function setSiteLocale($locale);
 
     /**
-     * @return \DateTime
+     * @return \DateTime|null
      */
     public function getEnabledFrom();
 
-    /**
-     * @param \DateTime|null $enabledFrom
-     */
-    public function setEnabledFrom(\DateTime $enabledFrom = null);
+    public function setEnabledFrom(?\DateTime $enabledFrom = null);
 
     /**
-     * @return \DateTime
+     * @return \DateTime|null
      */
     public function getEnabledTo();
 
-    /**
-     * @param \DateTime|null $enabledTo
-     */
-    public function setEnabledTo(\DateTime $enabledTo = null);
+    public function setEnabledTo(?\DateTime $enabledTo = null);
 
     /**
      * @return bool
@@ -88,25 +82,21 @@ interface SiteInterface
     public function setIsDefault($default);
 
     /**
-     * @param string $path
+     * @param string|null $path
      */
     public function setRelativePath($path);
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getRelativePath();
 
     /**
-     * Set enabled.
-     *
      * @param bool $enabled
      */
     public function setEnabled($enabled);
 
     /**
-     * Get enabled.
-     *
      * @return bool $enabled
      */
     public function getEnabled();
@@ -118,30 +108,16 @@ interface SiteInterface
      */
     public function isEnabled();
 
-    /**
-     * Set createdAt.
-     *
-     * @param \Datetime|null $createdAt
-     */
-    public function setCreatedAt(\DateTime $createdAt = null);
+    public function setCreatedAt(?\DateTime $createdAt = null);
 
     /**
-     * Get createdAt.
-     *
      * @return \Datetime $createdAt
      */
     public function getCreatedAt();
 
-    /**
-     * Set updatedAt.
-     *
-     * @param \Datetime|null $updatedAt
-     */
-    public function setUpdatedAt(\DateTime $updatedAt = null);
+    public function setUpdatedAt(?\DateTime $updatedAt = null);
 
     /**
-     * Get updatedAt.
-     *
      * @return \Datetime $updatedAt
      */
     public function getUpdatedAt();
@@ -157,38 +133,38 @@ interface SiteInterface
     public function isLocalhost();
 
     /**
-     * @param string $metaDescription
+     * @param string|null $metaDescription
      *
-     * @return string
+     * @return void
      */
     public function setMetaDescription($metaDescription);
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getMetaDescription();
 
     /**
-     * @param string $metaKeywords
+     * @param string|null $metaKeywords
      *
-     * @return string
+     * @return void
      */
     public function setMetaKeywords($metaKeywords);
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getMetaKeywords();
 
     /**
-     * @param string $title
+     * @param string|null $title
      *
-     * @return string
+     * @return void
      */
     public function setTitle($title);
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getTitle();
 }

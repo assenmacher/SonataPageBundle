@@ -26,6 +26,8 @@ use Symfony\Component\OptionsResolver\OptionsResolverInterface;
  * Select a page.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class PageSelectorType extends AbstractType
 {
@@ -34,17 +36,11 @@ class PageSelectorType extends AbstractType
      */
     protected $manager;
 
-    /**
-     * @param PageManagerInterface $manager
-     */
     public function __construct(PageManagerInterface $manager)
     {
         $this->manager = $manager;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureOptions(OptionsResolver $resolver)
     {
         $that = $this;
@@ -52,9 +48,7 @@ class PageSelectorType extends AbstractType
         $resolver->setDefaults([
             'page' => null,
             'site' => null,
-            'choices' => static function (Options $opts, $previousValue) use ($that) {
-                return $that->getChoices($opts);
-            },
+            'choices' => static fn (Options $opts, $previousValue) => $that->getChoices($opts),
             'choice_translation_domain' => false,
             'filter_choice' => [
                 'current_page' => false,
@@ -65,17 +59,12 @@ class PageSelectorType extends AbstractType
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
         $this->configureOptions($resolver);
     }
 
     /**
-     * @param Options $options
-     *
      * @return array
      */
     public function getChoices(Options $options)
@@ -112,9 +101,9 @@ class PageSelectorType extends AbstractType
             }
 
             if ('all' !== $filter_choice['dynamic'] && (
-                    ($filter_choice['dynamic'] && $page->isDynamic()) ||
+                ($filter_choice['dynamic'] && $page->isDynamic()) ||
                     (!$filter_choice['dynamic'] && !$page->isDynamic())
-                )
+            )
             ) {
                 continue;
             }
@@ -131,32 +120,22 @@ class PageSelectorType extends AbstractType
         return $choices;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getParent()
     {
         return ModelType::class;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBlockPrefix()
     {
         return 'sonata_page_selector';
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getName()
     {
         return $this->getBlockPrefix();
     }
 
     /**
-     * @param PageInterface $page
      * @param PageInterface $currentPage
      * @param array         $choices
      * @param int           $level

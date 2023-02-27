@@ -19,20 +19,16 @@ use Symfony\Component\HttpFoundation\Request as BaseRequest;
  * SiteRequest.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class SiteRequest extends BaseRequest implements SiteRequestInterface
 {
-    /**
-     * {@inheritdoc}
-     */
     public function setPathInfo($pathInfo)
     {
         $this->pathInfo = $pathInfo;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setBaseUrl($baseUrl)
     {
         $this->baseUrl = $baseUrl;

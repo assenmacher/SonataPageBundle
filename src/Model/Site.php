@@ -21,6 +21,11 @@ namespace Sonata\PageBundle\Model;
 abstract class Site implements SiteInterface
 {
     /**
+     * @var mixed
+     */
+    protected $id;
+
+    /**
      * @var bool
      */
     protected $enabled;
@@ -46,17 +51,17 @@ abstract class Site implements SiteInterface
     protected $host;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $relativePath;
 
     /**
-     * @var \DateTime
+     * @var \DateTime|null
      */
     protected $enabledFrom;
 
     /**
-     * @var \DateTime
+     * @var \DateTime|null
      */
     protected $enabledTo;
 
@@ -71,68 +76,50 @@ abstract class Site implements SiteInterface
     protected $formats = [];
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $siteLocale;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $title;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $metaKeywords;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $metaDescription;
 
-    /**
-     * {@inheritdoc}
-     */
     public function __construct()
     {
         $this->enabled = false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function __toString()
     {
         return $this->getName() ?: 'n/a';
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setId($id)
     {
         $this->id = $id;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setEnabled($enabled)
     {
         $this->enabled = $enabled;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getEnabled()
     {
         return $this->enabled;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isEnabled()
     {
         $now = new \DateTime();
@@ -148,9 +135,6 @@ abstract class Site implements SiteInterface
         return $this->enabled;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getUrl()
     {
         if ($this->isLocalhost()) {
@@ -168,209 +152,131 @@ abstract class Site implements SiteInterface
         return 'localhost' === $this->getHost();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setCreatedAt(\DateTime $createdAt = null)
+    public function setCreatedAt(?\DateTime $createdAt = null)
     {
         $this->createdAt = $createdAt;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getCreatedAt()
     {
         return $this->createdAt;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setUpdatedAt(\DateTime $updatedAt = null)
+    public function setUpdatedAt(?\DateTime $updatedAt = null)
     {
         $this->updatedAt = $updatedAt;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getUpdatedAt()
     {
         return $this->updatedAt;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setHost($host)
     {
         $this->host = $host;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getHost()
     {
         return $this->host;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setFormats($formats)
     {
         $this->formats = $formats;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getFormats()
     {
         return $this->formats;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setName($name)
     {
         $this->name = $name;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getName()
     {
         return $this->name;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setRelativePath($relativePath)
+    public function setRelativePath($path)
     {
-        $this->relativePath = $relativePath;
+        $this->relativePath = $path;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getRelativePath()
     {
         return $this->relativePath;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setIsDefault($default)
     {
         $this->isDefault = $default;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getIsDefault()
     {
         return $this->isDefault;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setEnabledFrom(\DateTime $enabledFrom = null)
+    public function setEnabledFrom(?\DateTime $enabledFrom = null)
     {
         $this->enabledFrom = $enabledFrom;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getEnabledFrom()
     {
         return $this->enabledFrom;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setEnabledTo(\DateTime $enabledTo = null)
+    public function setEnabledTo(?\DateTime $enabledTo = null)
     {
         $this->enabledTo = $enabledTo;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getEnabledTo()
     {
         return $this->enabledTo;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setSiteLocale($siteLocale)
+    public function setSiteLocale($locale)
     {
-        $this->siteLocale = $siteLocale;
+        $this->siteLocale = $locale;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getSiteLocale()
     {
         return $this->siteLocale;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setMetaDescription($metaDescription)
     {
         $this->metaDescription = $metaDescription;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getMetaDescription()
     {
         return $this->metaDescription;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setMetaKeywords($metaKeywords)
     {
         $this->metaKeywords = $metaKeywords;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getMetaKeywords()
     {
         return $this->metaKeywords;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setTitle($title)
     {
         $this->title = $title;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getTitle()
     {
         return $this->title;

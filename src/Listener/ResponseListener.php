@@ -27,6 +27,8 @@ use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
  * cms manager upon user permission.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class ResponseListener
 {
@@ -50,10 +52,7 @@ class ResponseListener
      */
     protected $templating;
 
-    /**
-     * @var bool
-     */
-    private $skipRedirection;
+    private bool $skipRedirection;
 
     /**
      * @param CmsManagerSelectorInterface $cmsSelector        CMS manager selector
@@ -81,8 +80,6 @@ class ResponseListener
     /**
      * Filter the `core.response` event to decorate the action.
      *
-     * @param FilterResponseEvent $event
-     *
      * @throws InternalErrorException
      */
     public function onCoreResponse(FilterResponseEvent $event)
@@ -96,7 +93,7 @@ class ResponseListener
             $response->setPrivate();
 
             if (!$request->cookies->has('sonata_page_is_editor')) {
-                $response->headers->setCookie(new Cookie('sonata_page_is_editor', '1'));
+                $response->headers->setCookie(Cookie::create('sonata_page_is_editor', '1'));
             }
         }
 

@@ -13,16 +13,17 @@ declare(strict_types=1);
 
 namespace Sonata\PageBundle\Serializer;
 
-use Sonata\Serializer\BaseSerializerHandler;
+use Sonata\Form\Serializer\BaseSerializerHandler;
 
 /**
+ * NEXT_MAJOR: Remove this file.
+ *
  * @author Sylvain Deloux <sylvain.deloux@ekino.com>
+ *
+ * @deprecated since sonata-project/page-bundle 3.24, to be removed in 4.0.
  */
 class BlockSerializerHandler extends BaseSerializerHandler
 {
-    /**
-     * {@inheritdoc}
-     */
     public static function getType()
     {
         return 'sonata_page_block_id';

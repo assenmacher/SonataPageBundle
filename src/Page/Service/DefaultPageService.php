@@ -25,6 +25,8 @@ use Symfony\Component\HttpFoundation\Response;
  * Note: this service is backward-compatible and functions like the old page renderer class.
  *
  * @author Olivier Paradis <paradis.olivier@gmail.com>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class DefaultPageService extends BasePageService
 {
@@ -43,17 +45,14 @@ class DefaultPageService extends BasePageService
      * @param TemplateManagerInterface $templateManager Template manager
      * @param SeoPageInterface         $seoPage         SEO page object
      */
-    public function __construct($name, TemplateManagerInterface $templateManager, SeoPageInterface $seoPage = null)
+    public function __construct($name, TemplateManagerInterface $templateManager, ?SeoPageInterface $seoPage = null)
     {
         $this->name = $name;
         $this->templateManager = $templateManager;
         $this->seoPage = $seoPage;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function execute(PageInterface $page, Request $request, array $parameters = [], Response $response = null)
+    public function execute(PageInterface $page, Request $request, array $parameters = [], ?Response $response = null)
     {
         $this->updateSeoPage($page);
 
@@ -64,8 +63,6 @@ class DefaultPageService extends BasePageService
 
     /**
      * Updates the SEO page values for given page instance.
-     *
-     * @param PageInterface $page
      */
     protected function updateSeoPage(PageInterface $page)
     {

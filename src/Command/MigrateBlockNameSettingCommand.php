@@ -15,33 +15,44 @@ namespace Sonata\PageBundle\Command;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Sonata\BlockBundle\Model\BlockInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Migrates the name setting of all blocks into a code setting.
+ *
+ * @final since sonata-project/page-bundle 3.26
+ *
+ * NEXT_MAJOR: Remove this class
+ *
+ * @deprecated since 3.27, and it will be removed in 4.0.
  */
 class MigrateBlockNameSettingCommand extends BaseCommand
 {
     public const CONTAINER_TYPE = 'sonata.page.block.container';
 
-    /**
-     * {@inheritdoc}
-     */
     public function configure()
     {
         $this->setName('sonata:page:migrate-block-setting');
-        $this->addOption('class', null, InputOption::VALUE_OPTIONAL, 'Block entity class',
-            'Application\Sonata\PageBundle\Entity\Block');
-        $this->addOption('update-name', null, InputOption::VALUE_OPTIONAL, 'update name field from code setting',
-            false);
+        $this->addOption(
+            'class',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'Block entity class',
+            'Application\Sonata\PageBundle\Entity\Block'
+        );
+        $this->addOption(
+            'update-name',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'update name field from code setting',
+            false
+        );
         $this->setDescription('Migrate the "name" setting of all blocks into a "code" setting and remove unused "orientation" setting on "'.self::CONTAINER_TYPE.'" blocks');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $count = 0;
@@ -49,6 +60,12 @@ class MigrateBlockNameSettingCommand extends BaseCommand
         $blocks = $repository->findAll();
 
         foreach ($blocks as $block) {
+            if (!$block instanceof BlockInterface) {
+                throw new \Exception(
+                    sprintf('The block class need to implements the %s interface.', BlockInterface::class)
+                );
+            }
+
             $settings = $block->getSettings();
 
             // Remove orientation option if it exists
@@ -84,6 +101,22 @@ class MigrateBlockNameSettingCommand extends BaseCommand
         $this->getEntityManager()->flush();
 
         $output->writeln("<info>Migrated $count blocks</info>");
+
+        return 0;
+    }
+
+    public function run(InputInterface $input, OutputInterface $output)
+    {
+        @trigger_error(
+            sprintf(
+                'This %s is deprecated since sonata-project/page-bundle 3.27.0'.
+                ' and it will be removed in 4.0',
+                self::class
+            ),
+            \E_USER_DEPRECATED
+        );
+
+        return parent::run($input, $output);
     }
 
     /**

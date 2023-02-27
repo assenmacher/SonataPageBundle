@@ -11,7 +11,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Sonata\PageBundle\Tests\Page;
+namespace Sonata\PageBundle\Tests\CmsManager;
 
 use PHPUnit\Framework\TestCase;
 use Sonata\BlockBundle\Model\BlockInterface;
@@ -27,7 +27,7 @@ use Sonata\PageBundle\Model\SnapshotPageProxyInterface;
 use Sonata\PageBundle\Model\TransformerInterface;
 use Sonata\PageBundle\Tests\Model\Page;
 
-class SnapshotBlock extends Block
+final class SnapshotBlock extends Block
 {
     public function setId($id)
     {
@@ -38,12 +38,9 @@ class SnapshotBlock extends Block
     }
 }
 
-class CmsSnapshotManagerTest extends TestCase
+final class CmsSnapshotManagerTest extends TestCase
 {
-    /**
-     * @var CmsSnapshotManager
-     */
-    protected $manager;
+    protected CmsSnapshotManager $manager;
 
     protected $blockInteractor;
 
@@ -54,7 +51,7 @@ class CmsSnapshotManagerTest extends TestCase
     /**
      * Setup manager object to test.
      */
-    public function setUp()
+    protected function setUp(): void
     {
         $this->blockInteractor = $this->getMockBlockInteractor();
         $this->snapshotManager = $this->createMock(SnapshotManagerInterface::class);
@@ -65,7 +62,7 @@ class CmsSnapshotManagerTest extends TestCase
     /**
      * Test finding an existing container in a page.
      */
-    public function testFindExistingContainer()
+    public function testFindExistingContainer(): void
     {
         $block = new SnapshotBlock();
         $block->setSettings(['code' => 'findme']);
@@ -75,7 +72,7 @@ class CmsSnapshotManagerTest extends TestCase
 
         $container = $this->manager->findContainer('findme', $page);
 
-        $this->assertSame(
+        static::assertSame(
             spl_object_hash($block),
             spl_object_hash($container),
             'should retrieve the block of the page'
@@ -85,20 +82,20 @@ class CmsSnapshotManagerTest extends TestCase
     /**
      * Test finding an non-existing container in a page does NOT create a new block.
      */
-    public function testFindNonExistingContainerCreatesNoNewBlock()
+    public function testFindNonExistingContainerCreatesNoNewBlock(): void
     {
         $page = new Page();
 
         $container = $this->manager->findContainer('newcontainer', $page);
 
-        $this->assertNull($container, 'should not create a new container block');
+        static::assertNull($container, 'should not create a new container block');
     }
 
-    public function testGetPageWithUnknownPage()
+    public function testGetPageWithUnknownPage(): void
     {
         $this->expectException(PageNotFoundException::class);
 
-        $this->snapshotManager->expects($this->once())->method('findEnableSnapshot')->willReturn(null);
+        $this->snapshotManager->expects(static::once())->method('findEnableSnapshot')->willReturn(null);
 
         $site = $this->createMock(SiteInterface::class);
 
@@ -107,19 +104,19 @@ class CmsSnapshotManagerTest extends TestCase
         $snapshotManager->getPage($site, 1);
     }
 
-    public function testGetPageWithId()
+    public function testGetPageWithId(): void
     {
         $cBlock = $this->createMock(BlockInterface::class);
-        $cBlock->expects($this->any())->method('hasChildren')->willReturn(false);
-        $cBlock->expects($this->any())->method('getId')->willReturn(2);
+        $cBlock->method('hasChildren')->willReturn(false);
+        $cBlock->method('getId')->willReturn(2);
 
         $pBlock = $this->createMock(BlockInterface::class);
-        $pBlock->expects($this->any())->method('getChildren')->willReturn([$cBlock]);
-        $pBlock->expects($this->any())->method('hasChildren')->willReturn(true);
-        $pBlock->expects($this->any())->method('getId')->willReturn(1);
+        $pBlock->method('getChildren')->willReturn([$cBlock]);
+        $pBlock->method('hasChildren')->willReturn(true);
+        $pBlock->method('getId')->willReturn(1);
 
         $page = $this->createMock(PageInterface::class);
-        $page->expects($this->any())->method('getBlocks')->willReturnCallback(static function () use ($pBlock) {
+        $page->method('getBlocks')->willReturnCallback(static function () use ($pBlock) {
             static $count;
 
             ++$count;
@@ -132,17 +129,17 @@ class CmsSnapshotManagerTest extends TestCase
         });
 
         $snapshot = $this->createMock(SnapshotInterface::class);
-        $snapshot->expects($this->once())->method('getContent')->willReturn([
+        $snapshot->expects(static::once())->method('getContent')->willReturn([
             // we don't care here about real values, the mock transformer will return the valid $pBlock instance
             'blocks' => [],
         ]);
 
         $this->snapshotManager
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('findEnableSnapshot')
             ->willReturn($snapshot);
 
-        $this->transformer->expects($this->once())->method('load')->willReturn($page);
+        $this->transformer->expects(static::once())->method('load')->willReturn($page);
 
         $site = $this->createMock(SiteInterface::class);
 
@@ -150,18 +147,16 @@ class CmsSnapshotManagerTest extends TestCase
 
         $page = $snapshotManager->getPage($site, 1);
 
-        $this->assertInstanceOf(SnapshotPageProxyInterface::class, $page);
+        static::assertInstanceOf(SnapshotPageProxyInterface::class, $page);
 
-        $this->assertInstanceOf(BlockInterface::class, $snapshotManager->getBlock(1));
-        $this->assertInstanceOf(BlockInterface::class, $snapshotManager->getBlock(2));
+        static::assertInstanceOf(BlockInterface::class, $snapshotManager->getBlock(1));
+        static::assertInstanceOf(BlockInterface::class, $snapshotManager->getBlock(2));
     }
 
     /**
      * Returns a mock block interactor.
-     *
-     * @return BlockInteractorInterface
      */
-    protected function getMockBlockInteractor()
+    protected function getMockBlockInteractor(): BlockInteractorInterface
     {
         $callback = static function ($options) {
             $block = new SnapshotBlock();
@@ -172,7 +167,6 @@ class CmsSnapshotManagerTest extends TestCase
 
         $blockInteractor = $this->createMock(BlockInteractorInterface::class);
         $blockInteractor
-            ->expects($this->any())
             ->method('createNewContainer')
             ->willReturnCallback($callback);
 

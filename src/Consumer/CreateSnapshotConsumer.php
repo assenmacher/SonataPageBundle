@@ -23,6 +23,12 @@ use Sonata\PageBundle\Model\TransformerInterface;
  * Consumer class to generate a snapshot.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * NEXT_MAJOR: Remove this class
+ *
+ * @final since sonata-project/page-bundle 3.26
+ *
+ * @deprecated since 3.27, and it will be removed in 4.0.
  */
 class CreateSnapshotConsumer implements ConsumerInterface
 {
@@ -41,21 +47,22 @@ class CreateSnapshotConsumer implements ConsumerInterface
      */
     protected $transformer;
 
-    /**
-     * @param SnapshotManagerInterface $snapshotManager
-     * @param PageManagerInterface     $pageManager
-     * @param TransformerInterface     $transformer
-     */
     public function __construct(SnapshotManagerInterface $snapshotManager, PageManagerInterface $pageManager, TransformerInterface $transformer)
     {
+        @trigger_error(
+            sprintf(
+                'This %s is deprecated since sonata-project/page-bundle 3.27.0'.
+                ' and will be removed in 4.0',
+                self::class
+            ),
+            \E_USER_DEPRECATED
+        );
+
         $this->snapshotManager = $snapshotManager;
         $this->pageManager = $pageManager;
         $this->transformer = $transformer;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function process(ConsumerEvent $event)
     {
         $pageId = $event->getMessage()->getValue('pageId');

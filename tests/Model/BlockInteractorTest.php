@@ -23,17 +23,17 @@ use Sonata\PageBundle\Entity\BlockInteractor;
 /**
  * @author Vincent Composieux <composieux@ekino.com>
  */
-class BlockInteractorTest extends TestCase
+final class BlockInteractorTest extends TestCase
 {
     /**
      * Test createNewContainer() method with some values.
      */
-    public function testCreateNewContainer()
+    public function testCreateNewContainer(): void
     {
         $registry = $this->createMock(ManagerRegistry::class);
 
         $blockManager = $this->createMock(BlockManagerInterface::class);
-        $blockManager->expects($this->any())->method('create')->willReturn(new Block());
+        $blockManager->method('create')->willReturn(new Block());
 
         $blockInteractor = new BlockInteractor($registry, $blockManager);
 
@@ -44,13 +44,13 @@ class BlockInteractorTest extends TestCase
             $container->setSetting('layout', '<div class="custom-layout">{{ CONTENT }}</div>');
         });
 
-        $this->assertInstanceOf(BlockInterface::class, $container);
+        static::assertInstanceOf(BlockInterface::class, $container);
 
         $settings = $container->getSettings();
 
-        $this->assertTrue($container->getEnabled());
+        static::assertTrue($container->getEnabled());
 
-        $this->assertSame('my-code', $settings['code']);
-        $this->assertSame('<div class="custom-layout">{{ CONTENT }}</div>', $settings['layout']);
+        static::assertSame('my-code', $settings['code']);
+        static::assertSame('<div class="custom-layout">{{ CONTENT }}</div>', $settings['layout']);
     }
 }

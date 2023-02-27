@@ -28,6 +28,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
  * Admin definition for the Site class.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class SiteAdmin extends AbstractAdmin
 {
@@ -51,20 +53,14 @@ class SiteAdmin extends AbstractAdmin
         parent::__construct($code, $class, $baseControllerName);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function postPersist($object)
     {
         $this->routePageGenerator->update($object);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function configureShowFields(ShowMapper $showMapper)
+    protected function configureShowFields(ShowMapper $show)
     {
-        $showMapper
+        $show
             ->add('name')
             ->add('isDefault')
             ->add('enabled')
@@ -75,16 +71,12 @@ class SiteAdmin extends AbstractAdmin
             ->add('enabledTo')
             ->add('title')
             ->add('metaDescription')
-            ->add('metaKeywords')
-        ;
+            ->add('metaKeywords');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function configureListFields(ListMapper $listMapper)
+    protected function configureListFields(ListMapper $list)
     {
-        $listMapper
+        $list
             ->addIdentifier('name')
             ->add('isDefault')
             ->add('enabled', null, ['editable' => true])
@@ -93,26 +85,18 @@ class SiteAdmin extends AbstractAdmin
             ->add('siteLocale')
             ->add('enabledFrom')
             ->add('enabledTo')
-            ->add('create_snapshots', 'string', ['template' => '@SonataPage/SiteAdmin/list_create_snapshots.html.twig'])
-        ;
+            ->add('create_snapshots', 'string', ['template' => '@SonataPage/SiteAdmin/list_create_snapshots.html.twig']);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function configureDatagridFilters(DatagridMapper $datagridMapper)
+    protected function configureDatagridFilters(DatagridMapper $filter)
     {
-        $datagridMapper
-            ->add('name')
-        ;
+        $filter
+            ->add('name');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function configureFormFields(FormMapper $formMapper)
+    protected function configureFormFields(FormMapper $form)
     {
-        $formMapper
+        $form
             ->with('form_site.label_general', ['class' => 'col-md-6'])
                 ->add('name')
                 ->add('isDefault', null, ['required' => false])
@@ -121,20 +105,19 @@ class SiteAdmin extends AbstractAdmin
                 ->add('siteLocale', LocaleType::class, ['required' => false])
                 ->add('relativePath', null, ['required' => false])
                 ->add('enabledFrom', DateTimePickerType::class, ['dp_side_by_side' => true])
-                ->add('enabledTo', DateTimePickerType::class, ['required' => false, 'dp_side_by_side' => true]
+                ->add(
+                    'enabledTo',
+                    DateTimePickerType::class,
+                    ['required' => false, 'dp_side_by_side' => true]
                 )
             ->end()
             ->with('form_site.label_seo', ['class' => 'col-md-6'])
                 ->add('title', null, ['required' => false])
                 ->add('metaDescription', TextareaType::class, ['required' => false])
                 ->add('metaKeywords', TextareaType::class, ['required' => false])
-            ->end()
-        ;
+            ->end();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function configureRoutes(RouteCollection $collection)
     {
         $collection->add('snapshots', $this->getRouterIdParameter().'/snapshots');

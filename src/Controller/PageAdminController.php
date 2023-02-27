@@ -14,10 +14,9 @@ declare(strict_types=1);
 namespace Sonata\PageBundle\Controller;
 
 use Sonata\AdminBundle\Controller\CRUDController as Controller;
-use Symfony\Bridge\Twig\AppVariable;
-use Symfony\Bridge\Twig\Command\DebugCommand;
-use Symfony\Bridge\Twig\Extension\FormExtension;
-use Symfony\Bridge\Twig\Form\TwigRenderer;
+use Sonata\NotificationBundle\Backend\BackendInterface;
+use Sonata\NotificationBundle\Backend\RuntimeBackend;
+use Sonata\PageBundle\Service\Contract\CreateSnapshotByPageInterface;
 use Symfony\Component\Form\FormRenderer;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -30,12 +29,12 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
  * Page Admin Controller.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class PageAdminController extends Controller
 {
     /**
-     * @param mixed $query
-     *
      * @throws AccessDeniedException
      *
      * @return RedirectResponse
@@ -47,19 +46,38 @@ class PageAdminController extends Controller
         }
 
         foreach ($query->execute() as $page) {
-            $this->get('sonata.notification.backend')
-                ->createAndPublish('sonata.page.create_snapshot', [
-                    'pageId' => $page->getId(),
-                ]);
+            // NEXT_MAJOR: Remove the $notificationBackend variable
+            $notificationBackend = $this->get('sonata.notification.backend');
+
+            // NEXT_MAJOR: Remove the "if" condition and use only "createByPage"
+            if ($notificationBackend instanceof RuntimeBackend) {
+                // NEXT_MAJOR: Inject CreateSnapshotByPageInterface type and remove this "get" call.
+                $this->get('sonata.page.service.create_snapshot')->createByPage($page);
+            } else {
+                @trigger_error(
+                    sprintf(
+                        'Inject %s in %s is deprecated since sonata-project/page-bundle 3.27.0'.
+                        ' and will be removed in 4.0, Please inject %s insteadof %s',
+                        BackendInterface::class,
+                        self::class,
+                        CreateSnapshotByPageInterface::class,
+                        BackendInterface::class
+                    ),
+                    \E_USER_DEPRECATED
+                );
+                $notificationBackend
+                    ->createAndPublish('sonata.page.create_snapshot', [
+                        'pageId' => $page->getId(),
+                    ]);
+            }
         }
 
-        return new RedirectResponse($this->admin->generateUrl('list', $this->admin->getFilterParameters()));
+        return new RedirectResponse($this->admin->generateUrl('list', [
+            'filter' => $this->admin->getFilterParameters(),
+        ]));
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function listAction(Request $request = null)
+    public function listAction(?Request $request = null)
     {
         if (!$request->get('filter')) {
             return new RedirectResponse($this->admin->generateUrl('tree'));
@@ -69,11 +87,9 @@ class PageAdminController extends Controller
     }
 
     /**
-     * @param Request|null $request
-     *
      * @return Response
      */
-    public function treeAction(Request $request = null)
+    public function treeAction(?Request $request = null)
     {
         $this->admin->checkAccess('tree');
 
@@ -114,10 +130,7 @@ class PageAdminController extends Controller
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function createAction(Request $request = null)
+    public function createAction(?Request $request = null)
     {
         $this->admin->checkAccess('create');
 
@@ -147,14 +160,12 @@ class PageAdminController extends Controller
     }
 
     /**
-     * @param Request|null $request
-     *
      * @throws AccessDeniedException
      * @throws NotFoundHttpException
      *
      * @return Response
      */
-    public function composeAction(Request $request = null)
+    public function composeAction(?Request $request = null)
     {
         $this->admin->checkAccess('compose');
         if (false === $this->get('sonata.page.admin.block')->isGranted('LIST')) {
@@ -225,14 +236,12 @@ class PageAdminController extends Controller
     }
 
     /**
-     * @param Request|null $request
-     *
      * @throws AccessDeniedException
      * @throws NotFoundHttpException
      *
      * @return Response
      */
-    public function composeContainerShowAction(Request $request = null)
+    public function composeContainerShowAction(?Request $request = null)
     {
         if (false === $this->get('sonata.page.admin.block')->isGranted('LIST')) {
             throw new AccessDeniedException();
@@ -276,20 +285,6 @@ class PageAdminController extends Controller
     private function setFormTheme(FormView $formView, $theme)
     {
         $twig = $this->get('twig');
-
-        // BC for Symfony < 3.2 where this runtime does not exists
-        if (!method_exists(AppVariable::class, 'getToken')) {
-            $twig->getExtension(FormExtension::class)->renderer->setTheme($formView, $theme);
-
-            return;
-        }
-
-        // BC for Symfony < 3.4 where runtime should be TwigRenderer
-        if (!method_exists(DebugCommand::class, 'getLoaderPaths')) {
-            $twig->getRuntime(TwigRenderer::class)->setTheme($formView, $theme);
-
-            return;
-        }
 
         $twig->getRuntime(FormRenderer::class)->setTheme($formView, $theme);
     }

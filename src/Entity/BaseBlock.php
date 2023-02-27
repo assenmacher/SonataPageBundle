@@ -24,8 +24,10 @@ use Sonata\PageBundle\Model\Block;
 abstract class BaseBlock extends Block
 {
     /**
-     * {@inheritdoc}
+     * @var mixed
      */
+    protected $id;
+
     public function __construct()
     {
         $this->children = new ArrayCollection();
@@ -33,9 +35,6 @@ abstract class BaseBlock extends Block
         parent::__construct();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setId($id)
     {
         $this->id = $id;
@@ -58,9 +57,6 @@ abstract class BaseBlock extends Block
         $this->updatedAt = new \DateTime();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setChildren($children)
     {
         $this->children = new ArrayCollection();

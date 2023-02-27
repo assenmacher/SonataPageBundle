@@ -31,29 +31,20 @@ interface PageInterface
      */
     public function getId();
 
-    /**
-     * @param mixed $id
-     */
     public function setId($id);
 
     /**
-     * Get routeName.
-     *
      * @return string $routeName
      */
     public function getRouteName();
 
     /**
-     * Set routeName.
-     *
      * @param string $routeName
      */
     public function setRouteName($routeName);
 
     /**
-     * Get pageAlias.
-     *
-     * @return string $pageAlias
+     * @return string|null $pageAlias
      */
     public function getPageAlias();
 
@@ -64,253 +55,193 @@ interface PageInterface
      * For performance, all pageAlias must be prefixed by _page_alias_ this will avoid
      * database lookup to load non existent alias
      *
-     * Set pageAlias
-     *
-     * @param string $pageAlias
+     * @param string|null $pageAlias
      */
     public function setPageAlias($pageAlias);
 
     /**
      * Returns the page type.
      *
-     * @return string
+     * @return string|null
      */
     public function getType();
 
     /**
      * Sets the page type.
      *
-     * @param string $type
+     * @param string|null $type
      */
     public function setType($type);
 
     /**
-     * Set enabled.
-     *
      * @param bool $enabled
      */
     public function setEnabled($enabled);
 
     /**
-     * Get enabled.
-     *
      * @return bool $enabled
      */
     public function getEnabled();
 
     /**
-     * Set name.
-     *
      * @param string $name
      */
     public function setName($name);
 
     /**
-     * Get name.
-     *
      * @return string $name
      */
     public function getName();
 
     /**
-     * Set slug.
-     *
-     * @param string $slug
+     * @param string|null $slug
      */
     public function setSlug($slug);
 
     /**
-     * Get slug.
-     *
-     * @return string
+     * @return string|null
      */
     public function getSlug();
 
     /**
-     * Get url.
-     *
-     * @return string
+     * @return string|null
      */
     public function getUrl();
 
     /**
-     * Set Url.
-     *
-     * @param string $url
+     * @param string|null $url
      */
     public function setUrl($url);
 
     /**
-     * Set customUrl.
-     *
-     * @param string $customUrl
+     * @param string|null $customUrl
      */
     public function setCustomUrl($customUrl);
 
     /**
-     * Get customUrl.
-     *
-     * @return int $customUrl
+     * @return string|null $customUrl
      */
     public function getCustomUrl();
 
     /**
-     * Set metaKeyword.
-     *
-     * @param string $metaKeyword
+     * @param string|null $metaKeyword
      */
     public function setMetaKeyword($metaKeyword);
 
     /**
-     * Get metaKeyword.
-     *
-     * @return string $metaKeyword
+     * @return string|null $metaKeyword
      */
     public function getMetaKeyword();
 
     /**
-     * Set metaDescription.
-     *
-     * @param string $metaDescription
+     * @param string|null $metaDescription
      */
     public function setMetaDescription($metaDescription);
 
     /**
-     * Get metaDescription.
-     *
-     * @return string $metaDescription
+     * @return string|null $metaDescription
      */
     public function getMetaDescription();
 
     /**
-     * Set javascript.
-     *
-     * @param string $javascript
+     * @param string|null $javascript
      */
     public function setJavascript($javascript);
 
     /**
-     * Get javascript.
-     *
-     * @return string $javascript
+     * @return string|null $javascript
      */
     public function getJavascript();
 
     /**
-     * Set stylesheet.
-     *
-     * @param string $stylesheet
+     * @param string|null $stylesheet
      */
     public function setStylesheet($stylesheet);
 
     /**
-     * Get stylesheet.
-     *
-     * @return string $stylesheet
+     * @return string|null $stylesheet
      */
     public function getStylesheet();
 
     /**
-     * Set createdAt.
-     *
      * @param \DateTime $createdAt
      */
-    public function setCreatedAt(\DateTime $createdAt = null);
+    public function setCreatedAt(?\DateTime $createdAt = null);
 
     /**
-     * Get createdAt.
-     *
      * @return \DateTime $createdAt
      */
     public function getCreatedAt();
 
     /**
-     * Set updatedAt.
-     *
      * @param \DateTime $updatedAt
      */
-    public function setUpdatedAt(\DateTime $updatedAt = null);
+    public function setUpdatedAt(?\DateTime $updatedAt = null);
 
     /**
-     * Get updatedAt.
-     *
      * @return \DateTime $updatedAt
      */
     public function getUpdatedAt();
 
     /**
-     * Add children.
-     *
      * @param PageInterface $children
      */
     public function addChildren(self $children);
 
     /**
-     * Get children.
-     *
      * @return ArrayCollection|PageInterface[]
      */
     public function getChildren();
 
-    /**
-     * Add blocks.
-     *
-     * @param PageBlockInterface $block
-     */
     public function addBlocks(PageBlockInterface $block);
 
     /**
-     * Get blocks.
-     *
      * @return ArrayCollection|PageBlockInterface[]
      */
     public function getBlocks();
 
     /**
-     * @param PageInterface $target
+     * @param pageInterface|null $target
+     *
+     * NEXT_MAJOR: Remove this method
+     *
+     * @deprecated since 3.27 and it will be removed on 4.0
      */
-    public function setTarget(self $target = null);
+    public function setTarget(?self $target = null);
 
     /**
-     * Get target.
+     * @return pageInterface|null
      *
-     * @return PageInterface
+     * NEXT_MAJOR: Remove this method
+     *
+     * @deprecated since 3.27 and it will be removed on 4.0
      */
     public function getTarget();
 
     /**
-     * Set parent.
-     *
-     * @param PageInterface $parent
+     * @param PageInterface|null $parent
      */
-    public function setParent(self $parent = null);
+    public function setParent(?self $parent = null);
 
     /**
-     * Get parent.
-     *
      * @param int $level default -1
      *
-     * @return PageInterface $parent
+     * @return PageInterface|null
      */
     public function getParent($level = -1);
 
     /**
-     * Set template.
-     *
-     * @param string $templateCode
+     * @param string|null $templateCode
      */
     public function setTemplateCode($templateCode);
 
     /**
-     * Get template.
-     *
-     * @return string
+     * @return string|null
      */
     public function getTemplateCode();
 
     /**
      * Indicates if the page should be decorated with the CMS outer layout.
-     *
      *
      * @param bool $decorate
      */
@@ -363,23 +294,19 @@ interface PageInterface
     public function getPosition();
 
     /**
-     * @param string $method
+     * @param string|null $method
      */
     public function setRequestMethod($method);
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getRequestMethod();
 
-    /**
-     * @param array $headers
-     */
     public function setHeaders(array $headers = []);
 
     /**
      * @param string $name
-     * @param mixed  $value
      */
     public function addHeader($name, $value);
 
@@ -405,18 +332,15 @@ interface PageInterface
      */
     public function hasRequestMethod($method);
 
-    /**
-     * @param SiteInterface $site
-     */
-    public function setSite(SiteInterface $site);
+    public function setSite(?SiteInterface $site = null);
 
     /**
-     * @return SiteInterface
+     * @return SiteInterface|null
      */
     public function getSite();
 
     /**
-     * @param array $rawHeaders
+     * @param string|null $rawHeaders
      */
     public function setRawHeaders($rawHeaders);
 
@@ -438,14 +362,14 @@ interface PageInterface
     /**
      * Return the title.
      *
-     * @return string
+     * @return string|null
      */
     public function getTitle();
 
     /**
      * Set the title.
      *
-     * @param string $title
+     * @param string|null $title
      */
     public function setTitle($title);
 }

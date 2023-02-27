@@ -11,7 +11,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Sonata\PageBundle\Tests\DependencyInjection;
+namespace Sonata\PageBundle\Tests\DependencyInjection\Compiler;
 
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractCompilerPassTestCase;
 use Sonata\PageBundle\DependencyInjection\Compiler\CmfRouterCompilerPass;
@@ -19,12 +19,12 @@ use Symfony\Cmf\Component\Routing\ChainRouter;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
-class CmfRouterAutoRegisterTest extends AbstractCompilerPassTestCase
+final class CmfRouterAutoRegisterTest extends AbstractCompilerPassTestCase
 {
     /**
      * @dataProvider providerRoutedAutoRegister
      */
-    public function testRouterAutoRegister($enabled, $priority)
+    public function testRouterAutoRegister($enabled, $priority): void
     {
         $this->container->setParameter('sonata.page.router_auto_register.enabled', $enabled);
         $this->container->setParameter('sonata.page.router_auto_register.priority', $priority);
@@ -33,23 +33,29 @@ class CmfRouterAutoRegisterTest extends AbstractCompilerPassTestCase
 
         $router = $this->container->getDefinition('cmf_routing.router');
         foreach ($router->getMethodCalls() as $methodCall) {
-            list($method, $arguments) = $methodCall;
+            [$method, $arguments] = $methodCall;
 
             if ('add' !== $method) {
                 continue;
             }
-            list($reference, $weight) = $arguments;
+
+            [$reference, $weight] = $arguments;
+
             if ($reference instanceof Reference && 'sonata.page.router' === $reference->__toString()) {
                 if ($enabled) {
-                    $this->assertSame($priority, $weight);
+                    static::assertSame($priority, $weight);
                     break;
                 }
-                $this->fail('"sonata.page.router" service should not be auto registered');
+                static::fail('"sonata.page.router" service should not be auto registered');
             }
+        }
+
+        if (0 === \count($router->getMethodCalls())) {
+            static::assertFalse($enabled);
         }
     }
 
-    public function providerRoutedAutoRegister()
+    public function providerRoutedAutoRegister(): array
     {
         return [
             'enabled router' => [true, 42],
@@ -57,7 +63,7 @@ class CmfRouterAutoRegisterTest extends AbstractCompilerPassTestCase
         ];
     }
 
-    protected function registerCompilerPass(ContainerBuilder $container)
+    protected function registerCompilerPass(ContainerBuilder $container): void
     {
         $container->addCompilerPass(new CmfRouterCompilerPass());
     }

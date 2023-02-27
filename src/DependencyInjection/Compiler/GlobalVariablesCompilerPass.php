@@ -21,15 +21,25 @@ use Symfony\Component\DependencyInjection\Reference;
  * GlobalVariablesCompilerPass.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class GlobalVariablesCompilerPass implements CompilerPassInterface
 {
-    /**
-     * {@inheritdoc}
-     */
     public function process(ContainerBuilder $container)
     {
-        $container->getDefinition('twig')
+        if (!$container->hasDefinition('twig')) {
+            return;
+        }
+
+        $twigDefinition = $container->getDefinition('twig');
+
+        $twigDefinition
             ->addMethodCall('addGlobal', ['sonata_page', new Reference('sonata.page.twig.global')]);
+
+        if ($container->hasDefinition('sonata.page.admin.page')) {
+            $twigDefinition
+                ->addMethodCall('addGlobal', ['sonata_page_admin', new Reference('sonata.page.admin.page')]);
+        }
     }
 }

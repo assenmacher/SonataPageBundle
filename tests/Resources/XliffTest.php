@@ -13,15 +13,72 @@ declare(strict_types=1);
 
 namespace Sonata\PageBundle\Tests\Resources;
 
-use Sonata\CoreBundle\Test\XliffValidatorTestCase;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\Translation\Exception\InvalidResourceException;
+use Symfony\Component\Translation\Loader\XliffFileLoader;
 
-class XliffTest extends XliffValidatorTestCase
+final class XliffTest extends TestCase
 {
+    protected XliffFileLoader $loader;
+
+    /**
+     * @var string[]
+     */
+    protected array $errors = [];
+
+    protected function setUp(): void
+    {
+        $this->loader = new XliffFileLoader();
+    }
+
+    /**
+     * @dataProvider getXliffPaths
+     */
+    public function testXliff($path): void
+    {
+        $this->validatePath($path);
+
+        if (\count($this->errors) > 0) {
+            static::fail(sprintf('Unable to parse xliff files: %s', implode(', ', $this->errors)));
+        }
+
+        static::assertCount(
+            0,
+            $this->errors,
+            sprintf('Unable to parse xliff files: %s', implode(', ', $this->errors))
+        );
+    }
+
     /**
      * @return array List all path to validate xliff
      */
-    public function getXliffPaths()
+    public function getXliffPaths(): array
     {
         return [[__DIR__.'/../../Resources/translations']];
+    }
+
+    /**
+     * @param string $file The path to the xliff file
+     */
+    protected function validateXliff($file): void
+    {
+        try {
+            $this->loader->load($file, 'en');
+            static::assertTrue(true, sprintf('Successful loading file: %s', $file));
+        } catch (InvalidResourceException $e) {
+            $this->errors[] = sprintf('%s => %s', $file, $e->getMessage());
+        }
+    }
+
+    /**
+     * @param string $path The path to lookup for Xliff file
+     */
+    protected function validatePath($path): void
+    {
+        $files = glob(sprintf('%s/*.xliff', $path));
+
+        foreach ($files as $file) {
+            $this->validateXliff($file);
+        }
     }
 }

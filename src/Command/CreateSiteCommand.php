@@ -23,12 +23,11 @@ use Symfony\Component\Console\Question\Question;
  * Create a site.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class CreateSiteCommand extends BaseCommand
 {
-    /**
-     * {@inheritdoc}
-     */
     public function configure()
     {
         $this->setName('sonata:page:create-site');
@@ -48,16 +47,14 @@ class CreateSiteCommand extends BaseCommand
 
         $this->setDescription('Create a site');
 
-        $this->setHelp(<<<'EOT'
-The <info>sonata:page:create-site</info> command create a new site entity.
+        $this->setHelp(
+            <<<'EOT'
+                The <info>sonata:page:create-site</info> command create a new site entity.
 
-EOT
+                EOT
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $helper = $this->getHelper('question');
@@ -83,7 +80,8 @@ EOT
         }
 
         // create the object
-        $site = $this->getSiteManager()->create();
+        $siteManager = $this->getContainer()->get('sonata.page.manager.site');
+        $site = $siteManager->create();
 
         $site->setName($values['name']);
 
@@ -99,14 +97,15 @@ EOT
         $info_enabledFrom = $site->getEnabledFrom() instanceof \DateTime ? $site->getEnabledFrom()->format('r') : 'ALWAYS';
         $info_enabledTo = $site->getEnabledTo() instanceof \DateTime ? $site->getEnabledTo()->format('r') : 'ALWAYS';
 
-        $output->writeln(<<<INFO
+        $output->writeln(
+            <<<INFO
 
-Creating website with the following information :
-  <info>name</info> : {$site->getName()}
-  <info>site</info> : http(s)://{$site->getHost()}{$site->getRelativePath()}
-  <info>enabled</info> :  <info>from</info> {$info_enabledFrom} => <info>to</info> {$info_enabledTo}
+                Creating website with the following information :
+                  <info>name</info> : {$site->getName()}
+                  <info>site</info> : http(s)://{$site->getHost()}{$site->getRelativePath()}
+                  <info>enabled</info> :  <info>from</info> {$info_enabledFrom} => <info>to</info> {$info_enabledTo}
 
-INFO
+                INFO
         );
 
         $confirmation = true;
@@ -117,7 +116,7 @@ INFO
         }
 
         if ($confirmation) {
-            $this->getSiteManager()->save($site);
+            $siteManager->save($site);
 
             $output->writeln([
                 '',
@@ -130,5 +129,7 @@ INFO
         } else {
             $output->writeln('<error>Site creation cancelled !</error>');
         }
+
+        return 0;
     }
 }

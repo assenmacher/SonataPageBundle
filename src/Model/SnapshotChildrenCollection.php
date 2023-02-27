@@ -17,6 +17,8 @@ namespace Sonata\PageBundle\Model;
  * SnapshotChildrenCollection.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class SnapshotChildrenCollection implements \Countable, \IteratorAggregate, \ArrayAccess
 {
@@ -35,19 +37,12 @@ class SnapshotChildrenCollection implements \Countable, \IteratorAggregate, \Arr
      */
     protected $collection;
 
-    /**
-     * @param TransformerInterface $transformer
-     * @param PageInterface        $page
-     */
     public function __construct(TransformerInterface $transformer, PageInterface $page)
     {
         $this->transformer = $transformer;
         $this->page = $page;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function offsetUnset($offset)
     {
         $this->load();
@@ -55,9 +50,6 @@ class SnapshotChildrenCollection implements \Countable, \IteratorAggregate, \Arr
         return $this->collection->offsetUnset($offset);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function offsetSet($offset, $value)
     {
         $this->load();
@@ -65,9 +57,6 @@ class SnapshotChildrenCollection implements \Countable, \IteratorAggregate, \Arr
         return $this->collection->offsetSet($offset, $value);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function offsetGet($offset)
     {
         $this->load();
@@ -75,9 +64,6 @@ class SnapshotChildrenCollection implements \Countable, \IteratorAggregate, \Arr
         return $this->collection->offsetGet($offset);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function offsetExists($offset)
     {
         $this->load();
@@ -85,9 +71,6 @@ class SnapshotChildrenCollection implements \Countable, \IteratorAggregate, \Arr
         return $this->collection->offsetExists($offset);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getIterator()
     {
         $this->load();
@@ -95,9 +78,6 @@ class SnapshotChildrenCollection implements \Countable, \IteratorAggregate, \Arr
         return $this->collection->getIterator();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function count()
     {
         $this->load();

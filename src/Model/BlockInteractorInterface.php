@@ -25,16 +25,12 @@ interface BlockInteractorInterface
     /**
      * return a block with the given id.
      *
-     * @param mixed $id
-     *
      * @return BlockInterface
      */
     public function getBlock($id);
 
     /**
      * return a flat list if page's blocks.
-     *
-     * @param PageInterface $page
      *
      * @return BlockInterface[]
      */
@@ -43,8 +39,6 @@ interface BlockInteractorInterface
     /**
      * load blocks attached the given page.
      *
-     * @param PageInterface $page
-     *
      * @return array $blocks
      */
     public function loadPageBlocks(PageInterface $page);
@@ -52,8 +46,7 @@ interface BlockInteractorInterface
     /**
      * save the blocks positions.
      *
-     * @param array $data
-     * @param bool  $partial Should we use partial references? (Better for performance, but can lead to query issues.)
+     * @param bool $partial Should we use partial references? (Better for performance, but can lead to query issues.)
      *
      * @return bool
      */
@@ -65,5 +58,5 @@ interface BlockInteractorInterface
      *
      * @return BlockInterface
      */
-    public function createNewContainer(array $values = [], \Closure $alter = null);
+    public function createNewContainer(array $values = [], ?\Closure $alter = null);
 }

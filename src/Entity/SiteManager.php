@@ -22,21 +22,22 @@ use Sonata\PageBundle\Model\SiteManagerInterface;
  * This class manages SiteInterface persistency with the Doctrine ORM.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class SiteManager extends BaseEntityManager implements SiteManagerInterface
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function save($site, $andFlush = true)
+    public function save($entity, $andFlush = true)
     {
-        parent::save($site, $andFlush);
+        parent::save($entity, $andFlush);
 
-        return $site;
+        return $entity;
     }
 
     /**
-     * {@inheritdoc}
+     * NEXT_MAJOR: remove this method.
+     *
+     * @deprecated since sonata-project/page-bundle 3.24, to be removed in 4.0.
      */
     public function getPager(array $criteria, $page, $limit = 10, array $sort = [])
     {

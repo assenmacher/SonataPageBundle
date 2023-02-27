@@ -22,40 +22,45 @@ use Sonata\PageBundle\Admin\BaseBlockAdmin;
 use Sonata\PageBundle\Model\PageBlockInterface;
 use Sonata\PageBundle\Model\PageInterface;
 
-class BaseBlockAdminTest extends TestCase
+final class BaseBlockAdminTest extends TestCase
 {
-    public function testSettingAsEditedOnPreBatchDeleteAction()
+    public function testSettingAsEditedOnPreBatchDeleteAction(): void
     {
         $page = $this->createMock(PageInterface::class);
-        $page->expects($this->once())->method('setEdited')->with(true);
+        $page->expects(static::once())->method('setEdited')->with(true);
 
         $parent = $this->createMock(AdminInterface::class);
-        $parent->expects($this->once())->method('getSubject')->willReturn($page);
+        $parent->expects(static::once())->method('getSubject')->willReturn($page);
 
         $blockAdmin = $this->getMockBuilder(BaseBlockAdmin::class)
             ->disableOriginalConstructor()
             ->getMockForAbstractClass();
-        $blockAdmin->setParent($parent);
+        $blockAdmin->setParent($parent, 'foo');
 
         $query = $this->createMock(ProxyQueryInterface::class);
         $idx = [];
         $blockAdmin->preBatchAction('delete', $query, $idx, true);
     }
 
-    public function testSettingAsEditedOnPreRemove()
+    /**
+     * NEXT_MAJOR: Remove this method.
+     *
+     * @group legacy
+     */
+    public function testSettingAsEditedOnPreRemove(): void
     {
         $page = $this->createMock(PageInterface::class);
-        $page->expects($this->once())->method('setEdited')->with(true);
+        $page->expects(static::once())->method('setEdited')->with(true);
 
         $block = $this->createMock(PageBlockInterface::class);
-        $block->expects($this->once())->method('getPage')->willReturn($page);
+        $block->expects(static::once())->method('getPage')->willReturn($page);
 
         $blockService = $this->createMock(AbstractAdminBlockService::class);
-        $blockService->expects($this->any())->method('preRemove')->with($block);
+        $blockService->method('preRemove')->with($block);
 
         $blockServiceManager = $this->createMock(BlockServiceManagerInterface::class);
         $blockServiceManager
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('get')
             ->with($block)
             ->willReturn($blockService);

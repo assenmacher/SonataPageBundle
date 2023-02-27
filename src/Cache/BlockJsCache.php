@@ -17,6 +17,7 @@ use Sonata\BlockBundle\Block\BlockContextManagerInterface;
 use Sonata\BlockBundle\Block\BlockRendererInterface;
 use Sonata\Cache\CacheAdapterInterface;
 use Sonata\Cache\CacheElement;
+use Sonata\Cache\CacheElementInterface;
 use Sonata\PageBundle\CmsManager\CmsManagerSelectorInterface;
 use Sonata\PageBundle\Exception\PageNotFoundException;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,6 +29,10 @@ use Symfony\Component\Routing\RouterInterface;
  * Cache a block through a Javascript code.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
+ *
+ * @deprecated since sonata-project/page-bundle 3.27.0
  */
 class BlockJsCache implements CacheAdapterInterface
 {
@@ -57,14 +62,15 @@ class BlockJsCache implements CacheAdapterInterface
     protected $contextManager;
 
     /**
-     * @param RouterInterface              $router
-     * @param CmsManagerSelectorInterface  $cmsSelector
-     * @param BlockRendererInterface       $blockRenderer
-     * @param BlockContextManagerInterface $contextManager
-     * @param bool                         $sync
+     * @param bool $sync
      */
-    public function __construct(RouterInterface $router, CmsManagerSelectorInterface $cmsSelector, BlockRendererInterface $blockRenderer, BlockContextManagerInterface $contextManager, $sync = false)
-    {
+    public function __construct(
+        RouterInterface $router,
+        CmsManagerSelectorInterface $cmsSelector,
+        BlockRendererInterface $blockRenderer,
+        BlockContextManagerInterface $contextManager,
+        $sync = false
+    ) {
         $this->router = $router;
         $this->sync = $sync;
         $this->cmsSelector = $cmsSelector;
@@ -72,44 +78,29 @@ class BlockJsCache implements CacheAdapterInterface
         $this->contextManager = $contextManager;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function flushAll()
+    public function flushAll(): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function flush(array $keys = [])
+    public function flush(array $keys = []): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function has(array $keys)
+    public function has(array $keys): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function get(array $keys)
+    public function get(array $keys): CacheElementInterface
     {
         $this->validateKeys($keys);
 
         return new CacheElement($keys, new Response($this->sync ? $this->getSync($keys) : $this->getAsync($keys)));
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function set(array $keys, $data, $ttl = CacheElement::DAY, array $contextualKeys = [])
+    public function set(array $keys, $data, int $ttl = CacheElement::DAY, array $contextualKeys = []): CacheElementInterface
     {
         $this->validateKeys($keys);
 
@@ -117,8 +108,6 @@ class BlockJsCache implements CacheAdapterInterface
     }
 
     /**
-     * @param Request $request
-     *
      * @return Response
      */
     public function cacheAction(Request $request)
@@ -161,30 +150,25 @@ class BlockJsCache implements CacheAdapterInterface
             }
         }
     })();
-', $block->getId(), json_encode($response->getContent())));
+', $block->getId(), json_encode($response->getContent(), \JSON_THROW_ON_ERROR)));
 
         $response->headers->set('Content-Type', 'application/javascript');
 
         return $response;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isContextual()
+    public function isContextual(): bool
     {
         return false;
     }
 
     /**
-     * @param array $keys
-     *
      * @return string
      */
     protected function getSync(array $keys)
     {
         return sprintf(
-'<div id="block-cms-%s" >
+            '<div id="block-cms-%s" >
     <script>
         /*<![CDATA[*/
             (function () {
@@ -212,18 +196,20 @@ class BlockJsCache implements CacheAdapterInterface
             })();
         /*]]>*/
     </script>
-</div>', $keys['block_id'], $keys['block_id'], $this->router->generate('sonata_page_js_sync_cache', $keys, UrlGeneratorInterface::ABSOLUTE_URL));
+</div>',
+            $keys['block_id'],
+            $keys['block_id'],
+            $this->router->generate('sonata_page_js_sync_cache', $keys, UrlGeneratorInterface::ABSOLUTE_URL)
+        );
     }
 
     /**
-     * @param array $keys
-     *
      * @return string
      */
     protected function getAsync(array $keys)
     {
         return sprintf(
-'<div id="block-cms-%s" >
+            '<div id="block-cms-%s" >
     <script>
         /*<![CDATA[*/
             (function() {
@@ -237,19 +223,20 @@ class BlockJsCache implements CacheAdapterInterface
 
         /*]]>*/
     </script>
-</div>', $keys['block_id'], $this->router->generate('sonata_page_js_async_cache', $keys, UrlGeneratorInterface::ABSOLUTE_URL));
+</div>',
+            $keys['block_id'],
+            $this->router->generate('sonata_page_js_async_cache', $keys, UrlGeneratorInterface::ABSOLUTE_URL)
+        );
     }
 
     /**
-     * @param array $keys
-     *
      * @throws \RuntimeException
      */
     private function validateKeys(array $keys)
     {
         foreach (['block_id', 'page_id', 'manager', 'updated_at'] as $key) {
             if (!isset($keys[$key])) {
-                throw new \RuntimeException(sprintf('Please define a `%s` key, provided: %s', $key, json_encode(array_keys($keys))));
+                throw new \RuntimeException(sprintf('Please define a `%s` key, provided: %s', $key, json_encode(array_keys($keys), \JSON_THROW_ON_ERROR)));
             }
         }
     }

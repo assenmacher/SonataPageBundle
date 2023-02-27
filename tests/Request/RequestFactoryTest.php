@@ -17,59 +17,44 @@ use PHPUnit\Framework\TestCase;
 use Sonata\PageBundle\Request\RequestFactory;
 use Sonata\PageBundle\Request\SiteRequest;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Kernel;
 
-class RequestFactoryTest extends TestCase
+final class RequestFactoryTest extends TestCase
 {
-    protected $hasFactory = false;
-
-    public function setup()
+    protected function setUp(): void
     {
-        $this->hasFactory = version_compare(Kernel::VERSION, '2.5', '>=');
-
-        if ($this->hasFactory) {
-            Request::setFactory(null);
-        }
+        Request::setFactory(null);
     }
 
-    public function tearDown()
+    protected function tearDown(): void
     {
-        if ($this->hasFactory) {
-            Request::setFactory(null);
-        }
+        Request::setFactory(null);
     }
 
-    public function testHostAndCreate()
+    public function testHostAndCreate(): void
     {
-        $this->assertInstanceOf(Request::class, RequestFactory::create('host', '/'));
-        $this->assertInstanceOf(Request::class, Request::create('/'));
+        static::assertInstanceOf(Request::class, RequestFactory::create('host', '/'));
+        static::assertInstanceOf(Request::class, Request::create('/'));
     }
 
-    public function testHostAndCreateFromGlobals()
+    public function testHostAndCreateFromGlobals(): void
     {
-        $this->assertInstanceOf(Request::class, RequestFactory::createFromGlobals('host'));
-        $this->assertInstanceOf(Request::class, Request::create('/'));
+        static::assertInstanceOf(Request::class, RequestFactory::createFromGlobals('host'));
+        static::assertInstanceOf(Request::class, Request::create('/'));
     }
 
-    public function testHostWithPathAndCreate()
+    public function testHostWithPathAndCreate(): void
     {
-        $this->assertInstanceOf(SiteRequest::class, RequestFactory::create('host_with_path', '/'));
-
-        if ($this->hasFactory) {
-            $this->assertInstanceOf(SiteRequest::class, Request::create('/'));
-        }
+        static::assertInstanceOf(SiteRequest::class, RequestFactory::create('host_with_path', '/'));
+        static::assertInstanceOf(SiteRequest::class, Request::create('/'));
     }
 
-    public function testHostWithPathAndCreateFromGlobals()
+    public function testHostWithPathAndCreateFromGlobals(): void
     {
-        $this->assertInstanceOf(SiteRequest::class, RequestFactory::createFromGlobals('host_with_path'));
-
-        if ($this->hasFactory) {
-            $this->assertInstanceOf(SiteRequest::class, Request::create('/'));
-        }
+        static::assertInstanceOf(SiteRequest::class, RequestFactory::createFromGlobals('host_with_path'));
+        static::assertInstanceOf(SiteRequest::class, Request::create('/'));
     }
 
-    public function testInvalidType()
+    public function testInvalidType(): void
     {
         $this->expectException(\RuntimeException::class);
 

@@ -28,17 +28,14 @@ use Symfony\Component\Routing\RouterInterface;
 /**
  * @author Vincent Composieux <vincent.composieux@gmail.com>
  */
-class RoutePageGeneratorTest extends TestCase
+final class RoutePageGeneratorTest extends TestCase
 {
-    /**
-     * @var RoutePageGenerator
-     */
-    protected $routePageGenerator;
+    protected RoutePageGenerator $routePageGenerator;
 
     /**
      * Set up dependencies.
      */
-    public function setUp()
+    protected function setUp(): void
     {
         $this->routePageGenerator = $this->getRoutePageGenerator();
     }
@@ -46,7 +43,7 @@ class RoutePageGeneratorTest extends TestCase
     /**
      * Tests site update route method with.
      */
-    public function testUpdateRoutes()
+    public function testUpdateRoutes(): void
     {
         $site = $this->getSiteMock();
 
@@ -62,23 +59,23 @@ class RoutePageGeneratorTest extends TestCase
             $output = fread($tmpFile, 4096);
         }
 
-        $this->assertRegExp('/CREATE(.*)route1(.*)\/first_custom_route/', $output);
-        $this->assertRegExp('/CREATE(.*)route1(.*)\/first_custom_route/', $output);
-        $this->assertRegExp('/CREATE(.*)test_hybrid_page_with_good_host(.*)\/third_custom_route/', $output);
-        $this->assertRegExp('/CREATE(.*)404/', $output);
-        $this->assertRegExp('/CREATE(.*)500/', $output);
+        static::assertMatchesRegularExpression('/CREATE(.*)route1(.*)\/first_custom_route/', $output);
+        static::assertMatchesRegularExpression('/CREATE(.*)route1(.*)\/first_custom_route/', $output);
+        static::assertMatchesRegularExpression('/CREATE(.*)test_hybrid_page_with_good_host(.*)\/third_custom_route/', $output);
+        static::assertMatchesRegularExpression('/CREATE(.*)404/', $output);
+        static::assertMatchesRegularExpression('/CREATE(.*)500/', $output);
 
-        $this->assertRegExp('/DISABLE(.*)test_hybrid_page_with_bad_host(.*)\/fourth_custom_route/', $output);
+        static::assertMatchesRegularExpression('/DISABLE(.*)test_hybrid_page_with_bad_host(.*)\/fourth_custom_route/', $output);
 
-        $this->assertRegExp('/UPDATE(.*)test_hybrid_page_with_bad_host(.*)\/fourth_custom_route/', $output);
+        static::assertMatchesRegularExpression('/UPDATE(.*)test_hybrid_page_with_bad_host(.*)\/fourth_custom_route/', $output);
 
-        $this->assertRegExp('/ERROR(.*)test_hybrid_page_not_exists/', $output);
+        static::assertMatchesRegularExpression('/ERROR(.*)test_hybrid_page_not_exists/', $output);
     }
 
     /**
      * Tests site update route method with.
      */
-    public function testUpdateRoutesClean()
+    public function testUpdateRoutesClean(): void
     {
         $site = $this->getSiteMock();
 
@@ -94,17 +91,17 @@ class RoutePageGeneratorTest extends TestCase
             $output = fread($tmpFile, 4096);
         }
 
-        $this->assertRegExp('#CREATE(.*)route1(.*)/first_custom_route#', $output);
-        $this->assertRegExp('#CREATE(.*)route1(.*)/first_custom_route#', $output);
-        $this->assertRegExp('#CREATE(.*)test_hybrid_page_with_good_host(.*)/third_custom_route#', $output);
-        $this->assertRegExp('#CREATE(.*)404#', $output);
-        $this->assertRegExp('#CREATE(.*)500#', $output);
+        static::assertMatchesRegularExpression('#CREATE(.*)route1(.*)/first_custom_route#', $output);
+        static::assertMatchesRegularExpression('#CREATE(.*)route1(.*)/first_custom_route#', $output);
+        static::assertMatchesRegularExpression('#CREATE(.*)test_hybrid_page_with_good_host(.*)/third_custom_route#', $output);
+        static::assertMatchesRegularExpression('#CREATE(.*)404#', $output);
+        static::assertMatchesRegularExpression('#CREATE(.*)500#', $output);
 
-        $this->assertRegExp('#DISABLE(.*)test_hybrid_page_with_bad_host(.*)/fourth_custom_route#', $output);
+        static::assertMatchesRegularExpression('#DISABLE(.*)test_hybrid_page_with_bad_host(.*)/fourth_custom_route#', $output);
 
-        $this->assertRegExp('#UPDATE(.*)test_hybrid_page_with_bad_host(.*)/fourth_custom_route#', $output);
+        static::assertMatchesRegularExpression('#UPDATE(.*)test_hybrid_page_with_bad_host(.*)/fourth_custom_route#', $output);
 
-        $this->assertRegExp('#REMOVED(.*)test_hybrid_page_not_exists#', $output);
+        static::assertMatchesRegularExpression('#REMOVED(.*)test_hybrid_page_not_exists#', $output);
     }
 
     /**
@@ -113,8 +110,8 @@ class RoutePageGeneratorTest extends TestCase
     protected function getSiteMock(): SiteInterface
     {
         $site = $this->createMock(SiteInterface::class);
-        $site->expects($this->any())->method('getHost')->willReturn('sonata-project.org');
-        $site->expects($this->any())->method('getId')->willReturn(1);
+        $site->method('getHost')->willReturn('sonata-project.org');
+        $site->method('getId')->willReturn(1);
 
         return $site;
     }
@@ -143,7 +140,7 @@ class RoutePageGeneratorTest extends TestCase
         ));
 
         $router = $this->createMock(RouterInterface::class);
-        $router->expects($this->any())->method('getRouteCollection')->willReturn($collection);
+        $router->method('getRouteCollection')->willReturn($collection);
 
         return $router;
     }
@@ -156,7 +153,7 @@ class RoutePageGeneratorTest extends TestCase
         $router = $this->getRouterMock();
 
         $pageManager = $this->createMock(PageManager::class);
-        $pageManager->expects($this->any())->method('create')->willReturn(new Page());
+        $pageManager->method('create')->willReturn(new Page());
 
         $hybridPageNotExists = new Page();
         $hybridPageNotExists->setRouteName('test_hybrid_page_not_exists');
@@ -167,19 +164,20 @@ class RoutePageGeneratorTest extends TestCase
         $hybridPageWithBadHost = new Page();
         $hybridPageWithBadHost->setRouteName('test_hybrid_page_with_bad_host');
 
-        $pageManager->expects($this->at(12))
+        $pageManager->expects(static::atLeastOnce())
             ->method('findOneBy')
-            ->with($this->equalTo(['routeName' => 'test_hybrid_page_with_bad_host', 'site' => 1]))
-            ->willReturn($hybridPageWithBadHost);
+            ->willReturnMap([
+                [['routeName' => 'test_hybrid_page_with_bad_host', 'site' => 1], null, $hybridPageWithBadHost],
+            ]);
 
-        $pageManager->expects($this->any())
+        $pageManager
             ->method('getHybridPages')
             ->willReturn([$hybridPageNotExists, $hybridPageWithGoodHost, $hybridPageWithBadHost]);
 
         $decoratorStrategy = new DecoratorStrategy([], [], []);
 
         $exceptionListener = $this->createMock(ExceptionListener::class);
-        $exceptionListener->expects($this->any())->method('getHttpErrorCodes')->willReturn([404, 500]);
+        $exceptionListener->method('getHttpErrorCodes')->willReturn([404, 500]);
 
         return new RoutePageGenerator($router, $pageManager, $decoratorStrategy, $exceptionListener);
     }

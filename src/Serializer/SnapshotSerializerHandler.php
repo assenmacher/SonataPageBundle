@@ -13,16 +13,17 @@ declare(strict_types=1);
 
 namespace Sonata\PageBundle\Serializer;
 
-use Sonata\Serializer\BaseSerializerHandler;
+use Sonata\Form\Serializer\BaseSerializerHandler;
 
 /**
+ * NEXT_MAJOR: Remove this file.
+ *
  * @author Benoit de JAcobet <benoit.de-jacobet@ekino.com>
+ *
+ * @deprecated since sonata-project/page-bundle 3.24, to be removed in 4.0.
  */
 class SnapshotSerializerHandler extends BaseSerializerHandler
 {
-    /**
-     * {@inheritdoc}
-     */
     public static function getType()
     {
         return 'sonata_page_snapshot_id';

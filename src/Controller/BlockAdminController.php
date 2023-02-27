@@ -25,17 +25,17 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
  * Block Admin Controller.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class BlockAdminController extends Controller
 {
     /**
-     * @param Request|null $request
-     *
      * @throws AccessDeniedException
      *
      * @return Response
      */
-    public function savePositionAction(Request $request = null)
+    public function savePositionAction(?Request $request = null)
     {
         $this->admin->checkAccess('savePosition');
 
@@ -74,10 +74,7 @@ class BlockAdminController extends Controller
         return $this->renderJson(['result' => $result], $status);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function createAction(Request $request = null)
+    public function createAction(?Request $request = null)
     {
         $this->admin->checkAccess('create');
 
@@ -101,17 +98,15 @@ class BlockAdminController extends Controller
     }
 
     /**
-     * @param Request|null $request
-     *
      * @return Response
      */
-    public function switchParentAction(Request $request = null)
+    public function switchParentAction(?Request $request = null)
     {
         $this->admin->checkAccess('switchParent');
 
         $blockId = $request->get('block_id');
         $parentId = $request->get('parent_id');
-        if (null === $blockId or null === $parentId) {
+        if (null === $blockId || null === $parentId) {
             throw new HttpException(400, 'wrong parameters');
         }
 
@@ -125,21 +120,19 @@ class BlockAdminController extends Controller
             throw new PageNotFoundException(sprintf('Unable to find parent block with id %d', $parentId));
         }
 
-        $parent->addChildren($block);
-        $this->admin->update($parent);
+        $block->setParent($parent);
+        $this->admin->update($block);
 
         return $this->renderJson(['result' => 'ok']);
     }
 
     /**
-     * @param Request|null $request
-     *
      * @throws AccessDeniedException
      * @throws PageNotFoundException
      *
      * @return Response
      */
-    public function composePreviewAction(Request $request = null)
+    public function composePreviewAction(?Request $request = null)
     {
         $this->admin->checkAccess('composePreview');
 

@@ -13,39 +13,27 @@ declare(strict_types=1);
 
 namespace Sonata\PageBundle\Entity;
 
-use Sonata\BlockBundle\Model\BlockManagerInterface;
 use Sonata\DatagridBundle\Pager\Doctrine\Pager;
 use Sonata\DatagridBundle\ProxyQuery\Doctrine\ProxyQuery;
 use Sonata\Doctrine\Entity\BaseEntityManager;
+use Sonata\PageBundle\Model\BlockManagerInterface;
 
 /**
  * This class manages BlockInterface persistency with the Doctrine ORM.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class BlockManager extends BaseEntityManager implements BlockManagerInterface
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function save($block, $andFlush = true)
+    public function save($entity, $andFlush = true)
     {
-        parent::save($block, $andFlush);
+        parent::save($entity, $andFlush);
 
-        return $block;
+        return $entity;
     }
 
-    /**
-     * Updates position for given block.
-     *
-     * @param int  $id       Block Id
-     * @param int  $position New Position
-     * @param int  $parentId Parent block Id (needed when partial = true)
-     * @param int  $pageId   Page Id (needed when partial = true)
-     * @param bool $partial  Should we use partial references? (Better for performance, but can lead to query issues.)
-     *
-     * @return mixed
-     */
     public function updatePosition($id, $position, $parentId = null, $pageId = null, $partial = true)
     {
         if ($partial) {
@@ -73,7 +61,9 @@ class BlockManager extends BaseEntityManager implements BlockManagerInterface
     }
 
     /**
-     * {@inheritdoc}
+     * NEXT_MAJOR: remove this method.
+     *
+     * @deprecated since sonata-project/page-bundle 3.24, to be removed in 4.0.
      */
     public function getPager(array $criteria, $page, $limit = 10, array $sort = [])
     {

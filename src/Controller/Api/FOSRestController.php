@@ -16,17 +16,19 @@ namespace Sonata\PageBundle\Controller\Api;
 use FOS\RestBundle\Context\Context;
 use FOS\RestBundle\Controller\Annotations\QueryParam;
 use FOS\RestBundle\Request\ParamFetcherInterface;
-use FOS\RestBundle\View\View as FOSRestView;
+use FOS\RestBundle\View\View;
 
 /**
+ * NEXT_MAJOR: Remove this file.
+ *
  * @author Duchkina Anastasiya <duchkina.nast@gmail.com>
+ *
+ * @deprecated since sonata-project/page-bundle 3.24, to be removed in 4.0.
  */
 abstract class FOSRestController
 {
     /**
      * NEXT_MAJOR: Remove this method, as it should be configured using annotations only.
-     *
-     * @param ParamFetcherInterface $paramFetcher
      *
      * @return ParamFetcherInterface
      */
@@ -41,9 +43,8 @@ abstract class FOSRestController
 
     /**
      * @param $entity
-     * @param array $groups
      *
-     * @return FOSRestView
+     * @return View
      */
     final protected function serializeContext($entity, array $groups)
     {
@@ -51,7 +52,7 @@ abstract class FOSRestController
         $context->setGroups($groups);
         $context->enableMaxDepth();
 
-        $view = FOSRestView::create($entity);
+        $view = View::create($entity);
         $view->setContext($context);
 
         return $view;

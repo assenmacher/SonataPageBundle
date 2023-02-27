@@ -39,7 +39,7 @@ abstract class BaseBlockAdmin extends AbstractAdmin
     protected $blockManager;
 
     /**
-     * @var CacheManagerInterface
+     * @var CacheManagerInterface|null
      */
     protected $cacheManager;
 
@@ -85,7 +85,16 @@ abstract class BaseBlockAdmin extends AbstractAdmin
      */
     public function preUpdate($object)
     {
-        $this->blockManager->get($object)->preUpdate($object);
+        $block = $this->blockManager->get($object);
+
+        if (\is_callable([$block, 'preUpdate'])) {
+            $block->preUpdate($object);
+
+            @trigger_error(
+                'The '.__METHOD__.'() method is deprecated since sonata-project/block-bundle 3.12.0 and will be removed in version 4.0.',
+                \E_USER_DEPRECATED
+            );
+        }
 
         if ($object->getPage() instanceof PageInterface) {
             $object->getPage()->setEdited(true);
@@ -93,27 +102,43 @@ abstract class BaseBlockAdmin extends AbstractAdmin
     }
 
     /**
-     * {@inheritdoc}
-     *
      * @param BaseBlock $object
      */
     public function postUpdate($object)
     {
-        $this->blockManager->get($object)->postUpdate($object);
+        $block = $this->blockManager->get($object);
 
-        $service = $this->blockManager->get($object);
+        if (\is_callable([$block, 'postUpdate'])) {
+            $block->postUpdate($object);
 
-        $this->cacheManager->invalidate($service->getCacheKeys($object));
+            @trigger_error(
+                'The '.__METHOD__.'() method is deprecated since sonata-project/block-bundle 3.12.0 and will be removed in version 4.0.',
+                \E_USER_DEPRECATED
+            );
+        }
+
+        if (null !== $this->cacheManager) {
+            $service = $this->blockManager->get($object);
+
+            $this->cacheManager->invalidate($service->getCacheKeys($object));
+        }
     }
 
     /**
-     * {@inheritdoc}
-     *
      * @param BaseBlock $object
      */
     public function prePersist($object)
     {
-        $this->blockManager->get($object)->prePersist($object);
+        $block = $this->blockManager->get($object);
+
+        if (\is_callable([$block, 'prePersist'])) {
+            $block->prePersist($object);
+
+            @trigger_error(
+                'The '.__METHOD__.'() method is deprecated since sonata-project/block-bundle 3.12.0 and will be removed in version 4.0.',
+                \E_USER_DEPRECATED
+            );
+        }
 
         if ($object->getPage() instanceof PageInterface) {
             $object->getPage()->setEdited(true);
@@ -121,27 +146,43 @@ abstract class BaseBlockAdmin extends AbstractAdmin
     }
 
     /**
-     * {@inheritdoc}
-     *
      * @param BaseBlock $object
      */
     public function postPersist($object)
     {
-        $this->blockManager->get($object)->postPersist($object);
+        $block = $this->blockManager->get($object);
 
-        $service = $this->blockManager->get($object);
+        if (\is_callable([$block, 'postPersist'])) {
+            $block->postPersist($object);
 
-        $this->cacheManager->invalidate($service->getCacheKeys($object));
+            @trigger_error(
+                'The '.__METHOD__.'() method is deprecated since sonata-project/block-bundle 3.12.0 and will be removed in version 4.0.',
+                \E_USER_DEPRECATED
+            );
+        }
+
+        if (null !== $this->cacheManager) {
+            $service = $this->blockManager->get($object);
+
+            $this->cacheManager->invalidate($service->getCacheKeys($object));
+        }
     }
 
     /**
-     * {@inheritdoc}
-     *
      * @param BaseBlock $object
      */
     public function preRemove($object)
     {
-        $this->blockManager->get($object)->preRemove($object);
+        $block = $this->blockManager->get($object);
+
+        if (\is_callable([$block, 'preRemove'])) {
+            $block->preRemove($object);
+
+            @trigger_error(
+                'The '.__METHOD__.'() method is deprecated since sonata-project/block-bundle 3.12.0 and will be removed in version 4.0.',
+                \E_USER_DEPRECATED
+            );
+        }
 
         $page = $object->getPage();
 
@@ -151,13 +192,20 @@ abstract class BaseBlockAdmin extends AbstractAdmin
     }
 
     /**
-     * {@inheritdoc}
-     *
      * @param BaseBlock $object
      */
     public function postRemove($object)
     {
-        $this->blockManager->get($object)->postRemove($object);
+        $block = $this->blockManager->get($object);
+
+        if (\is_callable([$block, 'postRemove'])) {
+            $block->postRemove($object);
+
+            @trigger_error(
+                'The '.__METHOD__.'() method is deprecated since sonata-project/block-bundle 3.12.0 and will be removed in version 4.0.',
+                \E_USER_DEPRECATED
+            );
+        }
     }
 
     /**
@@ -216,20 +264,37 @@ abstract class BaseBlockAdmin extends AbstractAdmin
         parent::preBatchAction($actionName, $query, $idx, $allElements);
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    protected function alterObject(object $object): void
+    {
+        $this->loadBlockDefaults($object);
+    }
+
+    protected function alterNewInstance(object $object): void
+    {
+        $object->setType($this->getPersistentParameter('type'));
+
+        $this->loadBlockDefaults($object);
+    }
+
+    protected function configurePersistentParameters(): array
+    {
+        if (!$this->hasRequest()) {
+            return [];
+        }
+
+        return [
+            'type' => $this->getRequest()->get('type'),
+        ];
+    }
+
     protected function configureRoutes(RouteCollection $collection)
     {
         $collection->add('view', $this->getRouterIdParameter().'/view');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function configureListFields(ListMapper $listMapper)
+    protected function configureListFields(ListMapper $list)
     {
-        $listMapper
+        $list
             ->addIdentifier('type')
             ->add('name')
             ->add('enabled', null, ['editable' => true])
@@ -238,12 +303,9 @@ abstract class BaseBlockAdmin extends AbstractAdmin
         ;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function configureDatagridFilters(DatagridMapper $datagridMapper)
+    protected function configureDatagridFilters(DatagridMapper $filter)
     {
-        $datagridMapper
+        $filter
             ->add('name')
             ->add('enabled')
             ->add('type')
@@ -257,6 +319,12 @@ abstract class BaseBlockAdmin extends AbstractAdmin
      */
     private function loadBlockDefaults(BlockInterface $block)
     {
+        $blockType = $block->getType();
+
+        if (null === $blockType || !$this->blockManager->has($blockType)) {
+            return $block;
+        }
+
         $service = $this->blockManager->get($block);
 
         $resolver = new OptionsResolver();

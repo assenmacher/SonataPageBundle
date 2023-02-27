@@ -17,11 +17,16 @@ use Sonata\BlockBundle\Block\BlockContextManager as BaseBlockContextManager;
 use Sonata\BlockBundle\Model\BlockInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ * NEXT_MAJOR: Do not extend from `BlockContextManager` since it will be final.
+ *
+ * @psalm-suppress InvalidExtendClass
+ * @phpstan-ignore-next-line
+ *
+ * @final since sonata-project/page-bundle 3.26
+ */
 class BlockContextManager extends BaseBlockContextManager
 {
-    /**
-     * {@inheritdoc}
-     */
     protected function configureSettings(OptionsResolver $optionsResolver, BlockInterface $block)
     {
         parent::configureSettings($optionsResolver, $block);
@@ -33,8 +38,7 @@ class BlockContextManager extends BaseBlockContextManager
 
         $optionsResolver
             ->addAllowedTypes('manager', ['string', 'bool'])
-            ->addAllowedTypes('page_id', ['int', 'string', 'bool'])
-        ;
+            ->addAllowedTypes('page_id', ['int', 'string', 'bool']);
 
         $optionsResolver->setRequired([
             'manager',

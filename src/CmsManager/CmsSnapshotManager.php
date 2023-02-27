@@ -26,6 +26,8 @@ use Sonata\PageBundle\Model\TransformerInterface;
  * The CmsSnapshotManager class is in charge of retrieving the correct page (cms page or action page).
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class CmsSnapshotManager extends BaseCmsPageManager
 {
@@ -49,19 +51,12 @@ class CmsSnapshotManager extends BaseCmsPageManager
      */
     protected $pages = [];
 
-    /**
-     * @param SnapshotManagerInterface $snapshotManager
-     * @param TransformerInterface     $transformer
-     */
     public function __construct(SnapshotManagerInterface $snapshotManager, TransformerInterface $transformer)
     {
         $this->snapshotManager = $snapshotManager;
         $this->transformer = $transformer;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPage(SiteInterface $site, $page)
     {
         if (\is_string($page) && '/' === substr($page, 0, 1)) {
@@ -81,18 +76,12 @@ class CmsSnapshotManager extends BaseCmsPageManager
         return $page;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getInternalRoute(SiteInterface $site, $pageName)
+    public function getInternalRoute(SiteInterface $site, $routeName)
     {
-        return $this->getPageByRouteName($site, sprintf('_page_internal_%s', $pageName));
+        return $this->getPageByRouteName($site, sprintf('_page_internal_%s', $routeName));
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function findContainer($code, PageInterface $page, BlockInterface $parentContainer = null)
+    public function findContainer($name, PageInterface $page, ?BlockInterface $parentContainer = null)
     {
         $container = null;
 
@@ -105,7 +94,7 @@ class CmsSnapshotManager extends BaseCmsPageManager
         // first level blocks are containers
         if (!$container && $page->getBlocks()) {
             foreach ($page->getBlocks() as $block) {
-                if ($block->getSetting('code') === $code) {
+                if ($block->getSetting('code') === $name) {
                     $container = $block;
 
                     break;
@@ -116,20 +105,16 @@ class CmsSnapshotManager extends BaseCmsPageManager
         return $container;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBlock($id)
     {
         if (isset($this->blocks[$id])) {
             return $this->blocks[$id];
         }
+
+        return null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getPageBy(SiteInterface $site = null, $fieldName, $value)
+    protected function getPageBy(?SiteInterface $site, $fieldName, $value)
     {
         if ('id' === $fieldName) {
             $fieldName = 'pageId';
@@ -180,8 +165,6 @@ class CmsSnapshotManager extends BaseCmsPageManager
 
     /**
      * load the blocks of the $page.
-     *
-     * @param PageInterface $page
      */
     private function loadBlocks(PageInterface $page)
     {

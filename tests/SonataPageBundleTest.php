@@ -18,12 +18,10 @@ use PHPUnit\Framework\TestCase;
 use Sonata\PageBundle\SonataPageBundle;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class Page extends \Sonata\PageBundle\Model\Page
+final class Page extends \Sonata\PageBundle\Model\Page
 {
     /**
      * Returns the id.
-     *
-     * @return mixed
      */
     public function getId()
     {
@@ -31,17 +29,17 @@ class Page extends \Sonata\PageBundle\Model\Page
     }
 }
 
-class SonataPageBundleTest extends TestCase
+final class SonataPageBundleTest extends TestCase
 {
     /**
      * @dataProvider getSlug
      */
-    public function testBoot($text, $expected)
+    public function testBoot($text, $expected): void
     {
         $bundle = new SonataPageBundle();
         $container = $this->createMock(ContainerInterface::class);
-        $container->expects($this->exactly(1))->method('hasParameter')->willReturn(true);
-        $container->expects($this->exactly(2))->method('getParameter')->willReturnCallback(static function ($value) {
+        $container->expects(static::once())->method('hasParameter')->willReturn(true);
+        $container->expects(static::exactly(2))->method('getParameter')->willReturnCallback(static function ($value) {
             if ('sonata.page.page.class' === $value) {
                 return Page::class;
             }
@@ -50,17 +48,17 @@ class SonataPageBundleTest extends TestCase
                 return 'slug_service';
             }
         });
-        $container->expects($this->once())->method('get')->willReturn(Slugify::create());
+        $container->expects(static::once())->method('get')->willReturn(Slugify::create());
 
         $bundle->setContainer($container);
         $bundle->boot();
 
         $page = new Page();
         $page->setSlug($text);
-        $this->assertSame($page->getSlug(), $expected);
+        static::assertSame($page->getSlug(), $expected);
     }
 
-    public function getSlug()
+    public function getSlug(): array
     {
         return [
             ['Salut comment ca va ?',  'salut-comment-ca-va'],

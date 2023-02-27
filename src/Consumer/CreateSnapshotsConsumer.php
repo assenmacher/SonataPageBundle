@@ -22,6 +22,11 @@ use Sonata\PageBundle\Model\PageManagerInterface;
  * Consumer class to generate snapshots.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * NEXT_MAJOR: Remove this class
+ * @final since sonata-project/page-bundle 3.26
+ *
+ * @deprecated since 3.27, and it will be removed in 4.0.
  */
 class CreateSnapshotsConsumer implements ConsumerInterface
 {
@@ -36,25 +41,31 @@ class CreateSnapshotsConsumer implements ConsumerInterface
     protected $runtimeBackend;
 
     /**
-     * @deprecated This property is deprecated since version 2.4 and will be removed in 3.0
+     * @var PageManagerInterface
+     */
+    protected $pageManager;
+
+    /**
+     * @deprecated This property is deprecated since sonata-project/page-bundle 2.4 and will be removed in 4.0
      */
     protected $pageInterface;
 
-    /**
-     * @param BackendInterface     $asyncBackend
-     * @param BackendInterface     $runtimeBackend
-     * @param PageManagerInterface $pageManager
-     */
     public function __construct(BackendInterface $asyncBackend, BackendInterface $runtimeBackend, PageManagerInterface $pageManager)
     {
+        @trigger_error(
+            sprintf(
+                'This %s is deprecated since sonata-project/page-bundle 3.27.0'.
+                ' and will be removed in 4.0',
+                self::class
+            ),
+            \E_USER_DEPRECATED
+        );
+
         $this->asyncBackend = $asyncBackend;
         $this->runtimeBackend = $runtimeBackend;
         $this->pageManager = $pageManager;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function process(ConsumerEvent $event)
     {
         $pages = $this->pageManager->findBy([

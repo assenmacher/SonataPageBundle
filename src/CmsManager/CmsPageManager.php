@@ -24,6 +24,8 @@ use Sonata\PageBundle\Model\SiteInterface;
  * The CmsPageManager class is in charge of retrieving the correct page (cms page or action page).
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class CmsPageManager extends BaseCmsPageManager
 {
@@ -47,19 +49,12 @@ class CmsPageManager extends BaseCmsPageManager
      */
     protected $pages = [];
 
-    /**
-     * @param PageManagerInterface     $pageManager
-     * @param BlockInteractorInterface $blockInteractor
-     */
     public function __construct(PageManagerInterface $pageManager, BlockInteractorInterface $blockInteractor)
     {
         $this->pageManager = $pageManager;
         $this->blockInteractor = $blockInteractor;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPage(SiteInterface $site, $page)
     {
         if (\is_string($page) && '/' === substr($page, 0, 1)) {
@@ -79,16 +74,13 @@ class CmsPageManager extends BaseCmsPageManager
         return $page;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getInternalRoute(SiteInterface $site, $pageName)
+    public function getInternalRoute(SiteInterface $site, $routeName)
     {
-        if ('error' === substr($pageName, 0, 5)) {
-            throw new \RuntimeException(sprintf('Illegal internal route name : %s, an internal page cannot start with `error`', $pageName));
+        if ('error' === substr($routeName, 0, 5)) {
+            throw new \RuntimeException(sprintf('Illegal internal route name : %s, an internal page cannot start with `error`', $routeName));
         }
 
-        $routeName = sprintf('_page_internal_%s', $pageName);
+        $routeName = sprintf('_page_internal_%s', $routeName);
 
         try {
             $page = $this->getPageByRouteName($site, $routeName);
@@ -96,7 +88,7 @@ class CmsPageManager extends BaseCmsPageManager
             $page = $this->pageManager->create([
                 'url' => null,
                 'routeName' => $routeName,
-                'name' => sprintf(sprintf('Internal Page : %s', $pageName)),
+                'name' => sprintf('Internal Page : %s', $routeName),
                 'decorate' => false,
             ]);
 
@@ -108,10 +100,7 @@ class CmsPageManager extends BaseCmsPageManager
         return $page;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function findContainer($code, PageInterface $page, BlockInterface $parentContainer = null)
+    public function findContainer($name, PageInterface $page, ?BlockInterface $parentContainer = null)
     {
         $container = null;
 
@@ -124,7 +113,7 @@ class CmsPageManager extends BaseCmsPageManager
         // first level blocks are containers
         if (!$container && $page->getBlocks()) {
             foreach ($page->getBlocks() as $block) {
-                if ($block->getSetting('code') === $code) {
+                if ($block->getSetting('code') === $name) {
                     $container = $block;
 
                     break;
@@ -136,7 +125,7 @@ class CmsPageManager extends BaseCmsPageManager
             $container = $this->blockInteractor->createNewContainer([
                 'enabled' => true,
                 'page' => $page,
-                'code' => $code,
+                'code' => $name,
                 'position' => 1,
                 'parent' => $parentContainer,
             ]);
@@ -145,9 +134,6 @@ class CmsPageManager extends BaseCmsPageManager
         return $container;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBlock($id)
     {
         if (!isset($this->blocks[$id])) {
@@ -157,10 +143,7 @@ class CmsPageManager extends BaseCmsPageManager
         return $this->blocks[$id];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getPageBy(SiteInterface $site = null, $fieldName, $value)
+    protected function getPageBy(?SiteInterface $site, $fieldName, $value)
     {
         if ('id' === $fieldName) {
             $id = $value;
@@ -202,8 +185,6 @@ class CmsPageManager extends BaseCmsPageManager
 
     /**
      * load all the related nested blocks linked to one page.
-     *
-     * @param PageInterface $page
      */
     private function loadBlocks(PageInterface $page)
     {

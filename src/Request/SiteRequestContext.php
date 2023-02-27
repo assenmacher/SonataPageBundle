@@ -21,6 +21,8 @@ use Symfony\Component\Routing\RequestContext;
  * SiteRequestContext.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class SiteRequestContext extends RequestContext implements SiteRequestContextInterface
 {
@@ -29,19 +31,15 @@ class SiteRequestContext extends RequestContext implements SiteRequestContextInt
      */
     protected $selector;
 
-    /**
-     * @var SiteInterface
-     */
-    private $site;
+    private ?SiteInterface $site = null;
 
     /**
-     * @param SiteSelectorInterface $selector
-     * @param string                $baseUrl
-     * @param string                $method
-     * @param string                $host
-     * @param string                $scheme
-     * @param int                   $httpPort
-     * @param int                   $httpsPort
+     * @param string $baseUrl
+     * @param string $method
+     * @param string $host
+     * @param string $scheme
+     * @param int    $httpPort
+     * @param int    $httpsPort
      */
     public function __construct(SiteSelectorInterface $selector, $baseUrl = '', $method = 'GET', $host = 'localhost', $scheme = 'http', $httpPort = 80, $httpsPort = 443)
     {
@@ -50,9 +48,6 @@ class SiteRequestContext extends RequestContext implements SiteRequestContextInt
         parent::__construct($baseUrl, $method, $host, $scheme, $httpPort, $httpsPort);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getHost()
     {
         $site = $this->getSite();
@@ -64,9 +59,6 @@ class SiteRequestContext extends RequestContext implements SiteRequestContextInt
         return parent::getHost();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBaseUrl()
     {
         $site = $this->getSite();

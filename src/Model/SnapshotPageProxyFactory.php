@@ -15,14 +15,9 @@ namespace Sonata\PageBundle\Model;
 
 final class SnapshotPageProxyFactory implements SnapshotPageProxyFactoryInterface
 {
-    /**
-     * @var string
-     */
-    private $snapshotPageProxyClass;
+    private string $snapshotPageProxyClass;
 
     /**
-     * SnapshotPageProxyFactory constructor.
-     *
      * @param string $snapshotPageProxyClass class name
      */
     public function __construct($snapshotPageProxyClass)
@@ -30,9 +25,6 @@ final class SnapshotPageProxyFactory implements SnapshotPageProxyFactoryInterfac
         $this->snapshotPageProxyClass = $snapshotPageProxyClass;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function create(SnapshotManagerInterface $manager, TransformerInterface $transformer, SnapshotInterface $snapshot)
     {
         return new $this->snapshotPageProxyClass($manager, $transformer, $snapshot);

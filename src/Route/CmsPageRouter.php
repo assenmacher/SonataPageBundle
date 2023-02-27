@@ -29,6 +29,9 @@ use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\RouterInterface;
 
+/**
+ * @final since sonata-project/page-bundle 3.26
+ */
 class CmsPageRouter implements ChainedRouterInterface
 {
     /**
@@ -63,33 +66,21 @@ class CmsPageRouter implements ChainedRouterInterface
         $this->router = $router;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setContext(RequestContext $context)
     {
         $this->context = $context;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getContext()
     {
         return $this->context;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getRouteCollection()
     {
         return new RouteCollection();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function supports($name)
     {
         if (\is_string($name) && !$this->isPageAlias($name) && !$this->isPageSlug($name)) {
@@ -103,9 +94,6 @@ class CmsPageRouter implements ChainedRouterInterface
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function generate($name, $parameters = [], $referenceType = self::ABSOLUTE_PATH)
     {
         try {
@@ -133,9 +121,6 @@ class CmsPageRouter implements ChainedRouterInterface
         return $url;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getRouteDebugMessage($name, array $parameters = [])
     {
         if ($this->router instanceof VersatileGeneratorInterface) {
@@ -145,9 +130,6 @@ class CmsPageRouter implements ChainedRouterInterface
         return "Route '$name' not found";
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function match($pathinfo)
     {
         $cms = $this->cmsSelector->retrieve();
@@ -192,7 +174,7 @@ class CmsPageRouter implements ChainedRouterInterface
      *
      * @param PageInterface $page          Page object
      * @param array         $parameters    An array of parameters
-     * @param bool|string   $referenceType The type of reference to be generated (one of the constants)
+     * @param int           $referenceType The type of reference to be generated (one of the constants)
      *
      * @throws \RuntimeException
      *
@@ -214,8 +196,8 @@ class CmsPageRouter implements ChainedRouterInterface
         // NEXT_MAJOR: remove this if block
         if (!$this->context instanceof SiteRequestContextInterface) {
             @trigger_error(
-                sprintf('Since, 3.3 when calling %s, %s::$context should implement SiteRequestContextInterface. This will become mandatory in 4.0.', __METHOD__, __CLASS__),
-                E_USER_DEPRECATED
+                sprintf('Since, 3.3 when calling %s, %s::$context should implement SiteRequestContextInterface. This will become mandatory in 4.0.', __METHOD__, self::class),
+                \E_USER_DEPRECATED
             );
 
             return $this->decorateUrl($url, $parameters, $referenceType);
@@ -236,8 +218,8 @@ class CmsPageRouter implements ChainedRouterInterface
     /**
      * Generates an URL for a page slug.
      *
-     * @param array       $parameters    An array of parameters
-     * @param bool|string $referenceType The type of reference to be generated (one of the constants)
+     * @param array $parameters    An array of parameters
+     * @param int   $referenceType The type of reference to be generated (one of the constants)
      *
      * @throws \RuntimeException
      *
@@ -258,9 +240,9 @@ class CmsPageRouter implements ChainedRouterInterface
     /**
      * Decorates an URL with url context and query.
      *
-     * @param string      $url           Relative URL
-     * @param array       $parameters    An array of parameters
-     * @param bool|string $referenceType The type of reference to be generated (one of the constants)
+     * @param string $url           Relative URL
+     * @param array  $parameters    An array of parameters
+     * @param int    $referenceType The type of reference to be generated (one of the constants)
      *
      * @throws \RuntimeException
      *
@@ -318,11 +300,16 @@ class CmsPageRouter implements ChainedRouterInterface
      *
      * @throws PageNotFoundException
      *
-     * @return \Sonata\PageBundle\Model\PageInterface|null
+     * @return PageInterface|null
      */
     protected function getPageByPageAlias($alias)
     {
         $site = $this->siteSelector->retrieve();
+
+        if (null === $site) {
+            return null;
+        }
+
         $page = $this->cmsSelector->retrieve()->getPageByPageAlias($site, $alias);
 
         return $page;
@@ -330,8 +317,6 @@ class CmsPageRouter implements ChainedRouterInterface
 
     /**
      * Returns the Url from a Page object.
-     *
-     * @param PageInterface $page
      *
      * @return string
      */

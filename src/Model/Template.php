@@ -17,6 +17,8 @@ namespace Sonata\PageBundle\Model;
  * Template.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class Template
 {
@@ -41,7 +43,6 @@ class Template
     /**
      * @param string $name
      * @param string $path
-     * @param array  $containers
      */
     public function __construct($name, $path, array $containers = [])
     {
@@ -106,8 +107,6 @@ class Template
     }
 
     /**
-     * @param array $meta
-     *
      * @return array
      */
     protected function normalize(array $meta)

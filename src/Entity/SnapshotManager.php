@@ -13,7 +13,8 @@ declare(strict_types=1);
 
 namespace Sonata\PageBundle\Entity;
 
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Common\Collections\Criteria;
+use Doctrine\Persistence\ManagerRegistry;
 use Sonata\DatagridBundle\Pager\Doctrine\Pager;
 use Sonata\DatagridBundle\ProxyQuery\Doctrine\ProxyQuery;
 use Sonata\Doctrine\Entity\BaseEntityManager;
@@ -23,13 +24,14 @@ use Sonata\PageBundle\Model\SnapshotManagerInterface;
 use Sonata\PageBundle\Model\SnapshotPageProxy;
 use Sonata\PageBundle\Model\SnapshotPageProxyFactory;
 use Sonata\PageBundle\Model\SnapshotPageProxyFactoryInterface;
-use Sonata\PageBundle\Model\SnapshotPageProxyInterface;
 use Sonata\PageBundle\Model\TransformerInterface;
 
 /**
  * This class manages SnapshotInterface persistency with the Doctrine ORM.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class SnapshotManager extends BaseEntityManager implements SnapshotManagerInterface
 {
@@ -39,7 +41,7 @@ class SnapshotManager extends BaseEntityManager implements SnapshotManagerInterf
     protected $children = [];
 
     /**
-     * @var array
+     * @var array<string, string>
      */
     protected $templates = [];
 
@@ -54,7 +56,7 @@ class SnapshotManager extends BaseEntityManager implements SnapshotManagerInterf
      * @param array                             $templates                An array of templates
      * @param SnapshotPageProxyFactoryInterface $snapshotPageProxyFactory
      */
-    public function __construct($class, ManagerRegistry $registry, $templates = [], SnapshotPageProxyFactoryInterface $snapshotPageProxyFactory = null)
+    public function __construct($class, ManagerRegistry $registry, $templates = [], ?SnapshotPageProxyFactoryInterface $snapshotPageProxyFactory = null)
     {
         parent::__construct($class, $registry);
 
@@ -62,7 +64,7 @@ class SnapshotManager extends BaseEntityManager implements SnapshotManagerInterf
         if (null === $snapshotPageProxyFactory) {
             @trigger_error(
                 'The $snapshotPageProxyFactory parameter is required with the next major release.',
-                E_USER_DEPRECATED
+                \E_USER_DEPRECATED
             );
             $snapshotPageProxyFactory = new SnapshotPageProxyFactory(SnapshotPageProxy::class);
         }
@@ -71,20 +73,14 @@ class SnapshotManager extends BaseEntityManager implements SnapshotManagerInterf
         $this->snapshotPageProxyFactory = $snapshotPageProxyFactory;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function save($snapshot, $andFlush = true)
+    public function save($entity, $andFlush = true)
     {
-        parent::save($snapshot);
+        parent::save($entity);
 
-        return $snapshot;
+        return $entity;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function enableSnapshots(array $snapshots, \DateTime $date = null)
+    public function enableSnapshots(array $snapshots, ?\DateTime $date = null)
     {
         if (0 === \count($snapshots)) {
             return;
@@ -104,23 +100,22 @@ class SnapshotManager extends BaseEntityManager implements SnapshotManagerInterf
         }
 
         $this->getEntityManager()->flush();
-        //@todo: strange sql and low-level pdo usage: use dql or qb
-        $sql = sprintf("UPDATE %s SET publication_date_end = '%s' WHERE id NOT IN(%s) AND page_id IN (%s)",
-            $this->getTableName(),
-            $date->format('Y-m-d H:i:s'),
-            implode(',', $snapshotIds),
-            implode(',', $pageIds)
-        );
 
-        $this->getConnection()->query($sql);
+        $qb = $this->getRepository()->createQueryBuilder('s');
+        $q = $qb->update()
+            ->set('s.publicationDateEnd', ':date_end')
+            ->where($qb->expr()->notIn('s.id', $snapshotIds))
+            ->andWhere($qb->expr()->in('s.page', $pageIds))
+            ->andWhere($qb->expr()->isNull('s.publicationDateEnd'))
+            ->setParameter('date_end', $date, 'datetime')
+            ->getQuery();
+
+        $q->execute();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function findEnableSnapshot(array $criteria)
     {
-        $date = new \Datetime();
+        $date = new \DateTime();
         $parameters = [
             'publicationDateStart' => $date,
             'publicationDateEnd' => $date,
@@ -129,8 +124,7 @@ class SnapshotManager extends BaseEntityManager implements SnapshotManagerInterf
         $query = $this->getRepository()
             ->createQueryBuilder('s')
             ->andWhere('s.publicationDateStart <= :publicationDateStart AND ( s.publicationDateEnd IS NULL OR s.publicationDateEnd >= :publicationDateEnd )')
-            ->andWhere('s.enabled = true')
-        ;
+            ->andWhere('s.enabled = true');
 
         if (isset($criteria['site'])) {
             $query->andWhere('s.site = :site');
@@ -169,13 +163,13 @@ class SnapshotManager extends BaseEntityManager implements SnapshotManagerInterf
      *
      * @return PageInterface|false
      *
-     * @deprecated since 3.2, to be removed in 4.0
+     * @deprecated since sonata-project/page-bundle 3.2, to be removed in 4.0
      */
     public function getPageByName($routeName)
     {
         @trigger_error(
             'The '.__METHOD__.' method is deprecated since version 3.2 and will be removed in 4.0.',
-            E_USER_DEPRECATED
+            \E_USER_DEPRECATED
         );
 
         $snapshots = $this->getEntityManager()->createQueryBuilder()
@@ -191,6 +185,10 @@ class SnapshotManager extends BaseEntityManager implements SnapshotManagerInterf
         $snapshot = \count($snapshots) > 0 ? $snapshots[0] : false;
 
         if ($snapshot) {
+            /**
+             * @phpstan-ignore-next-line
+             * @psalm-suppress TooFewArguments
+             */
             return new SnapshotPageProxy($this, $snapshot);
         }
 
@@ -198,7 +196,7 @@ class SnapshotManager extends BaseEntityManager implements SnapshotManagerInterf
     }
 
     /**
-     * @param array $templates
+     * @param string[] $templates
      */
     public function setTemplates($templates)
     {
@@ -206,7 +204,7 @@ class SnapshotManager extends BaseEntityManager implements SnapshotManagerInterf
     }
 
     /**
-     * @return array
+     * @return string
      */
     public function getTemplates()
     {
@@ -218,7 +216,7 @@ class SnapshotManager extends BaseEntityManager implements SnapshotManagerInterf
      *
      * @throws \RuntimeException
      *
-     * @return mixed
+     * @return string
      */
     public function getTemplate($code)
     {
@@ -229,73 +227,51 @@ class SnapshotManager extends BaseEntityManager implements SnapshotManagerInterf
         return $this->templates[$code];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function cleanup(PageInterface $page, $keep)
     {
         if (!is_numeric($keep)) {
             throw new \RuntimeException(sprintf('Please provide an integer value, %s given', \gettype($keep)));
         }
 
-        $tableName = $this->getTableName();
-        $platform = $this->getConnection()->getDatabasePlatform()->getName();
+        $innerQb = $this->getRepository()->createQueryBuilder('i');
+        $expr = $innerQb->expr();
 
-        if ('mysql' === $platform) {
-            return $this->getConnection()->exec(sprintf(
-                'DELETE FROM %s
-                WHERE
-                    page_id = %d
-                    AND id NOT IN (
-                        SELECT id
-                        FROM (
-                            SELECT id, publication_date_end
-                            FROM %s
-                            WHERE
-                                page_id = %d
-                            ORDER BY
-                                publication_date_end IS NULL DESC,
-                                publication_date_end DESC
-                            LIMIT %d
-                        ) AS table_alias
-                )',
-                $tableName,
-                $page->getId(),
-                $tableName,
-                $page->getId(),
-                $keep
+        // try a better Function expression for this?
+        $ifNullExpr = sprintf(
+            'CASE WHEN %s THEN 1 ELSE 0 END',
+            $expr->isNull('i.publicationDateEnd')
+        );
+
+        // Subquery DQL doesn't support Limit
+        $innerQb
+            ->select('i.id')
+            ->where($expr->eq('i.page', $page->getId()))
+            ->orderBy($ifNullExpr, Criteria::DESC)
+            ->addOrderBy('i.publicationDateEnd', Criteria::DESC)
+            ->setMaxResults($keep);
+
+        $query = $innerQb->getQuery();
+        $innerArray = $query->getSingleColumnResult();
+
+        $qb = $this->getRepository()->createQueryBuilder('s');
+        $expr = $qb->expr();
+        $qb->delete()
+            ->where($expr->eq('s.page', $page->getId()));
+
+        if ([] !== $innerArray) {
+            $qb->andWhere($expr->notIn(
+                's.id',
+                $innerArray
             ));
         }
 
-        if ('oracle' === $platform) {
-            return $this->getConnection()->exec(sprintf(
-                'DELETE FROM %s
-                WHERE
-                    page_id = %d
-                    AND id NOT IN (
-                        SELECT id
-                        FROM (
-                            SELECT id, publication_date_end
-                            FROM %s
-                            WHERE
-                                page_id = %d
-                                AND rownum <= %d
-                            ORDER BY publication_date_end DESC
-                        ) table_alias
-                )',
-                $tableName,
-                $page->getId(),
-                $tableName,
-                $page->getId(),
-                $keep
-            ));
-        }
-
-        throw new \RuntimeException(sprintf('The %s database platform has not been tested yet. Please report us if it works and feel free to create a pull request to handle it ;-)', $platform));
+        return $qb->getQuery()->execute();
     }
 
     /**
-     * {@inheritdoc}
+     * NEXT_MAJOR: remove this method.
+     *
+     * @deprecated since sonata-project/page-bundle 3.24, to be removed in 4.0.
      */
     public function getPager(array $criteria, $page, $limit = 10, array $sort = [])
     {
@@ -348,18 +324,9 @@ class SnapshotManager extends BaseEntityManager implements SnapshotManagerInterf
         return $pager;
     }
 
-    /**
-     * Create a snapShotPageProxy instance.
-     *
-     * @param TransformerInterface $transformer
-     * @param SnapshotInterface    $snapshot
-     *
-     * @return SnapshotPageProxyInterface
-     */
     final public function createSnapshotPageProxy(TransformerInterface $transformer, SnapshotInterface $snapshot)
     {
         return $this->snapshotPageProxyFactory
-            ->create($this, $transformer, $snapshot)
-        ;
+            ->create($this, $transformer, $snapshot);
     }
 }

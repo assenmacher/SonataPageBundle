@@ -16,13 +16,13 @@ namespace Sonata\PageBundle\Tests\Validator\Constraints;
 use PHPUnit\Framework\TestCase;
 use Sonata\PageBundle\Validator\Constraints\UniqueUrl;
 
-class UniqueUrlTest extends TestCase
+final class UniqueUrlTest extends TestCase
 {
-    public function testInstance()
+    public function testInstance(): void
     {
         $constraint = new UniqueUrl();
 
-        $this->assertSame('class', $constraint->getTargets());
-        $this->assertSame('sonata.page.validator.unique_url', $constraint->validatedBy());
+        static::assertSame('class', $constraint->getTargets());
+        static::assertSame('sonata.page.validator.unique_url', $constraint->validatedBy());
     }
 }

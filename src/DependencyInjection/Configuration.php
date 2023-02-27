@@ -15,6 +15,7 @@ namespace Sonata\PageBundle\DependencyInjection;
 
 use Sonata\PageBundle\Model\Template;
 use Sonata\PageBundle\Template\Matrix\Parser;
+use Symfony\Component\Config\Definition\BaseNode;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
@@ -25,52 +26,54 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
  * To learn more see {@link http://symfony.com/doc/current/cookbook/bundles/extension.html#cookbook-bundles-extension-config-class}
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class Configuration implements ConfigurationInterface
 {
-    /**
-     * {@inheritdoc}
-     */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder();
-        $node = $treeBuilder->root('sonata_page')->children();
+        $treeBuilder = new TreeBuilder('sonata_page');
+
+        $node = $treeBuilder->getRootNode();
+
+        $node = $node->children();
 
         $routerAutoRegisterInfo = <<<'EOF'
-Automatically add 'sonata.page.router' service to the index of 'cmf_routing.router' chain router
+            Automatically add 'sonata.page.router' service to the index of 'cmf_routing.router' chain router
 
-Examples:
-enabled:  true      Enable auto-registration
-priority: 150       The priority
-EOF;
+            Examples:
+            enabled:  true      Enable auto-registration
+            priority: 150       The priority
+            EOF;
 
         $ignoreRoutePatternsInfo = <<<'EOF'
-(.*)admin(.*)       ignore admin route, i.e. route containing 'admin'
-^_(.*)              ignore Symfony routes
-EOF;
+            (.*)admin(.*)       ignore admin route, i.e. route containing 'admin'
+            ^_(.*)              ignore Symfony routes
+            EOF;
 
         $ignoreUriPatternsInfo = <<<'EOF'
-admin(.*)           ignore admin route, i.e. route containing 'admin'
-EOF;
+            admin(.*)           ignore admin route, i.e. route containing 'admin'
+            EOF;
 
         $pageDefaultsInfo = <<<'EOF'
-Example:
-homepage: { decorate: false }       disable decoration for 'homepage', key is a page route
-EOF;
+            Example:
+            homepage: { decorate: false }       disable decoration for 'homepage', key is a page route
+            EOF;
 
         $catchExceptionsInfo = <<<'EOF'
-Manage the HTTP errors
+            Manage the HTTP errors
 
-Examples:
-not_found: [404]    render 404 page with "not_found" key (name generated: _page_internal_error_not_found)
-fatal:     [500]    render 500 page with "fatal" key (name generated: _page_internal_error_fatal)
-EOF;
+            Examples:
+            not_found: [404]    render 404 page with "not_found" key (name generated: _page_internal_error_not_found)
+            fatal:     [500]    render 500 page with "fatal" key (name generated: _page_internal_error_fatal)
+            EOF;
 
         $directPublicationInfo = <<<'EOF'
-Generates a snapshot when a page is saved from the admin.
+            Generates a snapshot when a page is saved from the admin.
 
-You can use %kernel.debug%, if you want to publish in dev mode, but not in prod.
-EOF;
+            You can use %kernel.debug%, if you want to publish in dev mode, but not in prod.
+            EOF;
 
         $node
             ->scalarNode('skip_redirection')
@@ -117,10 +120,17 @@ EOF;
             ->end()
             ->scalarNode('slugify_service')
                 // NEXT_MAJOR: reword this info message
-                ->info('You should use: sonata.core.slugify.cocur, but for BC we keep \'sonata.core.slugify.native\' as default')
+                ->info('You should use: sonata.page.slugify.cocur, but for BC we keep \'sonata.core.slugify.native\' as default')
 
-                // NEXT_MAJOR: use "sonata.core.slugify.cocur" instead of "sonata.core.slugify.native" as default value
+                // NEXT_MAJOR: use "sonata.page.slugify.cocur" instead of "sonata.core.slugify.native" as default value
                 ->defaultValue('sonata.core.slugify.native')
+
+                ->setDeprecated(
+                    ...$this->getDeprecationMessage(
+                        'The "slugify_service" option is deprecated since sonata-project/page-bundle 3.28 and will be removed in 4.0. Use decoration of services instead.',
+                        '3.x'
+                    )
+                )
             ->end()
             ->arrayNode('ignore_routes')
                 ->defaultValue([
@@ -146,6 +156,12 @@ EOF;
 
             ->arrayNode('cache_invalidation')
                 ->addDefaultsIfNotSet()
+                ->setDeprecated(
+                    ...$this->getDeprecationMessage(
+                        'The "cache_invalidation" option is deprecated since sonata-project/page-bundle 3.27.0 and will be removed in 4.0',
+                        '3.27'
+                    )
+                )
                 ->children()
                     ->scalarNode('service')->defaultValue('sonata.cache.invalidation.simple')->end()
                     ->scalarNode('recorder')->defaultValue('sonata.cache.recorder')->end()
@@ -165,6 +181,12 @@ EOF;
             ->end()
 
             ->arrayNode('assets')
+                ->setDeprecated(
+                    ...$this->getDeprecationMessage(
+                        'The "assets" option is deprecated since sonata-project/page-bundle 3.28.0 and will be removed in 4.0',
+                        '3.29'
+                    )
+                )
                 ->addDefaultsIfNotSet()
                 ->children()
                     ->arrayNode('stylesheets')
@@ -224,9 +246,7 @@ EOF;
                             ->end()
                             ->validate()
                             ->always()
-                                ->then(static function ($matrix) {
-                                    return Parser::parse($matrix['layout'], $matrix['mapping']);
-                                })
+                                ->then(static fn ($matrix) => Parser::parse($matrix['layout'], $matrix['mapping']))
                             ->end()
                         ->end()
                     ->end()
@@ -315,6 +335,12 @@ EOF;
             ->end()
 
             ->arrayNode('caches')
+                ->setDeprecated(
+                    ...$this->getDeprecationMessage(
+                        'The "caches" option is deprecated since sonata-project/page-bundle 3.27.0 and will be removed in 4.0',
+                        '3.27'
+                    )
+                )
                 ->children()
                     ->arrayNode('esi')
                         ->children()
@@ -368,8 +394,29 @@ EOF;
                 ->info($directPublicationInfo)
                 ->defaultValue(false)
             ->end()
-        ;
+            ->booleanNode('cache')
+                ->defaultValue(true)
+                ->setDeprecated(
+                    ...$this->getDeprecationMessage(
+                        'The "cache" option is deprecated since sonata-project/page-bundle 3.27.0 and will be removed in 4.0',
+                        '3.27'
+                    )
+                )
+            ->end();
 
         return $treeBuilder;
+    }
+
+    protected function getDeprecationMessage($message, $version): array
+    {
+        if (method_exists(BaseNode::class, 'getDeprecation')) {
+            return [
+                'sonata-project/page-bundle',
+                $version,
+                $message,
+            ];
+        }
+
+        return [$message];
     }
 }

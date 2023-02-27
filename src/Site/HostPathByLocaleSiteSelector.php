@@ -21,12 +21,11 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
  * HostPathByLocaleSiteSelector.
  *
  * @author Rémi Marseille <marseille@ekino.com>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class HostPathByLocaleSiteSelector extends HostPathSiteSelector
 {
-    /**
-     * {@inheritdoc}
-     */
     public function handleKernelRequest(GetResponseEvent $event)
     {
         $request = $event->getRequest();

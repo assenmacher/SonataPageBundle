@@ -17,11 +17,15 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * @final since sonata-project/page-bundle 3.26
+ *
+ * NEXT_MAJOR: Remove this class
+ *
+ * @deprecated since 3.27, and it will be removed in 4.0.
+ */
 class MigrateToJsonTypeCommand extends BaseCommand
 {
-    /**
-     * {@inheritdoc}
-     */
     public function configure()
     {
         $this->setName('sonata:page:migrate-block-json');
@@ -29,9 +33,6 @@ class MigrateToJsonTypeCommand extends BaseCommand
         $this->setDescription('Migrate all block settings to the doctrine JsonType');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $count = 0;
@@ -42,12 +43,28 @@ class MigrateToJsonTypeCommand extends BaseCommand
         foreach ($blocks as $block) {
             // if the row need to migrate
             if (0 !== strpos($block['settings'], '{') && '[]' !== $block['settings']) {
-                $block['settings'] = json_encode(unserialize($block['settings']));
+                $block['settings'] = json_encode(unserialize($block['settings']), \JSON_THROW_ON_ERROR);
                 $connection->update($table, ['settings' => $block['settings']], ['id' => $block['id']]);
                 ++$count;
             }
         }
 
         $output->writeln("Migrated $count blocks");
+
+        return 0;
+    }
+
+    public function run(InputInterface $input, OutputInterface $output)
+    {
+        @trigger_error(
+            sprintf(
+                'This %s is deprecated since sonata-project/page-bundle 3.27.0'.
+                ' and it will be removed in 4.0',
+                self::class
+            ),
+            \E_USER_DEPRECATED
+        );
+
+        return parent::run($input, $output);
     }
 }

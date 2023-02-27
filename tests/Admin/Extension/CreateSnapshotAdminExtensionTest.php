@@ -19,18 +19,24 @@ use Sonata\NotificationBundle\Backend\BackendInterface;
 use Sonata\PageBundle\Admin\Extension\CreateSnapshotAdminExtension;
 use Sonata\PageBundle\Model\PageBlockInterface;
 use Sonata\PageBundle\Model\PageInterface;
+use Sonata\PageBundle\Service\Contract\CreateSnapshotByPageInterface;
 
-class CreateSnapshotAdminExtensionTest extends TestCase
+final class CreateSnapshotAdminExtensionTest extends TestCase
 {
-    public function testPostUpdateOnPage()
+    /**
+     * @group legacy
+     *
+     * NEXT_MAJOR: after remove the deprecated code into the CreateSnapshotAdminExtension, remove the group legacy above.
+     */
+    public function testPostUpdateOnPage(): void
     {
         $page = $this->createMock(PageInterface::class);
-        $page->expects($this->once())->method('getId')->willReturn(42);
+        $page->expects(static::once())->method('getId')->willReturn(42);
 
         $admin = $this->createMock(AdminInterface::class);
 
         $backend = $this->createMock(BackendInterface::class);
-        $backend->expects($this->once())->method('createAndPublish')->with(
+        $backend->expects(static::once())->method('createAndPublish')->with(
             'sonata.page.create_snapshot',
             ['pageId' => 42]
         );
@@ -39,15 +45,20 @@ class CreateSnapshotAdminExtensionTest extends TestCase
         $extension->postUpdate($admin, $page);
     }
 
-    public function testPostPersistOnPage()
+    /**
+     * @group legacy
+     *
+     * NEXT_MAJOR: after remove the deprecated code into the CreateSnapshotAdminExtension, remove the group legacy above.
+     */
+    public function testPostPersistOnPage(): void
     {
         $page = $this->createMock(PageInterface::class);
-        $page->expects($this->once())->method('getId')->willReturn(42);
+        $page->expects(static::once())->method('getId')->willReturn(42);
 
         $admin = $this->createMock(AdminInterface::class);
 
         $backend = $this->createMock(BackendInterface::class);
-        $backend->expects($this->once())->method('createAndPublish')->with(
+        $backend->expects(static::once())->method('createAndPublish')->with(
             'sonata.page.create_snapshot',
             ['pageId' => 42]
         );
@@ -56,18 +67,23 @@ class CreateSnapshotAdminExtensionTest extends TestCase
         $extension->postPersist($admin, $page);
     }
 
-    public function testPostUpdateOnBlock()
+    /**
+     * @group legacy
+     *
+     * NEXT_MAJOR: after remove the deprecated code into the CreateSnapshotAdminExtension, remove the group legacy above.
+     */
+    public function testPostUpdateOnBlock(): void
     {
         $page = $this->createMock(PageInterface::class);
-        $page->expects($this->once())->method('getId')->willReturn(42);
+        $page->expects(static::once())->method('getId')->willReturn(42);
 
         $block = $this->createMock(PageBlockInterface::class);
-        $block->expects($this->once())->method('getPage')->willReturn($page);
+        $block->expects(static::once())->method('getPage')->willReturn($page);
 
         $admin = $this->createMock(AdminInterface::class);
 
         $backend = $this->createMock(BackendInterface::class);
-        $backend->expects($this->once())->method('createAndPublish')->with(
+        $backend->expects(static::once())->method('createAndPublish')->with(
             'sonata.page.create_snapshot',
             ['pageId' => 42]
         );
@@ -76,23 +92,71 @@ class CreateSnapshotAdminExtensionTest extends TestCase
         $extension->postUpdate($admin, $block);
     }
 
-    public function testPostPersistOnBlock()
+    /**
+     * @group legacy
+     *
+     * NEXT_MAJOR: after remove the deprecated code into the CreateSnapshotAdminExtension, remove the group legacy above.
+     */
+    public function testPostPersistOnBlock(): void
     {
         $page = $this->createMock(PageInterface::class);
-        $page->expects($this->once())->method('getId')->willReturn(42);
+        $page->expects(static::once())->method('getId')->willReturn(42);
 
         $block = $this->createMock(PageBlockInterface::class);
-        $block->expects($this->once())->method('getPage')->willReturn($page);
+        $block->expects(static::once())->method('getPage')->willReturn($page);
 
         $admin = $this->createMock(AdminInterface::class);
 
         $backend = $this->createMock(BackendInterface::class);
-        $backend->expects($this->once())->method('createAndPublish')->with(
+        $backend->expects(static::once())->method('createAndPublish')->with(
             'sonata.page.create_snapshot',
             ['pageId' => 42]
         );
 
         $extension = new CreateSnapshotAdminExtension($backend);
         $extension->postPersist($admin, $block);
+    }
+
+    /**
+     * @group legacy
+     *
+     * NEXT_MAJOR: after remove the deprecated code into the CreateSnapshotAdminExtension, remove the group legacy above.
+     */
+    public function testPostRemoveOnBlock(): void
+    {
+        $page = $this->createMock(PageInterface::class);
+        $page->expects(static::once())->method('getId')->willReturn(42);
+
+        $block = $this->createMock(PageBlockInterface::class);
+        $block->expects(static::once())->method('getPage')->willReturn($page);
+
+        $admin = $this->createStub(AdminInterface::class);
+
+        $backend = $this->createMock(BackendInterface::class);
+        $backend->expects(static::once())->method('createAndPublish')->with(
+            'sonata.page.create_snapshot',
+            ['pageId' => 42]
+        );
+
+        $extension = new CreateSnapshotAdminExtension($backend);
+        $extension->postRemove($admin, $block);
+    }
+
+    public function testCreateSnapshotByPage(): void
+    {
+        // Mocks
+        $adminMock = $this->createMock(AdminInterface::class);
+
+        $pageMock = $this->createMock(PageInterface::class);
+
+        $createSnapshotByPageMock = $this->createMock(CreateSnapshotByPageInterface::class);
+        $createSnapshotByPageMock
+            ->expects(static::once())
+            ->method('createByPage')
+            ->with(static::isInstanceOf(PageInterface::class));
+
+        // Run code
+        $createSnapshotAdminExtension = new CreateSnapshotAdminExtension($createSnapshotByPageMock);
+        $createSnapshotAdminExtension->postUpdate($adminMock, $pageMock);
     }
 }

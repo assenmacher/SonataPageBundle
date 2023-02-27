@@ -20,8 +20,8 @@ use Sonata\BlockBundle\Block\BlockContextInterface;
 use Sonata\BlockBundle\Block\Service\AbstractAdminBlockService;
 use Sonata\BlockBundle\Model\BlockInterface;
 use Sonata\BlockBundle\Model\BlockManagerInterface;
-use Sonata\CoreBundle\Validator\ErrorElement;
 use Sonata\Form\Type\ImmutableArrayType;
+use Sonata\Form\Validator\ErrorElement;
 use Sonata\PageBundle\Admin\SharedBlockAdmin;
 use Sonata\PageBundle\Model\Block;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -35,6 +35,8 @@ use Symfony\Component\Validator\Constraints\NotBlank;
  * Render a shared block.
  *
  * @author Romain Mouillard <romain.mouillard@gmail.com>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class SharedBlockBlockService extends AbstractAdminBlockService
 {
@@ -43,21 +45,14 @@ class SharedBlockBlockService extends AbstractAdminBlockService
      */
     private $sharedBlockAdmin;
 
-    /**
-     * @var ContainerInterface
-     */
-    private $container;
+    private ContainerInterface $container;
+
+    private BlockManagerInterface $blockManager;
 
     /**
-     * @var BlockManagerInterface
-     */
-    private $blockManager;
-
-    /**
-     * @param string                $name
-     * @param EngineInterface       $templating
-     * @param ContainerInterface    $container
-     * @param BlockManagerInterface $blockManager
+     * @param string $name
+     *
+     * @psalm-suppress ContainerDependency
      */
     public function __construct($name, EngineInterface $templating, ContainerInterface $container, BlockManagerInterface $blockManager)
     {
@@ -67,10 +62,7 @@ class SharedBlockBlockService extends AbstractAdminBlockService
         $this->blockManager = $blockManager;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function execute(BlockContextInterface $blockContext, Response $response = null)
+    public function execute(BlockContextInterface $blockContext, ?Response $response = null)
     {
         $block = $blockContext->getBlock();
 
@@ -88,9 +80,6 @@ class SharedBlockBlockService extends AbstractAdminBlockService
             ], $response);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function validateBlock(ErrorElement $errorElement, BlockInterface $block)
     {
         $errorElement
@@ -99,33 +88,24 @@ class SharedBlockBlockService extends AbstractAdminBlockService
             ->end();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function buildEditForm(FormMapper $formMapper, BlockInterface $block)
+    public function buildEditForm(FormMapper $form, BlockInterface $block)
     {
         if (!$block->getSetting('blockId') instanceof BlockInterface) {
             $this->load($block);
         }
 
-        $formMapper->add('settings', ImmutableArrayType::class, [
+        $form->add('settings', ImmutableArrayType::class, [
             'keys' => [
-                [$this->getBlockBuilder($formMapper), null, []],
+                [$this->getBlockBuilder($form), null, []],
             ],
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getName()
     {
         return 'Shared Block';
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureSettings(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
@@ -134,9 +114,6 @@ class SharedBlockBlockService extends AbstractAdminBlockService
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function load(BlockInterface $block)
     {
         $sharedBlock = $block->getSetting('blockId', null);
@@ -148,17 +125,11 @@ class SharedBlockBlockService extends AbstractAdminBlockService
         $block->setSetting('blockId', $sharedBlock);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function prePersist(BlockInterface $block)
     {
         $block->setSetting('blockId', \is_object($block->getSetting('blockId')) ? $block->getSetting('blockId')->getId() : null);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function preUpdate(BlockInterface $block)
     {
         $block->setSetting('blockId', \is_object($block->getSetting('blockId')) ? $block->getSetting('blockId')->getId() : null);
@@ -177,30 +148,28 @@ class SharedBlockBlockService extends AbstractAdminBlockService
     }
 
     /**
-     * @param FormMapper $formMapper
-     *
      * @return FormBuilder
      */
-    protected function getBlockBuilder(FormMapper $formMapper)
+    protected function getBlockBuilder(FormMapper $form)
     {
         // simulate an association ...
         $fieldDescription = $this->getSharedBlockAdmin()->getModelManager()->getNewFieldDescriptionInstance($this->sharedBlockAdmin->getClass(), 'block', [
             'translation_domain' => 'SonataPageBundle',
         ]);
         $fieldDescription->setAssociationAdmin($this->getSharedBlockAdmin());
-        $fieldDescription->setAdmin($formMapper->getAdmin());
+        $fieldDescription->setAdmin($form->getAdmin());
         $fieldDescription->setOption('edit', 'list');
         $fieldDescription->setAssociationMapping([
-                'fieldName' => 'block',
-                'type' => ClassMetadataInfo::MANY_TO_ONE,
-            ]);
+            'fieldName' => 'block',
+            'type' => ClassMetadataInfo::MANY_TO_ONE,
+        ]);
 
-        return $formMapper->create('blockId', ModelListType::class, [
-                'sonata_field_description' => $fieldDescription,
-                'class' => $this->getSharedBlockAdmin()->getClass(),
-                'model_manager' => $this->getSharedBlockAdmin()->getModelManager(),
-                'label' => 'form.label_block',
-                'required' => false,
-            ]);
+        return $form->create('blockId', ModelListType::class, [
+            'sonata_field_description' => $fieldDescription,
+            'class' => $this->getSharedBlockAdmin()->getClass(),
+            'model_manager' => $this->getSharedBlockAdmin()->getModelManager(),
+            'label' => 'form.label_block',
+            'required' => false,
+        ]);
     }
 }

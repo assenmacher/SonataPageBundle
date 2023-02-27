@@ -20,53 +20,46 @@ use Symfony\Component\Console\Input\InputInterface;
 
 /**
  * @author Vincent Composieux <vincent.composieux@gmail.com>
+ *
+ * NEXT_MAJOR: Remove this class.
  */
-class BaseCommandTest extends TestCase
+final class BaseCommandTest extends TestCase
 {
-    /**
-     * @var BaseCommand
-     */
-    private $command;
+    private BaseCommand $command;
 
     /**
      * Sets up a new BaseCommand instance.
      */
-    public function setUp()
+    protected function setUp(): void
     {
-        $this->command = $this->getMockBuilder(BaseCommand::class)
-            ->disableOriginalConstructor()
-            ->setMethods(['getSiteManager'])
-            ->getMock();
+        $this->command = $this->createMock(BaseCommand::class);
     }
 
     /**
      * Tests the getSites() method with different parameters.
      */
-    public function testGetSites()
+    public function testGetSites(): void
     {
         // Given
         $method = new \ReflectionMethod($this->command, 'getSites');
         $method->setAccessible(true);
 
         $input = $this->createMock(InputInterface::class);
+        $siteManager = $this->createMock(SiteManager::class);
 
-        $siteManager = $this->getMockBuilder(SiteManager::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->command->method('getSiteManager')->willReturn($siteManager);
 
-        $this->command->expects($this->any())->method('getSiteManager')->willReturn($siteManager);
+        $input->expects(static::exactly(3))->method('getOption')->with('site')->willReturnOnConsecutiveCalls(
+            ['all'],
+            ['10'],
+            ['10', '11']
+        );
 
-        // Test --site=all value
-        $input->expects($this->at(0))->method('getOption')->with('site')->willReturn(['all']);
-        $siteManager->expects($this->at(0))->method('findBy')->with([]);
-
-        // Test --site=10 value
-        $input->expects($this->at(1))->method('getOption')->with('site')->willReturn(['10']);
-        $siteManager->expects($this->at(1))->method('findBy')->with(['id' => 10]);
-
-        // Test --site=10 --site=11 value
-        $input->expects($this->at(2))->method('getOption')->with('site')->willReturn(['10', '11']);
-        $siteManager->expects($this->at(2))->method('findBy')->with(['id' => [10, 11]]);
+        $siteManager->expects(static::exactly(3))->method('findBy')->withConsecutive(
+            [[]],
+            [['id' => 10]],
+            [['id' => [10, 11]]]
+        );
 
         $method->invoke($this->command, $input);
         $method->invoke($this->command, $input);

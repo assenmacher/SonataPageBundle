@@ -36,12 +36,12 @@ abstract class Snapshot implements SnapshotInterface
     protected $routeName;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $pageAlias;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $type;
 
@@ -51,22 +51,22 @@ abstract class Snapshot implements SnapshotInterface
     protected $name;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected $url;
 
     /**
-     * @var
+     * @var bool
      */
     protected $enabled;
 
     /**
-     * @var \DateTime
+     * @var \DateTime|null
      */
     protected $publicationDateStart;
 
     /**
-     * @var \DateTime
+     * @var \DateTime|null
      */
     protected $publicationDateEnd;
 
@@ -86,7 +86,7 @@ abstract class Snapshot implements SnapshotInterface
     protected $content = [];
 
     /**
-     * @var PageInterface
+     * @var PageInterface|null
      */
     protected $page;
 
@@ -101,375 +101,311 @@ abstract class Snapshot implements SnapshotInterface
     protected $parent;
 
     /**
-     * @var int
+     * @var int|null
      */
     protected $parentId;
 
     /**
-     * @deprecated since version 2.4 and will be removed in 3.0
+     * @deprecated since sonata-project/page-bundle 2.4 and will be removed in 4.0
      */
     protected $sources;
 
+    /**
+     * @var PageInterface|null
+     *
+     * NEXT_MAJOR: Remove this method and remember to remove the field definition at "src/Resources/config/doctrine/BaseSnapshot.orm.xml"
+     *
+     * @deprecated since 3.27 and it will be removed on 4.0
+     */
     protected $target;
 
+    /**
+     * @var int|null
+     *
+     * NEXT_MAJOR: Remove this method
+     *
+     * @deprecated since 3.27 and it will be removed on 4.0
+     */
     protected $targetId;
 
     /**
-     * @var SiteInterface
+     * @var SiteInterface|null
      */
     protected $site;
 
-    /**
-     * {@inheritdoc}
-     */
     public function __toString()
     {
         return $this->getName() ?: '-';
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setRouteName($routeName)
     {
         $this->routeName = $routeName;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getRouteName()
     {
         return $this->routeName;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setPageAlias($pageAlias)
     {
         $this->pageAlias = $pageAlias;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPageAlias()
     {
         return $this->pageAlias;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setType($type)
     {
         $this->type = $type;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getType()
     {
         return $this->type;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setEnabled($enabled)
     {
         $this->enabled = $enabled;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getEnabled()
     {
         return $this->enabled;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setName($name)
     {
         $this->name = $name;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getName()
     {
         return $this->name;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setPublicationDateStart(\DateTime $publicationDateStart = null)
+    public function setPublicationDateStart(?\DateTime $publicationDateStart = null)
     {
         $this->publicationDateStart = $publicationDateStart;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPublicationDateStart()
     {
         return $this->publicationDateStart;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setPublicationDateEnd(\DateTime $publicationDateEnd = null)
+    public function setPublicationDateEnd(?\DateTime $publicationDateEnd = null)
     {
         $this->publicationDateEnd = $publicationDateEnd;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPublicationDateEnd()
     {
         return $this->publicationDateEnd;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setCreatedAt(\DateTime $createdAt = null)
+    public function setCreatedAt(?\DateTime $createdAt = null)
     {
         $this->createdAt = $createdAt;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getCreatedAt()
     {
         return $this->createdAt;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setUpdatedAt(\DateTime $updatedAt = null)
+    public function setUpdatedAt(?\DateTime $updatedAt = null)
     {
         $this->updatedAt = $updatedAt;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getUpdatedAt()
     {
         return $this->updatedAt;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setDecorate($decorate)
     {
         $this->decorate = $decorate;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getDecorate()
     {
         return $this->decorate;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isHybrid()
     {
-        return self::PAGE_ROUTE_CMS_NAME !== $this->getRouteName();
+        return PageInterface::PAGE_ROUTE_CMS_NAME !== $this->getRouteName();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setPosition($position)
     {
         $this->position = $position;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPosition()
     {
         return $this->position;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setContent($content)
     {
         $this->content = $content;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getContent()
     {
         return $this->content;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setPage(PageInterface $page = null)
+    public function setPage(?PageInterface $page = null)
     {
         $this->page = $page;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPage()
     {
         return $this->page;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setChildren($children)
     {
         $this->children = $children;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getChildren()
     {
         return $this->children;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setParent($parent)
     {
         $this->parent = $parent;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getParent()
     {
         return $this->parent;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setParentId($parentId)
     {
         $this->parentId = $parentId;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getParentId()
     {
         return $this->parentId;
     }
 
     /**
-     * @deprecated since version 2.4 and will be removed in 3.0
+     * NEXT_MAJOR: Remove this method.
+     *
+     * @deprecated since sonata-project/page-bundle 2.4 and will be removed in 4.0
      */
     public function setSources($sources)
     {
-        @trigger_error('The '.__METHOD__.' method is deprecated since version 2.4 and will be removed in 3.0.', E_USER_DEPRECATED);
+        @trigger_error('The '.__METHOD__.' method is deprecated since version 2.4 and will be removed in 3.0.', \E_USER_DEPRECATED);
 
         $this->sources = $sources;
     }
 
     /**
-     * @deprecated since version 2.4 and will be removed in 3.0
+     * NEXT_MAJOR: Remove this method.
+     *
+     * @deprecated since sonata-project/page-bundle 2.4 and will be removed in 4.0
      */
     public function getSource()
     {
-        @trigger_error('The '.__METHOD__.' method is deprecated since version 2.4 and will be removed in 3.0.', E_USER_DEPRECATED);
+        @trigger_error('The '.__METHOD__.' method is deprecated since version 2.4 and will be removed in 3.0.', \E_USER_DEPRECATED);
 
         return $this->sources;
     }
 
     /**
-     * {@inheritdoc}
+     * NEXT_MAJOR: Remove this method.
+     *
+     * @deprecated since 3.27 and it will be removed on 4.0
      */
     public function setTarget($target)
     {
+        @trigger_error(
+            'target page is deprecate since sonata-project/page-bundle 3.27.0'.
+            ', and it will be removed in 4.0',
+            \E_USER_DEPRECATED
+        );
+
         $this->target = $target;
     }
 
     /**
-     * {@inheritdoc}
+     * NEXT_MAJOR: Remove this method.
+     *
+     * @deprecated since 3.27 and it will be removed on 4.0
      */
     public function getTarget()
     {
+        @trigger_error(
+            'target page is deprecate since sonata-project/page-bundle 3.27.0'.
+            ', and it will be removed in 4.0',
+            \E_USER_DEPRECATED
+        );
+
         return $this->target;
     }
 
     /**
-     * {@inheritdoc}
+     * NEXT_MAJOR: Remove this method.
+     *
+     * @deprecated since 3.27 and it will be removed on 4.0
      */
     public function setTargetId($targetId)
     {
+        @trigger_error(
+            'target page is deprecate since sonata-project/page-bundle 3.27.0'.
+            ', and it will be removed in 4.0',
+            \E_USER_DEPRECATED
+        );
+
         $this->targetId = $targetId;
     }
 
     /**
-     * {@inheritdoc}
+     * NEXT_MAJOR: Remove this method.
+     *
+     * @deprecated since 3.27 and it will be removed on 4.0
      */
     public function getTargetId()
     {
+        @trigger_error(
+            'target page is deprecate since sonata-project/page-bundle 3.27.0'.
+            ', and it will be removed in 4.0',
+            \E_USER_DEPRECATED
+        );
+
         return $this->targetId;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setUrl($url)
     {
         $this->url = $url;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getUrl()
     {
         return $this->url;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function setSite(SiteInterface $site)
+    public function setSite(?SiteInterface $site = null)
     {
         $this->site = $site;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getSite()
     {
         return $this->site;

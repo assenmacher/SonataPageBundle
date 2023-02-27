@@ -18,10 +18,6 @@ interface SnapshotPageProxyFactoryInterface
     /**
      * Create snapshot instance.
      *
-     * @param SnapshotManagerInterface $manager
-     * @param TransformerInterface     $transformer
-     * @param SnapshotInterface        $snapshot
-     *
      * @return SnapshotPageProxyInterface
      */
     public function create(SnapshotManagerInterface $manager, TransformerInterface $transformer, SnapshotInterface $snapshot);

@@ -20,38 +20,42 @@ use Symfony\Bundle\TwigBundle\DependencyInjection\TwigExtension;
 /**
  * @author Rémi Marseille <marseille@ekino.com>
  */
-class SonataPageExtensionTest extends AbstractExtensionTestCase
+final class SonataPageExtensionTest extends AbstractExtensionTestCase
 {
-    public function testRequestContextServiceIsDefined()
+    public function testRequestContextServiceIsDefined(): void
     {
-        $this->container->setParameter('kernel.bundles', []);
+        $this->container->setParameter('kernel.bundles', ['SonataDoctrineBundle' => true]);
         $this->load();
         $this->assertContainerBuilderHasService('sonata.page.router.request_context');
     }
 
-    public function testApiServicesAreDefinedWhenSpecificBundlesArePresent()
+    public function testApiServicesAreDefinedWhenSpecificBundlesArePresent(): void
     {
         $this->container->setParameter('kernel.bundles', [
-            'FOSRestBundle' => 42,
-            'NelmioApiDocBundle' => 42,
+            'FOSRestBundle' => true,
+            'NelmioApiDocBundle' => true,
+            'SonataDoctrineBundle' => true,
+            'JMSSerializerBundle' => true,
         ]);
         $this->load();
         $this->assertContainerBuilderHasService('sonata.page.serializer.handler.page');
     }
 
-    public function testAdminServicesAreDefinedWhenAdminBundlesIsPresent()
+    public function testAdminServicesAreDefinedWhenAdminBundlesIsPresent(): void
     {
         $this->container->setParameter('kernel.bundles', [
-            'SonataAdminBundle' => 42,
+            'SonataAdminBundle' => true,
+            'SonataDoctrineBundle' => true,
         ]);
         $this->load();
         $this->assertContainerBuilderHasService('sonata.page.admin.page');
     }
 
-    public function testRouterAutoRegister()
+    public function testRouterAutoRegister(): void
     {
         $this->container->setParameter('kernel.bundles', [
-            'CmfRouterBundle' => 42,
+            'CmfRouterBundle' => true,
+            'SonataDoctrineBundle' => true,
         ]);
         $this->load([
             'router_auto_register' => [
@@ -63,9 +67,13 @@ class SonataPageExtensionTest extends AbstractExtensionTestCase
         $this->assertContainerBuilderHasParameter('sonata.page.router_auto_register.priority', 84);
     }
 
-    public function testDatePickerFormTheme()
+    public function testDatePickerFormThemeFromSonataCore(): void
     {
-        $this->container->setParameter('kernel.bundles', []);
+        $this->container->setParameter('kernel.bundles', [
+            'SonataCoreBundle' => true,
+            'SonataFormBundle' => true,
+            'SonataDoctrineBundle' => true,
+        ]);
         $this->container->setParameter('kernel.bundles_metadata', []);
         $this->container->setParameter('kernel.project_dir', __DIR__);
         $this->container->setParameter('kernel.root_dir', __DIR__);
@@ -73,18 +81,37 @@ class SonataPageExtensionTest extends AbstractExtensionTestCase
         $this->container->registerExtension(new TwigExtension());
 
         $this->container->compile();
-        $this->assertTrue(\in_array(
+        static::assertContains(
             '@SonataCore/Form/datepicker.html.twig',
-            $this->container->getParameter('twig.form.resources'), true
-        ));
+            $this->container->getParameter('twig.form.resources')
+        );
     }
 
-    protected function getContainerExtensions()
+    public function testDatePickerFormThemeFromSonataForm(): void
+    {
+        $this->container->setParameter('kernel.bundles', [
+            'SonataFormBundle' => true,
+            'SonataDoctrineBundle' => true,
+        ]);
+        $this->container->setParameter('kernel.bundles_metadata', []);
+        $this->container->setParameter('kernel.project_dir', __DIR__);
+        $this->container->setParameter('kernel.root_dir', __DIR__);
+        $this->container->setParameter('kernel.debug', false);
+        $this->container->registerExtension(new TwigExtension());
+
+        $this->container->compile();
+        static::assertContains(
+            '@SonataForm/Form/datepicker.html.twig',
+            $this->container->getParameter('twig.form.resources')
+        );
+    }
+
+    protected function getContainerExtensions(): array
     {
         return [new SonataPageExtension()];
     }
 
-    protected function getMinimalConfiguration()
+    protected function getMinimalConfiguration(): array
     {
         return [
             'multisite' => 'host',

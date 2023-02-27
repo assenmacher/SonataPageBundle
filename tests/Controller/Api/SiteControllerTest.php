@@ -26,33 +26,37 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
+ * NEXT_MAJOR: Remove this class.
+ *
  * @author Benoit de Jacobet <benoit.de-jacobet@ekino.com>
+ *
+ * @group legacy
  */
-class SiteControllerTest extends TestCase
+final class SiteControllerTest extends TestCase
 {
-    public function testGetSitesAction()
+    public function testGetSitesAction(): void
     {
         $siteManager = $this->createMock(SiteManagerInterface::class);
-        $siteManager->expects($this->once())->method('getPager')->willReturn([]);
+        $siteManager->expects(static::once())->method('getPager')->willReturn([]);
 
         $paramFetcher = $this->getMockBuilder(ParamFetcherInterface::class)
             ->setMethods(['setController', 'get', 'all'])
             ->getMock();
 
-        $paramFetcher->expects($this->exactly(3))->method('get');
-        $paramFetcher->expects($this->once())->method('all')->willReturn([]);
+        $paramFetcher->expects(static::exactly(3))->method('get');
+        $paramFetcher->expects(static::once())->method('all')->willReturn([]);
 
-        $this->assertSame([], $this->createSiteController(null, $siteManager)->getSitesAction($paramFetcher));
+        static::assertSame([], $this->createSiteController(null, $siteManager)->getSitesAction($paramFetcher));
     }
 
-    public function testGetSiteAction()
+    public function testGetSiteAction(): void
     {
         $site = $this->createMock(SiteInterface::class);
 
-        $this->assertSame($site, $this->createSiteController($site)->getSiteAction(1));
+        static::assertSame($site, $this->createSiteController($site)->getSiteAction(1));
     }
 
-    public function testGetSiteActionNotFoundException()
+    public function testGetSiteActionNotFoundException(): void
     {
         $this->expectException(NotFoundHttpException::class);
         $this->expectExceptionMessage('Site (1) not found');
@@ -60,102 +64,102 @@ class SiteControllerTest extends TestCase
         $this->createSiteController()->getSiteAction(1);
     }
 
-    public function testPostSiteAction()
+    public function testPostSiteAction(): void
     {
         $site = $this->createMock(SiteInterface::class);
 
         $siteManager = $this->createMock(SiteManagerInterface::class);
-        $siteManager->expects($this->once())->method('save')->willReturn($site);
+        $siteManager->expects(static::once())->method('save')->willReturn($site);
 
         $form = $this->createMock(Form::class);
-        $form->expects($this->once())->method('handleRequest');
-        $form->expects($this->once())->method('isValid')->willReturn(true);
-        $form->expects($this->once())->method('getData')->willReturn($site);
+        $form->expects(static::once())->method('handleRequest');
+        $form->expects(static::once())->method('isValid')->willReturn(true);
+        $form->expects(static::once())->method('getData')->willReturn($site);
 
         $formFactory = $this->createMock(FormFactoryInterface::class);
-        $formFactory->expects($this->once())->method('createNamed')->willReturn($form);
+        $formFactory->expects(static::once())->method('createNamed')->willReturn($form);
 
         $view = $this->createSiteController(null, $siteManager, $formFactory)->postSiteAction(new Request());
 
-        $this->assertInstanceOf(View::class, $view);
+        static::assertInstanceOf(View::class, $view);
     }
 
-    public function testPostSiteInvalidAction()
+    public function testPostSiteInvalidAction(): void
     {
         $site = $this->createMock(SiteInterface::class);
 
         $siteManager = $this->createMock(SiteManagerInterface::class);
-        $siteManager->expects($this->never())->method('save')->willReturn($site);
+        $siteManager->expects(static::never())->method('save')->willReturn($site);
 
         $form = $this->createMock(Form::class);
-        $form->expects($this->once())->method('handleRequest');
-        $form->expects($this->once())->method('isValid')->willReturn(false);
+        $form->expects(static::once())->method('handleRequest');
+        $form->expects(static::once())->method('isValid')->willReturn(false);
 
         $formFactory = $this->createMock(FormFactoryInterface::class);
-        $formFactory->expects($this->once())->method('createNamed')->willReturn($form);
+        $formFactory->expects(static::once())->method('createNamed')->willReturn($form);
 
         $view = $this->createSiteController(null, $siteManager, $formFactory)->postSiteAction(new Request());
 
-        $this->assertInstanceOf(FormInterface::class, $view);
+        static::assertInstanceOf(FormInterface::class, $view);
     }
 
-    public function testPutSiteAction()
+    public function testPutSiteAction(): void
     {
         $site = $this->createMock(SiteInterface::class);
 
         $siteManager = $this->createMock(SiteManagerInterface::class);
-        $siteManager->expects($this->once())->method('save')->willReturn($site);
+        $siteManager->expects(static::once())->method('save')->willReturn($site);
 
         $form = $this->createMock(Form::class);
-        $form->expects($this->once())->method('handleRequest');
-        $form->expects($this->once())->method('isValid')->willReturn(true);
-        $form->expects($this->once())->method('getData')->willReturn($site);
+        $form->expects(static::once())->method('handleRequest');
+        $form->expects(static::once())->method('isValid')->willReturn(true);
+        $form->expects(static::once())->method('getData')->willReturn($site);
 
         $formFactory = $this->createMock(FormFactoryInterface::class);
-        $formFactory->expects($this->once())->method('createNamed')->willReturn($form);
+        $formFactory->expects(static::once())->method('createNamed')->willReturn($form);
 
         $view = $this->createSiteController($site, $siteManager, $formFactory)->putSiteAction(1, new Request());
 
-        $this->assertInstanceOf(View::class, $view);
+        static::assertInstanceOf(View::class, $view);
     }
 
-    public function testPutSiteInvalidAction()
+    public function testPutSiteInvalidAction(): void
     {
         $site = $this->createMock(SiteInterface::class);
 
         $siteManager = $this->createMock(SiteManagerInterface::class);
-        $siteManager->expects($this->never())->method('save')->willReturn($site);
+        $siteManager->expects(static::never())->method('save')->willReturn($site);
 
         $form = $this->createMock(Form::class);
-        $form->expects($this->once())->method('handleRequest');
-        $form->expects($this->once())->method('isValid')->willReturn(false);
+        $form->expects(static::once())->method('handleRequest');
+        $form->expects(static::once())->method('isValid')->willReturn(false);
 
         $formFactory = $this->createMock(FormFactoryInterface::class);
-        $formFactory->expects($this->once())->method('createNamed')->willReturn($form);
+        $formFactory->expects(static::once())->method('createNamed')->willReturn($form);
 
         $view = $this->createSiteController($site, $siteManager, $formFactory)->putSiteAction(1, new Request());
 
-        $this->assertInstanceOf(FormInterface::class, $view);
+        static::assertInstanceOf(FormInterface::class, $view);
     }
 
-    public function testDeleteSiteAction()
+    public function testDeleteSiteAction(): void
     {
         $site = $this->createMock(SiteInterface::class);
 
         $siteManager = $this->createMock(SiteManagerInterface::class);
-        $siteManager->expects($this->once())->method('delete');
+        $siteManager->expects(static::once())->method('delete');
 
         $view = $this->createSiteController($site, $siteManager)->deleteSiteAction(1);
 
-        $this->assertSame(['deleted' => true], $view);
+        static::assertSame(['deleted' => true], $view);
     }
 
-    public function testDeleteSiteInvalidAction()
+    public function testDeleteSiteInvalidAction(): void
     {
         $this->expectException(NotFoundHttpException::class);
 
         $siteManager = $this->createMock(SiteManagerInterface::class);
-        $siteManager->expects($this->never())->method('delete');
+        $siteManager->expects(static::never())->method('delete');
 
         $this->createSiteController(null, $siteManager)->deleteSiteAction(1);
     }
@@ -166,7 +170,7 @@ class SiteControllerTest extends TestCase
             $siteManager = $this->createMock(SiteManagerInterface::class);
         }
         if (null !== $site) {
-            $siteManager->expects($this->once())->method('findOneBy')->willReturn($site);
+            $siteManager->expects(static::once())->method('findOneBy')->willReturn($site);
         }
         if (null === $formFactory) {
             $formFactory = $this->createMock(FormFactoryInterface::class);

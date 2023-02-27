@@ -26,6 +26,8 @@ use Symfony\Component\Routing\RouterInterface;
  * to handle the page rendering but it may also implement an alternate rendering method.
  *
  * @author Olivier Paradis <paradis.olivier@gmail.com>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class PageServiceManager implements PageServiceManagerInterface
 {
@@ -52,17 +54,11 @@ class PageServiceManager implements PageServiceManagerInterface
         $this->router = $router;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function add($type, PageServiceInterface $service)
     {
         $this->services[$type] = $service;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function get($type)
     {
         if ($type instanceof PageInterface) {
@@ -80,26 +76,17 @@ class PageServiceManager implements PageServiceManagerInterface
         return $this->services[$type];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getAll()
     {
         return $this->services;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setDefault(PageServiceInterface $service)
     {
         $this->default = $service;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function execute(PageInterface $page, Request $request, array $parameters = [], Response $response = null)
+    public function execute(PageInterface $page, Request $request, array $parameters = [], ?Response $response = null)
     {
         $service = $this->get($page);
 
@@ -120,13 +107,20 @@ class PageServiceManager implements PageServiceManagerInterface
     /**
      * Creates a base response for given page.
      *
-     * @param PageInterface $page
-     *
      * @return Response
+     *
+     * @deprecated since 3.27, and it will be removed in 4.0.
+     *
+     * NEXT_MAJOR: Remove this method, and move the response for the method above.
      */
     protected function createResponse(PageInterface $page)
     {
         if ($page->getTarget()) {
+            @trigger_error(
+                'target page is deprecate since sonata-project/page-bundle 3.27.0'.
+                ', and it will be removed in 4.0',
+                \E_USER_DEPRECATED
+            );
             $page->addHeader('Location', $this->router->generate($page->getTarget()));
             $response = new Response('', 302, $page->getHeaders() ?: []);
         } else {

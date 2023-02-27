@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Sonata\PageBundle\Entity;
 
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ManagerRegistry;
 use Sonata\DatagridBundle\Pager\Doctrine\Pager;
 use Sonata\DatagridBundle\ProxyQuery\Doctrine\ProxyQuery;
 use Sonata\Doctrine\Entity\BaseEntityManager;
@@ -26,6 +26,8 @@ use Sonata\PageBundle\Model\SiteInterface;
  * This class manages PageInterface persistency with the Doctrine ORM.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class PageManager extends BaseEntityManager implements PageManagerInterface
 {
@@ -40,10 +42,7 @@ class PageManager extends BaseEntityManager implements PageManagerInterface
     protected $defaults;
 
     /**
-     * @param string          $class
-     * @param ManagerRegistry $registry
-     * @param array           $defaults
-     * @param array           $pageDefaults
+     * @param string $class
      */
     public function __construct($class, ManagerRegistry $registry, array $defaults = [], array $pageDefaults = [])
     {
@@ -53,9 +52,6 @@ class PageManager extends BaseEntityManager implements PageManagerInterface
         $this->pageDefaults = $pageDefaults;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPageByUrl(SiteInterface $site, $url)
     {
         return $this->findOneBy([
@@ -65,7 +61,9 @@ class PageManager extends BaseEntityManager implements PageManagerInterface
     }
 
     /**
-     * {@inheritdoc}
+     * NEXT_MAJOR: remove this method.
+     *
+     * @deprecated since sonata-project/page-bundle 3.24, to be removed in 4.0.
      */
     public function getPager(array $criteria, $page, $limit = 10, array $sort = [])
     {
@@ -131,9 +129,6 @@ class PageManager extends BaseEntityManager implements PageManagerInterface
         return $pager;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function create(array $defaults = [])
     {
         // create a new page for this routing
@@ -155,9 +150,6 @@ class PageManager extends BaseEntityManager implements PageManagerInterface
         return $page;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function fixUrl(PageInterface $page)
     {
         if ($page->isInternal()) {
@@ -195,23 +187,17 @@ class PageManager extends BaseEntityManager implements PageManagerInterface
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function save($page, $andFlush = true)
+    public function save($entity, $andFlush = true)
     {
-        if (!$page->isHybrid()) {
-            $this->fixUrl($page);
+        if (!$entity->isHybrid()) {
+            $this->fixUrl($entity);
         }
 
-        parent::save($page, $andFlush);
+        parent::save($entity, $andFlush);
 
-        return $page;
+        return $entity;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function loadPages(SiteInterface $site)
     {
         $pages = $this->getEntityManager()
@@ -234,9 +220,7 @@ class PageManager extends BaseEntityManager implements PageManagerInterface
     }
 
     /**
-     * @param SiteInterface $site
-     *
-     * @return mixed
+     * @return PageInterface[]
      */
     public function getHybridPages(SiteInterface $site)
     {

@@ -17,6 +17,7 @@ use Knp\Menu\FactoryInterface;
 use Knp\Menu\ItemInterface;
 use Knp\Menu\Provider\MenuProviderInterface;
 use Sonata\BlockBundle\Block\BlockContextInterface;
+use Sonata\BlockBundle\Meta\Metadata;
 use Sonata\PageBundle\CmsManager\CmsManagerSelectorInterface;
 use Sonata\PageBundle\Model\PageInterface;
 use Sonata\SeoBundle\Block\Breadcrumb\BaseBreadcrumbMenuBlockService;
@@ -26,6 +27,8 @@ use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
  * BlockService for homepage breadcrumb.
  *
  * @author Sylvain Deloux <sylvain.deloux@ekino.com>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class BreadcrumbBlockService extends BaseBreadcrumbMenuBlockService
 {
@@ -35,12 +38,8 @@ class BreadcrumbBlockService extends BaseBreadcrumbMenuBlockService
     protected $cmsSelector;
 
     /**
-     * @param string                      $context
-     * @param string                      $name
-     * @param EngineInterface             $templating
-     * @param MenuProviderInterface       $menuProvider
-     * @param FactoryInterface            $factory
-     * @param CmsManagerSelectorInterface $cmsSelector
+     * @param string $context
+     * @param string $name
      */
     public function __construct($context, $name, EngineInterface $templating, MenuProviderInterface $menuProvider, FactoryInterface $factory, CmsManagerSelectorInterface $cmsSelector)
     {
@@ -49,17 +48,18 @@ class BreadcrumbBlockService extends BaseBreadcrumbMenuBlockService
         parent::__construct($context, $name, $templating, $menuProvider, $factory);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getName()
     {
         return 'sonata.page.block.breadcrumb';
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    public function getBlockMetadata($code = null)
+    {
+        return new Metadata($this->getName(), $code ?? $this->getName(), false, 'SonataPageBundle', [
+            'class' => 'fa fa-bars',
+        ]);
+    }
+
     protected function getMenu(BlockContextInterface $blockContext)
     {
         $blockContext->setSetting('include_homepage_link', false);

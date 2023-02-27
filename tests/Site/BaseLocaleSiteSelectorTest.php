@@ -27,15 +27,10 @@ abstract class BaseLocaleSiteSelectorTest extends TestCase
      */
     protected $siteSelector;
 
-    protected function setUp()
-    {
-        throw new \RuntimeException('You must define a setUp method to initialize the site selector.');
-    }
-
     /**
      * Cleanups the site selector.
      */
-    protected function tearDown()
+    protected function tearDown(): void
     {
         unset($this->siteSelector);
     }
@@ -45,7 +40,7 @@ abstract class BaseLocaleSiteSelectorTest extends TestCase
      *
      * @return Site[]
      */
-    protected function getSites()
+    protected function getSites(): array
     {
         $sites = [];
 
@@ -68,16 +63,14 @@ abstract class BaseLocaleSiteSelectorTest extends TestCase
 
     /**
      * Gets the site from site selector.
-     *
-     * @return Site|null
      */
-    protected function getSite()
+    protected function getSite(): ?Site
     {
         return $this->siteSelector->retrieve();
     }
 }
 
-class Site extends BaseSite
+final class Site extends BaseSite
 {
     /**
      * @var int
@@ -85,8 +78,6 @@ class Site extends BaseSite
     protected $id;
 
     /**
-     * Get id.
-     *
      * @return int $id
      */
     public function getId()

@@ -18,6 +18,7 @@ use Sonata\PageBundle\DependencyInjection\Compiler\CacheCompilerPass;
 use Sonata\PageBundle\DependencyInjection\Compiler\CmfRouterCompilerPass;
 use Sonata\PageBundle\DependencyInjection\Compiler\GlobalVariablesCompilerPass;
 use Sonata\PageBundle\DependencyInjection\Compiler\PageServiceCompilerPass;
+use Sonata\PageBundle\DependencyInjection\Compiler\TwigStringExtensionCompilerPass;
 use Sonata\PageBundle\Form\Type\ApiBlockType;
 use Sonata\PageBundle\Form\Type\ApiPageType;
 use Sonata\PageBundle\Form\Type\ApiSiteType;
@@ -26,6 +27,7 @@ use Sonata\PageBundle\Form\Type\PageSelectorType;
 use Sonata\PageBundle\Form\Type\PageTypeChoiceType;
 use Sonata\PageBundle\Form\Type\TemplateChoiceType;
 use Symfony\Cmf\Bundle\RoutingBundle\Form\Type\RouteTypeType;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
@@ -33,31 +35,25 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
  * SonataPageBundle.
  *
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
+ *
+ * @final since sonata-project/page-bundle 3.26
  */
 class SonataPageBundle extends Bundle
 {
-    /**
-     * {@inheritdoc}
-     */
     public function init()
     {
         $this->registerFormMapping();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function build(ContainerBuilder $container)
     {
         $container->addCompilerPass(new CacheCompilerPass());
         $container->addCompilerPass(new GlobalVariablesCompilerPass());
         $container->addCompilerPass(new PageServiceCompilerPass());
         $container->addCompilerPass(new CmfRouterCompilerPass());
+        $container->addCompilerPass(new TwigStringExtensionCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 1);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function boot()
     {
         $this->registerFormMapping();
@@ -77,12 +73,12 @@ class SonataPageBundle extends Bundle
             } else {
                 @trigger_error(
                     'The "sonata.core.slugify.native" service is deprecated since 2.3.9, to be removed in 4.0. '.
-                    'Use "sonata.core.slugify.cocur" service through config instead.',
-                    E_USER_DEPRECATED
+                    'Use "sonata.page.slugify.cocur" service through config instead.',
+                    \E_USER_DEPRECATED
                 );
 
-                // default BC value, you should use sonata.core.slugify.cocur
-                $id = 'sonata.core.slugify.native';
+                // default BC value, you should use sonata.page.slugify.cocur
+                $id = 'sonata.page.slugify.cocur';
             }
 
             $service = $container->get($id);
@@ -93,18 +89,22 @@ class SonataPageBundle extends Bundle
 
     /**
      * Register form mapping information.
+     *
+     * NEXT_MAJOR: remove this method
      */
     public function registerFormMapping()
     {
-        FormHelper::registerFormTypeMapping([
-            'sonata_page_api_form_site' => ApiSiteType::class,
-            'sonata_page_api_form_page' => ApiPageType::class,
-            'sonata_page_api_form_block' => ApiBlockType::class,
-            'sonata_page_selector' => PageSelectorType::class,
-            'sonata_page_create_snapshot' => CreateSnapshotType::class,
-            'sonata_page_template' => TemplateChoiceType::class,
-            'sonata_page_type_choice' => PageTypeChoiceType::class,
-            'cmf_routing_route_type' => RouteTypeType::class,
-        ]);
+        if (class_exists(FormHelper::class)) {
+            FormHelper::registerFormTypeMapping([
+                'sonata_page_api_form_site' => ApiSiteType::class,
+                'sonata_page_api_form_page' => ApiPageType::class,
+                'sonata_page_api_form_block' => ApiBlockType::class,
+                'sonata_page_selector' => PageSelectorType::class,
+                'sonata_page_create_snapshot' => CreateSnapshotType::class,
+                'sonata_page_template' => TemplateChoiceType::class,
+                'sonata_page_type_choice' => PageTypeChoiceType::class,
+                'cmf_routing_route_type' => RouteTypeType::class,
+            ]);
+        }
     }
 }

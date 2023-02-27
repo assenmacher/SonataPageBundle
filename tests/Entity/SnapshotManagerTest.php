@@ -13,13 +13,21 @@ declare(strict_types=1);
 
 namespace Sonata\PageBundle\Tests\Entity;
 
-use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\ORM\AbstractQuery;
+use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\Mapping\ClassMetadataFactory;
+use Doctrine\ORM\Query;
+use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\ORM\UnitOfWork;
+use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Persistence\Mapping\MappingException;
 use PHPUnit\Framework\TestCase;
 use Sonata\PageBundle\Entity\BaseSnapshot;
 use Sonata\PageBundle\Entity\SnapshotManager;
@@ -28,10 +36,11 @@ use Sonata\PageBundle\Model\SnapshotInterface;
 use Sonata\PageBundle\Model\SnapshotPageProxyFactoryInterface;
 use Sonata\PageBundle\Model\SnapshotPageProxyInterface;
 use Sonata\PageBundle\Model\TransformerInterface;
+use Sonata\PageBundle\Tests\App\Entity\SonataPageSnapshot;
 
-class SnapshotManagerTest extends TestCase
+final class SnapshotManagerTest extends TestCase
 {
-    public function testSetTemplates()
+    public function testSetTemplates(): void
     {
         $manager = $this->getMockBuilder(SnapshotManager::class)
             // we need to set at least one method, which does not need to exist!
@@ -41,194 +50,164 @@ class SnapshotManagerTest extends TestCase
                 'fooBar',
             ])
             ->disableOriginalConstructor()
-            ->getMock()
-        ;
+            ->getMock();
 
-        $this->assertSame([], $manager->getTemplates());
+        static::assertSame([], $manager->getTemplates());
 
         $manager->setTemplates(['foo' => 'bar']);
 
-        $this->assertSame(['foo' => 'bar'], $manager->getTemplates());
+        static::assertSame(['foo' => 'bar'], $manager->getTemplates());
     }
 
-    public function testGetTemplates()
+    public function testGetTemplates(): void
     {
         $manager = $this->getMockBuilder(SnapshotManager::class)
             ->setMethods([
                 'setTemplates',
             ])
             ->disableOriginalConstructor()
-            ->getMock()
-        ;
+            ->getMock();
 
         $managerReflection = new \ReflectionClass($manager);
         $templates = $managerReflection->getProperty('templates');
         $templates->setAccessible(true);
         $templates->setValue($manager, ['foo' => 'bar']);
 
-        $this->assertSame(['foo' => 'bar'], $manager->getTemplates());
+        static::assertSame(['foo' => 'bar'], $manager->getTemplates());
     }
 
-    public function testGetTemplate()
+    public function testGetTemplate(): void
     {
         $manager = $this->getMockBuilder(SnapshotManager::class)
             ->setMethods([
                 'setTemplates',
             ])
             ->disableOriginalConstructor()
-            ->getMock()
-        ;
+            ->getMock();
 
         $managerReflection = new \ReflectionClass($manager);
         $templates = $managerReflection->getProperty('templates');
         $templates->setAccessible(true);
         $templates->setValue($manager, ['foo' => 'bar']);
 
-        $this->assertSame('bar', $manager->getTemplate('foo'));
+        static::assertSame('bar', $manager->getTemplate('foo'));
     }
 
-    public function testGetTemplatesException()
+    public function testGetTemplatesException(): void
     {
         $manager = $this->getMockBuilder(SnapshotManager::class)
             ->setMethods([
                 'setTemplates',
             ])
             ->disableOriginalConstructor()
-            ->getMock()
-        ;
+            ->getMock();
 
-        $this->expectException('RuntimeException');
+        $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('No template references with the code : foo');
 
         $manager->getTemplate('foo');
     }
 
-    public function testGetPager()
-    {
-        $self = $this;
-        $this
-            ->getSnapshotManager(static function ($qb) use ($self) {
-                $qb->expects($self->never())->method('andWhere');
-                $qb->expects($self->once())->method('setParameters')->with([]);
-            })
-            ->getPager([], 1);
-    }
-
-    public function testGetPagerWithEnabledSnapshots()
-    {
-        $self = $this;
-        $this
-            ->getSnapshotManager(static function ($qb) use ($self) {
-                $qb->expects($self->once())->method('andWhere')->with($self->equalTo('s.enabled = :enabled'));
-                $qb->expects($self->once())->method('setParameters')->with($self->equalTo(['enabled' => true]));
-            })
-            ->getPager(['enabled' => true], 1);
-    }
-
-    public function testGetPagerWithDisabledSnapshots()
-    {
-        $self = $this;
-        $this
-            ->getSnapshotManager(static function ($qb) use ($self) {
-                $qb->expects($self->once())->method('andWhere')->with($self->equalTo('s.enabled = :enabled'));
-                $qb->expects($self->once())->method('setParameters')->with($self->equalTo(['enabled' => false]));
-            })
-            ->getPager(['enabled' => false], 1);
-    }
-
-    public function testGetPagerWithRootSnapshots()
-    {
-        $self = $this;
-        $this
-            ->getSnapshotManager(static function ($qb) use ($self) {
-                $qb->expects($self->once())->method('andWhere')->with($self->equalTo('s.parent IS NULL'));
-            })
-            ->getPager(['root' => true], 1);
-    }
-
-    public function testGetPagerWithNonRootSnapshots()
-    {
-        $self = $this;
-        $this
-            ->getSnapshotManager(static function ($qb) use ($self) {
-                $qb->expects($self->once())->method('andWhere')->with($self->equalTo('s.parent IS NOT NULL'));
-            })
-            ->getPager(['root' => false], 1);
-    }
-
-    public function testGetPagerWithParentChildSnapshots()
-    {
-        $self = $this;
-        $this
-            ->getSnapshotManager(static function ($qb) use ($self) {
-                $qb->expects($self->once())->method('join')->with(
-                    $self->equalTo('s.parent'),
-                    $self->equalTo('pa')
-                );
-                $qb->expects($self->once())->method('andWhere')->with($self->equalTo('pa.id = :parentId'));
-                $qb->expects($self->once())->method('setParameters')->with($self->equalTo(['parentId' => 13]));
-            })
-            ->getPager(['parent' => 13], 1);
-    }
-
-    public function testGetPagerWithSiteSnapshots()
-    {
-        $self = $this;
-        $this
-            ->getSnapshotManager(static function ($qb) use ($self) {
-                $qb->expects($self->once())->method('join')->with(
-                    $self->equalTo('s.site'),
-                    $self->equalTo('si')
-                );
-                $qb->expects($self->once())->method('andWhere')->with($self->equalTo('si.id = :siteId'));
-                $qb->expects($self->once())->method('setParameters')->with($self->equalTo(['siteId' => 13]));
-            })
-            ->getPager(['site' => 13], 1);
-    }
-
     /**
      * Tests the enableSnapshots() method to ensure execute queries are correct.
      */
-    public function testEnableSnapshots()
+    public function testEnableSnapshots(): void
     {
         // Given
         $page = $this->createMock(PageInterface::class);
-        $page->expects($this->once())->method('getId')->willReturn(456);
+        $page->expects(static::once())->method('getId')->willReturn(456);
 
-        $snapshot = $this->createMock(Snapshot::class);
-        $snapshot->expects($this->once())->method('getId')->willReturn(123);
-        $snapshot->expects($this->once())->method('getPage')->willReturn($page);
+        $snapshot = $this->getMockBuilder(SnapshotInterface::class)
+            ->disableOriginalConstructor()
+            ->addMethods(['getId'])
+            ->getMockForAbstractClass();
+        $snapshot->expects(static::once())->method('getId')->willReturn(123);
+        $snapshot->expects(static::once())->method('getPage')->willReturn($page);
 
         $date = new \DateTime();
 
         $connection = $this->createMock(Connection::class);
-        $connection
-            ->expects($this->once())
-            ->method('query')
-            ->with(sprintf(
-                "UPDATE page_snapshot SET publication_date_end = '%s' WHERE id NOT IN(123) AND page_id IN (456)",
-                $date->format('Y-m-d H:i:s')
-            ));
+
+        $sql = 'UPDATE page_snapshot SET publication_date_end = ? WHERE id NOT IN (123) AND page_id IN (456) AND publication_date_end IS NULL';
+
+        $connection->expects(static::once())->method('executeStatement')->with($sql, [$date], ['datetime'])->willReturn(0);
+
+        $platform = $this->createMock(AbstractPlatform::class);
+        $platform->method('getDateTimeFormatString')->willReturn('Y-m-d H:i:s');
+        $connection->method('getDatabasePlatform')->willReturn($platform);
+        $connection->method('getParams')->willReturn([]);
 
         $em = $this->createMock(EntityManagerInterface::class);
+        $config = new Configuration();
 
-        $em->expects($this->once())->method('persist')->with($snapshot);
-        $em->expects($this->once())->method('flush');
-        $em->expects($this->once())->method('getConnection')->willReturn($connection);
+        $qb = new QueryBuilder($em);
+        $expr = new Expr();
+        $em->expects(static::once())->method('persist')->with($snapshot);
+        $em->expects(static::once())->method('flush');
+        $em->expects(static::atLeastOnce())->method('getConnection')->willReturn($connection);
+        $em->expects(static::once())->method('createQueryBuilder')->willReturn($qb);
+        $em->method('getConfiguration')->willReturn($config);
+        $em->method('getExpressionBuilder')->willReturn($expr);
+        $em->expects(static::once())->method('createQuery')->willReturnCallback(static function ($dql) use ($em) {
+            $query = new Query($em);
+            $query->setDQL($dql);
+
+            return $query;
+        });
+
+        $unit = $this->createMock(UnitOfWork::class);
+        $unit->method('getSingleIdentifierValue')->willReturnCallback(static function ($entity) {
+            if ($entity instanceof \DateTime) {
+                throw new MappingException();
+            }
+
+            return null;
+        });
+        $em->method('getUnitOfWork')->willReturn($unit);
+
+        $classMetadata = new ClassMetadata(SonataPageSnapshot::class);
+        $classMetadata->setPrimaryTable([
+            'name' => 'page_snapshot',
+        ]);
+        $classMetadata->addInheritedFieldMapping([
+            'fieldName' => 'publicationDateEnd',
+            'columnName' => 'publication_date_end',
+            'type' => 'datetime',
+            'nullable' => true,
+        ]);
+        $classMetadata->addInheritedFieldMapping([
+            'fieldName' => 'id',
+            'columnName' => 'id',
+        ]);
+        $classMetadata->addInheritedFieldMapping([
+            'fieldName' => 'page',
+            'columnName' => 'page_id',
+        ]);
+        $classMetadata->identifier = ['id'];
+
+        $em->method('getClassMetadata')->with(SonataPageSnapshot::class)->willReturn($classMetadata);
+
+        $metaDataFactory = $this->createMock(ClassMetadataFactory::class);
+        $metaDataFactory->method('hasMetadataFor')
+            ->willReturnCallback(static fn ($class) => SonataPageSnapshot::class === $class);
+        $metaDataFactory->method('getMetadataFor')->with(SonataPageSnapshot::class)->willReturn($classMetadata);
+        $em->method('getMetadataFactory')->willReturn($metaDataFactory);
+
+        $repo = new EntityRepository($em, $classMetadata);
 
         $manager = $this->getMockBuilder(SnapshotManager::class)
             ->disableOriginalConstructor()
-            ->setMethods(['getEntityManager', 'getTableName'])
+            ->setMethods(['getEntityManager', 'getRepository'])
             ->getMock();
 
-        $manager->expects($this->exactly(3))->method('getEntityManager')->willReturn($em);
-        $manager->expects($this->once())->method('getTableName')->willReturn('page_snapshot');
+        $manager->expects(static::exactly(2))->method('getEntityManager')->willReturn($em);
+        $manager->method('getRepository')->willReturn($repo);
 
         // When calling method, expects calls
         $manager->enableSnapshots([$snapshot], $date);
     }
 
-    public function testCreateSnapshotPageProxy()
+    public function testCreateSnapshotPageProxy(): void
     {
         $proxyInterface = $this->createMock(SnapshotPageProxyInterface::class);
 
@@ -240,61 +219,61 @@ class SnapshotManagerTest extends TestCase
         $transformer = $this->createMock(TransformerInterface::class);
         $snapshot = $this->createMock(SnapshotInterface::class);
 
-        $snapshotProxyFactory->expects($this->once())->method('create')
+        $snapshotProxyFactory->expects(static::once())->method('create')
             ->with($manager, $transformer, $snapshot)
             ->willReturn($proxyInterface);
 
-        $this->assertSame($proxyInterface, $manager->createSnapshotPageProxy($transformer, $snapshot));
+        static::assertSame($proxyInterface, $manager->createSnapshotPageProxy($transformer, $snapshot));
     }
 
     /**
      * Tests the enableSnapshots() method to ensure execute queries are not executed when no snapshots are given.
      */
-    public function testEnableSnapshotsWhenNoSnapshots()
+    public function testEnableSnapshotsWhenNoSnapshots(): void
     {
         $connection = $this->createMock(Connection::class);
-        $connection->expects($this->never())->method('query');
+        $connection->expects(static::never())->method('query');
 
         $em = $this->createMock(EntityManagerInterface::class);
-        $em->expects($this->never())->method('persist');
-        $em->expects($this->never())->method('flush');
-        $em->expects($this->never())->method('getConnection');
+        $em->expects(static::never())->method('persist');
+        $em->expects(static::never())->method('flush');
+        $em->expects(static::never())->method('getConnection');
 
         $manager = $this->getMockBuilder(SnapshotManager::class)
             ->disableOriginalConstructor()
             ->setMethods(['getEntityManager', 'getTableName'])
             ->getMock();
 
-        $manager->expects($this->never())->method('getEntityManager');
-        $manager->expects($this->never())->method('getTableName');
+        $manager->expects(static::never())->method('getEntityManager');
+        $manager->expects(static::never())->method('getTableName');
 
         // When calling method, do not expects any calls
         $manager->enableSnapshots([]);
     }
 
-    protected function getSnapshotManager($qbCallback)
+    protected function getSnapshotManager($qbCallback): SnapshotManager
     {
         $query = $this->getMockForAbstractClass(AbstractQuery::class, [], '', false, true, true, ['execute']);
-        $query->expects($this->any())->method('execute')->willReturn(true);
+        $query->method('execute')->willReturn(true);
 
         $qb = $this->getMockBuilder(QueryBuilder::class)
             ->setConstructorArgs([$this->createMock(EntityManager::class)])
             ->getMock();
 
-        $qb->expects($this->any())->method('getRootAliases')->willReturn([]);
-        $qb->expects($this->any())->method('select')->willReturn($qb);
-        $qb->expects($this->any())->method('getQuery')->willReturn($query);
+        $qb->method('getRootAliases')->willReturn([]);
+        $qb->method('select')->willReturn($qb);
+        $qb->method('getQuery')->willReturn($query);
 
         $qbCallback($qb);
 
         $repository = $this->createMock(EntityRepository::class);
-        $repository->expects($this->any())->method('createQueryBuilder')->willReturn($qb);
+        $repository->method('createQueryBuilder')->willReturn($qb);
 
-        $em = $this->createMock(EntityManagerInterface::class);
-        $em->expects($this->any())->method('getRepository')->willReturn($repository);
+        $em = $this->createMock(EntityManager::class);
+        $em->method('getRepository')->willReturn($repository);
 
         $registry = $this->createMock(ManagerRegistry::class);
-        $registry->expects($this->any())->method('getManagerForClass')->willReturn($em);
+        $registry->method('getManagerForClass')->willReturn($em);
 
         $snapshotProxyFactory = $this->createMock(SnapshotPageProxyFactoryInterface::class);
 

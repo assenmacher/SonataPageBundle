@@ -90,7 +90,7 @@ class RequestListener
         }
 
         if ($site->getSiteLocale() && $site->getSiteLocale() !== $request->get('_locale')) {
-            throw new PageNotFoundException(sprintf('Invalid locale - site.locale=%s - request._locale=%s', $site->getSiteLocale(), $request->get('_locale')));
+            throw new PageNotFoundException(sprintf('Invalid locale - site.siteLocale=%s - request._locale=%s', $site->getSiteLocale(), $request->get('_locale')));
         }
 
         try {

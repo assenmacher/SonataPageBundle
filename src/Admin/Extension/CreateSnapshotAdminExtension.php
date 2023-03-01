@@ -72,6 +72,8 @@ class CreateSnapshotAdminExtension extends AbstractAdminExtension
         } else {
             return;
         }
+        
+        if(!$pageId) return;
 
         // NEXT_MAJOR: Remove the if code and all code related with BackendInterface
         if ($this->backend instanceof BackendInterface) {

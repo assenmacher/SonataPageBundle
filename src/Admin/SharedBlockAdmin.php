@@ -20,7 +20,6 @@ use Sonata\BlockBundle\Block\BlockServiceInterface;
 use Sonata\BlockBundle\Block\Service\EditableBlockService;
 use Sonata\BlockBundle\Model\BlockInterface;
 use Sonata\PageBundle\Entity\BaseBlock;
-use Sonata\PageBundle\Mapper\PageFormMapper;
 
 /**
  * Admin class for shared Block model.
@@ -107,11 +106,10 @@ class SharedBlockAdmin extends BaseBlockAdmin
         }
 
         if ($service instanceof EditableBlockService) {
-            $blockMapper = new PageFormMapper($form);
             if ($block->getId() > 0) {
-                $service->configureEditForm($blockMapper, $block);
+                $service->configureEditForm($form, $block);
             } else {
-                $service->configureCreateForm($blockMapper, $block);
+                $service->configureCreateForm($form, $block);
             }
         } else {
             @trigger_error(

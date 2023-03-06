@@ -20,7 +20,6 @@ use Sonata\BlockBundle\Block\BlockServiceInterface;
 use Sonata\BlockBundle\Block\Service\EditableBlockService;
 use Sonata\BlockBundle\Form\Type\ServiceListType;
 use Sonata\BlockBundle\Model\BlockInterface;
-use Sonata\PageBundle\Mapper\PageFormMapper;
 use Sonata\PageBundle\Model\PageInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -223,11 +222,10 @@ class BlockAdmin extends BaseBlockAdmin
         }
 
         if ($service instanceof EditableBlockService) {
-            $blockMapper = new PageFormMapper($form);
             if ($block->getId() > 0) {
-                $service->configureEditForm($blockMapper, $block);
+                $service->configureEditForm($form, $block);
             } else {
-                $service->configureCreateForm($blockMapper, $block);
+                $service->configureCreateForm($form, $block);
             }
         } else {
             @trigger_error(

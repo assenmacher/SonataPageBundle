@@ -157,7 +157,11 @@ class BlockAdmin extends BaseBlockAdmin
             }
 
             if ($isComposer) {
-                $form->add('enabled', HiddenType::class, ['data' => true]);
+                if (!$isStandardBlock || !$block->getId()) {
+                    $form->add('enabled', HiddenType::class, ['data' => true]);
+                } else {
+                    $form->add('enabled', HiddenType::class);
+                }
             } else {
                 $form->add('enabled');
             }
